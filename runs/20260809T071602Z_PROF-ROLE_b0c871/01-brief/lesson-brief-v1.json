@@ -45,11 +45,11 @@
     "обзор конкретных инструментов Jira/Confluence/Figma"
   ],
   "projectUsage": {
-    "case": "Compliance onboarding: автоматизация первичной проверки клиента перед активацией аккаунта.",
+    "case": "Compliance portal: внутренняя система для обращений сотрудников, регистрации подарков, деклараций, обработки комплаенс-офицерами и дашбордов руководителя.",
     "artifactsToUpdate": [
       "business-analysis/analyst-first-day-notes.md"
     ],
-    "practice": "Студент превращает сырой запрос в первые вопросы, участников, статусы и acceptance criteria."
+    "practice": "Студент превращает сырой запрос о Compliance-портале в первые вопросы, пользователей, процессы, статусы и acceptance criteria."
   },
   "lessonFlow": [
     "Зачем нужен аналитик",

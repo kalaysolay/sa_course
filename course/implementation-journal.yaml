@@ -147,6 +147,24 @@
       ],
       "created_at": "2026-08-09T00:00:00+05:00",
       "resolved_at": "2026-08-09T00:00:00+05:00"
+    },
+    {
+      "id": "IMPL-0011",
+      "status": "closed",
+      "severity": "info",
+      "type": "lesson_correction",
+      "iteration": "production",
+      "title": "Compliance project manifest added and lesson 1 corrected",
+      "description": "Recorded the real Compliance project context: internal employee portal, SSO, requests, gifts, declarations, compliance officer processing, employee list, and head dashboards. Corrected lesson 1 and artifacts to remove the earlier client/KYC onboarding interpretation.",
+      "evidence": [
+        "project/compliance/project.yaml",
+        "project/compliance/facts.md",
+        "references/source-registry.yaml REF-COMPLIANCE-MOCKUPS",
+        "output/M01/PROF-ROLE/lecture.md",
+        "tests: 28 pass / 0 fail"
+      ],
+      "created_at": "2026-08-09T00:00:00+05:00",
+      "resolved_at": "2026-08-09T00:00:00+05:00"
     }
   ]
 }

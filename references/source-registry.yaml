@@ -43,6 +43,17 @@
         "type": "local_file",
         "path": "references/artifact-examples/stakeholder-registers/stakeholders-example.md"
       }
+    },
+    {
+      "id": "REF-COMPLIANCE-MOCKUPS",
+      "type": "artifact_example",
+      "title": "Макеты учебной Compliance-системы",
+      "availability": "available",
+      "location": {
+        "type": "directory",
+        "path": "compliance_project_example"
+      },
+      "notes": "Employee portal and compliance officer/head workspace mockups for the course project."
     }
   ]
 }

@@ -1,8 +1,16 @@
 {
   "project_id": "compliance",
   "current_stage": "business_analysis",
-  "completed_artifacts": [],
+  "completed_artifacts": [
+    "business-analysis/analyst-first-day-notes.md"
+  ],
   "planned_artifacts": [
-    "business-analysis/stakeholders.md"
+    "business-analysis/system-context.md",
+    "business-analysis/stakeholders.md",
+    "business-analysis/processes.md",
+    "requirements/requests.md",
+    "requirements/gifts.md",
+    "requirements/declarations.md",
+    "requirements/dashboards.md"
   ]
 }

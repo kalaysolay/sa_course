@@ -9,3 +9,4 @@ output/*
 !output/M01/PROF-ROLE/**
 node_modules/
 .DS_Store
+compliance_project_example/
