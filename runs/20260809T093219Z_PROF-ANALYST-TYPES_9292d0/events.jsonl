@@ -1,0 +1,7 @@
+{"ts":"2026-08-09T09:32:19.013Z","event":"RUN_CREATED","topicId":"PROF-ANALYST-TYPES"}
+{"ts":"2026-08-09T09:32:19.022Z","event":"STATE_CHANGED","status":"TOPIC_RESOLVED"}
+{"ts":"2026-08-09T09:32:19.027Z","event":"STATE_CHANGED","status":"PROGRESS_CHECKED"}
+{"ts":"2026-08-09T09:32:19.035Z","event":"STATE_CHANGED","status":"CONTEXT_READY"}
+{"ts":"2026-08-09T09:32:19.049Z","event":"CODEX_TASKS_CREATED","taskDir":"codex-tasks","taskCount":9}
+{"ts":"2026-08-09T09:32:19.050Z","event":"STATE_CHANGED","status":"CODEX_TASKS_READY"}
+{"at":"2026-08-09T09:51:51.974Z","type":"manual_codex_package_completed","runId":"20260809T093219Z_PROF-ANALYST-TYPES_9292d0","topicId":"PROF-ANALYST-TYPES"}

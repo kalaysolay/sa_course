@@ -1,0 +1,11 @@
+{
+  "verdict": "APPROVED",
+  "positiveNotes": [
+    "Все роли из паспорта раскрыты на обзорном уровне.",
+    "Есть связь с дальнейшим фокусом курса BA -> SA."
+  ],
+  "summary": "Лекция покрывает mustCover: зачем нужны аналитики, карту ролей, BA/SA, Process/Data/BI/Product и Compliance-практику.",
+  "artifact": "03-lecture/draft-v1.md",
+  "issues": [],
+  "reviewer": "content-critic"
+}

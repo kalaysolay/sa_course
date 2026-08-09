@@ -1,0 +1,11 @@
+{
+  "artifact": "04-assessment/draft-v1.json",
+  "reviewer": "assessment-reviewer",
+  "verdict": "APPROVED",
+  "summary": "Assessment covers all learning outcomes and includes scenario/project_case tasks on the Compliance example.",
+  "issues": [],
+  "positiveNotes": [
+    "Есть вопросы на BA/SA boundary without absolutes.",
+    "Есть project_case без преждевременного канонического артефакта."
+  ]
+}

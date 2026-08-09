@@ -1,0 +1,13 @@
+{
+  "reviewer": "content-critic",
+  "artifact": "01-brief/lesson-brief-v1.json",
+  "verdict": "APPROVED",
+  "summary": "Lesson Brief покрывает Topic Passport: урок остается обзорной картой аналитических ролей для новичков, выделяет BA/SA как основные роли курса, не углубляется в Data/BI/Product analytics и корректно использует внутренний Compliance-кейс.",
+  "positiveNotes": [
+    "Есть явные границы doNotCover, включая запрет на KYC и внешних клиентов.",
+    "BA и SA разведены через типичные фокусы, но без жесткого правила «всегда».",
+    "Process, Data, BI и Product Analyst включены как обзорные соседние роли.",
+    "Практика привязана к Compliance-системе и не требует создания канонического проектного артефакта."
+  ],
+  "issues": []
+}

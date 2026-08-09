@@ -1,0 +1,12 @@
+{
+  "module": "M01",
+  "section": "M01-S01",
+  "topic": {
+    "id": "PROF-ANALYST-TYPES",
+    "slug": "analyst-types",
+    "title": "Какие бывают аналитики в IT",
+    "order": 1,
+    "course_order": 1,
+    "passport": "course/modules/M01-profession/sections/S01-role/topics/analyst-types.yaml"
+  }
+}

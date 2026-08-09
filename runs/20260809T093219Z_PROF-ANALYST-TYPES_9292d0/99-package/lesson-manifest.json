@@ -1,0 +1,27 @@
+{
+  "topicId": "PROF-ANALYST-TYPES",
+  "runId": "20260809T093219Z_PROF-ANALYST-TYPES_9292d0",
+  "status": "COMPLETED",
+  "learningOutcomes": [
+    "PROF-ANALYST-TYPES-LO1",
+    "PROF-ANALYST-TYPES-LO2",
+    "PROF-ANALYST-TYPES-LO3",
+    "PROF-ANALYST-TYPES-LO4",
+    "PROF-ANALYST-TYPES-LO5"
+  ],
+  "files": {
+    "lecture": "lecture.md",
+    "exercises": "exercises.md",
+    "answers": "answers.md",
+    "sources": "sources.md"
+  },
+  "projectChanges": [],
+  "reviews": {
+    "subject": "APPROVED",
+    "coverage": "APPROVED",
+    "methodology": "APPROVED",
+    "editorial": "APPROVED",
+    "assessment": "APPROVED",
+    "project": "APPROVED"
+  }
+}

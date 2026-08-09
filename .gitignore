@@ -10,3 +10,7 @@ output/*
 node_modules/
 .DS_Store
 compliance_project_example/
+!runs/20260809T093219Z_PROF-ANALYST-TYPES_9292d0/
+!runs/20260809T093219Z_PROF-ANALYST-TYPES_9292d0/**
+!output/M01/PROF-ANALYST-TYPES/
+!output/M01/PROF-ANALYST-TYPES/**
