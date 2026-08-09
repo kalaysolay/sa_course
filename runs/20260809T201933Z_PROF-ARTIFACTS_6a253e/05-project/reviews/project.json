@@ -1,0 +1,7 @@
+{
+  "reviewer": "Project Artifact Reviewer",
+  "artifact": "05-project/project-change.json",
+  "verdict": "APPROVED",
+  "summary": "No canonical project artifact is required for PROF-ARTIFACTS. The lesson correctly uses the Compliance project as a module-ending overview of future artifact types.",
+  "issues": []
+}

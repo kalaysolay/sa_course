@@ -1,0 +1,6 @@
+{"ts":"2026-08-09T20:19:33.627Z","event":"RUN_CREATED","topicId":"PROF-ARTIFACTS"}
+{"ts":"2026-08-09T20:19:33.642Z","event":"STATE_CHANGED","status":"TOPIC_RESOLVED"}
+{"ts":"2026-08-09T20:19:33.646Z","event":"STATE_CHANGED","status":"PROGRESS_CHECKED"}
+{"ts":"2026-08-09T20:19:33.796Z","event":"STATE_CHANGED","status":"CONTEXT_READY"}
+{"ts":"2026-08-09T20:19:33.928Z","event":"CODEX_TASKS_CREATED","taskDir":"codex-tasks","taskCount":9}
+{"ts":"2026-08-09T20:19:33.930Z","event":"STATE_CHANGED","status":"CODEX_TASKS_READY"}

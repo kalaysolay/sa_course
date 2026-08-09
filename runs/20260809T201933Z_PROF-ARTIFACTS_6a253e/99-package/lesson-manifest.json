@@ -1,0 +1,27 @@
+{
+  "topicId": "PROF-ARTIFACTS",
+  "runId": "20260809T201933Z_PROF-ARTIFACTS_6a253e",
+  "status": "COMPLETED",
+  "learningOutcomes": [
+    "PROF-ARTIFACTS-LO1",
+    "PROF-ARTIFACTS-LO2",
+    "PROF-ARTIFACTS-LO3",
+    "PROF-ARTIFACTS-LO4",
+    "PROF-ARTIFACTS-LO5"
+  ],
+  "files": {
+    "lecture": "lecture.md",
+    "exercises": "exercises.md",
+    "answers": "answers.md",
+    "sources": "sources.md"
+  },
+  "projectChanges": [],
+  "reviews": {
+    "subject": "APPROVED",
+    "coverage": "APPROVED",
+    "methodology": "APPROVED",
+    "editorial": "APPROVED",
+    "assessment": "APPROVED",
+    "project": "APPROVED"
+  }
+}

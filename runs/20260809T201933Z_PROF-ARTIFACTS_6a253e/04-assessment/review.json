@@ -1,0 +1,13 @@
+{
+  "reviewer": "Assessment Reviewer",
+  "artifact": "04-assessment/draft-v1.json",
+  "verdict": "APPROVED",
+  "summary": "Assessment checks artifact purpose, route mapping, Compliance-case selection and risk-reduction reasoning. It is practical and aligned with the overview level of the lesson.",
+  "issues": [],
+  "coverage": {
+    "PROF-ARTIFACTS-LO1": "PROF-ARTIFACTS-Q1",
+    "PROF-ARTIFACTS-LO2": "PROF-ARTIFACTS-Q2",
+    "PROF-ARTIFACTS-LO3": "PROF-ARTIFACTS-Q3",
+    "PROF-ARTIFACTS-LO4": "PROF-ARTIFACTS-Q4"
+  }
+}

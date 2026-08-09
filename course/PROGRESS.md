@@ -1,12 +1,12 @@
 # Course Progress
 
-Готово: 7 / 98 тем.
+Готово: 8 / 98 тем.
 
 Последняя готовая тема:
-7. PROF-BA-SA-PATH
+8. PROF-ARTIFACTS
 
 Следующая:
-8. PROF-ARTIFACTS
+9. TEAM-ROLES
 
 Открытые GAP:
 - см. course/gap-registry.yaml

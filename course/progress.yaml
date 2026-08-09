@@ -1,22 +1,22 @@
 {
   "course_id": "system-analysis",
-  "updated_at": "2026-08-09T17:09:26.483Z",
+  "updated_at": "2026-08-09T20:25:42.420Z",
   "summary": {
     "total_topics": 98,
-    "completed": 7,
+    "completed": 8,
     "in_progress": 0,
     "blocked": 0,
     "needs_revision": 0,
-    "planned": 91
+    "planned": 90
   },
   "last_completed": {
-    "topic_id": "PROF-BA-SA-PATH",
-    "course_order": 7,
-    "run_id": "20260809T170136Z_PROF-BA-SA-PATH_7fe2ed"
+    "topic_id": "PROF-ARTIFACTS",
+    "course_order": 8,
+    "run_id": "20260809T201933Z_PROF-ARTIFACTS_6a253e"
   },
   "next_candidate": {
-    "topic_id": "PROF-ARTIFACTS",
-    "course_order": 8
+    "topic_id": "TEAM-ROLES",
+    "course_order": 9
   },
   "topics": {
     "PROF-ANALYST-TYPES": {
@@ -82,8 +82,9 @@
       "course_order": 8,
       "module_id": "M01",
       "title": "Какие результаты и артефакты возникают по пути",
-      "status": "planned",
-      "output": null
+      "status": "completed",
+      "output": "output/M01/PROF-ARTIFACTS/",
+      "run_id": "20260809T201933Z_PROF-ARTIFACTS_6a253e"
     },
     "TEAM-ROLES": {
       "course_order": 9,

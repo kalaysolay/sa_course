@@ -1,0 +1,12 @@
+{
+  "module": "M01",
+  "section": "M01-S03",
+  "topic": {
+    "id": "PROF-ARTIFACTS",
+    "slug": "artifacts-path",
+    "title": "Какие результаты и артефакты возникают по пути",
+    "order": 2,
+    "course_order": 8,
+    "passport": "course/modules/M01-profession/sections/S03-course-path/topics/artifacts-path.yaml"
+  }
+}
