@@ -1,0 +1,12 @@
+{
+  "module": "M01",
+  "section": "M01-S02",
+  "topic": {
+    "id": "PROF-ROLE",
+    "slug": "analyst-role",
+    "title": "Типовые задачи бизнес- и системного аналитика",
+    "order": 1,
+    "course_order": 4,
+    "passport": "course/modules/M01-profession/sections/S02-ba-sa/topics/analyst-role.yaml"
+  }
+}

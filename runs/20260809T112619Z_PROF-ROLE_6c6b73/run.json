@@ -1,0 +1,27 @@
+{
+  "runId": "20260809T112619Z_PROF-ROLE_6c6b73",
+  "topicId": "PROF-ROLE",
+  "status": "COMPLETED",
+  "startedAt": "2026-08-09T11:26:19.267Z",
+  "updatedAt": "2026-08-09T11:36:35.097Z",
+  "workflowVersion": "0.3-iteration-6",
+  "adapter": {
+    "name": "CodexAppAdapter",
+    "version": "0.3-task-packets",
+    "externalApiRequired": false
+  },
+  "promptVersions": {
+    "methodologist": "stakeholders-iteration-2",
+    "contentCritic": "stakeholders-iteration-2",
+    "writer": "stakeholders-iteration-2",
+    "reviewPanel": "stakeholders-iteration-3",
+    "assessment": "stakeholders-iteration-4",
+    "projectArtifacts": "stakeholders-iteration-5"
+  },
+  "revision": {
+    "lecture": 1,
+    "assessment": 1,
+    "projectArtifacts": 1
+  },
+  "errors": []
+}

@@ -1,0 +1,7 @@
+{
+  "reviewer": "coverage-reviewer",
+  "artifact": "03-lecture/final.md",
+  "verdict": "APPROVED",
+  "summary": "Лекция покрывает паспорт темы: типовые задачи аналитика, требования, процессы, сценарии, спецификации, коммуникации и Compliance-пример. Exclude-scope не нарушен.",
+  "issues": []
+}

@@ -1,0 +1,7 @@
+{"ts":"2026-08-09T11:26:19.268Z","event":"RUN_CREATED","topicId":"PROF-ROLE"}
+{"ts":"2026-08-09T11:26:19.274Z","event":"STATE_CHANGED","status":"TOPIC_RESOLVED"}
+{"ts":"2026-08-09T11:26:19.278Z","event":"STATE_CHANGED","status":"PROGRESS_CHECKED"}
+{"ts":"2026-08-09T11:26:19.284Z","event":"STATE_CHANGED","status":"CONTEXT_READY"}
+{"ts":"2026-08-09T11:26:19.295Z","event":"CODEX_TASKS_CREATED","taskDir":"codex-tasks","taskCount":9}
+{"ts":"2026-08-09T11:26:19.296Z","event":"STATE_CHANGED","status":"CODEX_TASKS_READY"}
+{"at":"2026-08-09T11:36:35.098Z","event":"manual_codex_package_completed","topicId":"PROF-ROLE","output":"output/M01/PROF-ROLE/"}
