@@ -1,0 +1,10 @@
+{
+  "topicId": "PROF-ROLE",
+  "changes": [
+    {
+      "artifact": "business-analysis/analyst-first-day-notes.md",
+      "action": "create_proposed",
+      "reason": "Первый урок дает студенту мягкий проектный выход: сырой Compliance-запрос превращается в вопросы, участников, статусы и критерии приемки."
+    }
+  ]
+}

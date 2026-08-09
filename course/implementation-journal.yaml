@@ -131,6 +131,22 @@
       ],
       "created_at": "2026-08-09T00:00:00+05:00",
       "resolved_at": "2026-08-09T00:00:00+05:00"
+    },
+    {
+      "id": "IMPL-0010",
+      "status": "closed",
+      "severity": "info",
+      "type": "lesson_production",
+      "iteration": "production",
+      "title": "Lesson 1 generated through Codex-native pipeline",
+      "description": "Generated production lesson 1 PROF-ROLE with brief, source pack, lecture, review panel, assessment, project artifact, package manifest, output files, and completed progress state.",
+      "evidence": [
+        "output/M01/PROF-ROLE/lecture.md",
+        "runs/20260809T071602Z_PROF-ROLE_b0c871/99-package/lesson-manifest.json",
+        "tests: schema validation ok"
+      ],
+      "created_at": "2026-08-09T00:00:00+05:00",
+      "resolved_at": "2026-08-09T00:00:00+05:00"
     }
   ]
 }

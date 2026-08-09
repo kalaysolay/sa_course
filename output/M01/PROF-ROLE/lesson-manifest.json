@@ -1,0 +1,29 @@
+{
+  "topicId": "PROF-ROLE",
+  "runId": "20260809T071602Z_PROF-ROLE_b0c871",
+  "status": "COMPLETED",
+  "learningOutcomes": [
+    "PROF-ROLE-LO1",
+    "PROF-ROLE-LO2",
+    "PROF-ROLE-LO3",
+    "PROF-ROLE-LO4",
+    "PROF-ROLE-LO5"
+  ],
+  "files": {
+    "lecture": "lecture.md",
+    "exercises": "exercises.md",
+    "answers": "answers.md",
+    "sources": "sources.md"
+  },
+  "projectChanges": [
+    "business-analysis/analyst-first-day-notes.md"
+  ],
+  "reviews": {
+    "subject": "APPROVED",
+    "coverage": "APPROVED",
+    "methodology": "APPROVED",
+    "editorial": "APPROVED",
+    "assessment": "APPROVED",
+    "project": "APPROVED"
+  }
+}

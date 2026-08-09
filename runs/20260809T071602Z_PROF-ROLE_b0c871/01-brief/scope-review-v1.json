@@ -1,0 +1,12 @@
+{
+  "reviewer": "content-critic",
+  "artifact": "01-brief/lesson-brief-v1.json",
+  "verdict": "APPROVED",
+  "summary": "Brief подходит для первого production-урока: фокус на новичках, роль SA отделена от соседних ролей, Compliance используется как сквозная практика, но предусмотрены другие домены.",
+  "issues": [],
+  "positiveNotes": [
+    "Есть явные границы doNotCover",
+    "Есть практический выход для Compliance-кейса",
+    "Есть разнообразные примеры"
+  ]
+}

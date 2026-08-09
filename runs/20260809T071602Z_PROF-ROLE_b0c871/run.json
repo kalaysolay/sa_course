@@ -1,9 +1,9 @@
 {
   "runId": "20260809T071602Z_PROF-ROLE_b0c871",
   "topicId": "PROF-ROLE",
-  "status": "CODEX_TASKS_READY",
+  "status": "COMPLETED",
   "startedAt": "2026-08-09T07:16:02.619Z",
-  "updatedAt": "2026-08-09T07:16:02.650Z",
+  "updatedAt": "2026-08-09T07:41:37.048Z",
   "workflowVersion": "0.3-iteration-6",
   "adapter": {
     "name": "CodexAppAdapter",
@@ -19,9 +19,9 @@
     "projectArtifacts": "stakeholders-iteration-5"
   },
   "revision": {
-    "lecture": 0,
-    "assessment": 0,
-    "projectArtifacts": 0
+    "lecture": 1,
+    "assessment": 1,
+    "projectArtifacts": 1
   },
   "errors": []
 }

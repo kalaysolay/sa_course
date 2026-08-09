@@ -1,0 +1,11 @@
+{
+  "reviewer": "content-critic",
+  "artifact": "03-lecture/draft-v1.md",
+  "verdict": "APPROVED",
+  "summary": "Лекция покрывает все mustCover из brief: роль, типовые задачи, границы ответственности, Compliance-практику и примеры из fintech, edtech, marketplace, HR/internal tools.",
+  "issues": [],
+  "positiveNotes": [
+    "Не зациклена на Compliance",
+    "Есть плохие и хорошие формулировки требований"
+  ]
+}
