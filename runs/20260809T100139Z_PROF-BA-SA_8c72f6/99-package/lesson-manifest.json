@@ -1,0 +1,27 @@
+{
+  "topicId": "PROF-BA-SA",
+  "runId": "20260809T100139Z_PROF-BA-SA_8c72f6",
+  "status": "COMPLETED",
+  "learningOutcomes": [
+    "PROF-BA-SA-LO1",
+    "PROF-BA-SA-LO2",
+    "PROF-BA-SA-LO3",
+    "PROF-BA-SA-LO4",
+    "PROF-BA-SA-LO5"
+  ],
+  "files": {
+    "lecture": "lecture.md",
+    "exercises": "exercises.md",
+    "answers": "answers.md",
+    "sources": "sources.md"
+  },
+  "projectChanges": [],
+  "reviews": {
+    "subject": "APPROVED",
+    "coverage": "APPROVED",
+    "methodology": "APPROVED",
+    "editorial": "APPROVED",
+    "assessment": "APPROVED",
+    "project": "APPROVED"
+  }
+}

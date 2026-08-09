@@ -1,0 +1,11 @@
+{
+  "positiveNotes": [
+    "Есть project_case на дашборд руководителя комплаенс.",
+    "Нет заданий, требующих будущих UML/API/DB знаний."
+  ],
+  "artifact": "04-assessment/draft-v1.json",
+  "verdict": "APPROVED",
+  "reviewer": "assessment-reviewer",
+  "summary": "Assessment covers BA/SA focus, problem-to-specification chain, role collaboration, combined role work, and Compliance scenario practice.",
+  "issues": []
+}

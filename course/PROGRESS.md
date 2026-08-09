@@ -1,12 +1,12 @@
 # Course Progress
 
-Готово: 1 / 98 тем.
+Готово: 2 / 98 тем.
 
 Последняя готовая тема:
-1. PROF-ANALYST-TYPES
+2. PROF-BA-SA
 
 Следующая:
-2. PROF-BA-SA
+3. PROF-BA-SA-BOUNDARY
 
 Открытые GAP:
 - см. course/gap-registry.yaml

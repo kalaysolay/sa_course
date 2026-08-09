@@ -1,0 +1,12 @@
+{
+  "module": "M01",
+  "section": "M01-S01",
+  "topic": {
+    "id": "PROF-BA-SA",
+    "slug": "ba-sa",
+    "title": "Бизнес-аналитик и системный аналитик — в чем разница",
+    "order": 2,
+    "course_order": 2,
+    "passport": "course/modules/M01-profession/sections/S01-role/topics/ba-sa.yaml"
+  }
+}

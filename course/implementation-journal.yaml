@@ -200,6 +200,39 @@
       ],
       "created_at": "2026-08-09T00:00:00+05:00",
       "resolved_at": "2026-08-09T00:00:00+05:00"
+    },
+    {
+      "id": "IMPL-0014",
+      "status": "closed",
+      "severity": "info",
+      "type": "quality_checkpoint",
+      "iteration": "production-v0.3.1",
+      "title": "Lesson 1 quality checkpoint passed",
+      "description": "Checked the regenerated PROF-ANALYST-TYPES package before starting lesson 2. Manifest reviews are approved, npm test passed 28/28, progress pointed to PROF-BA-SA, and no new blocking content GAP was found. KYC/client-onboarding mentions appear only as explicit negative boundaries for the internal Compliance project.",
+      "evidence": [
+        "output/M01/PROF-ANALYST-TYPES/lesson-manifest.json reviews=APPROVED",
+        "output/M01/PROF-ANALYST-TYPES/lecture.md",
+        "course/progress.yaml next_candidate=PROF-BA-SA",
+        "tests: 28 pass / 0 fail"
+      ],
+      "created_at": "2026-08-09T00:00:00+05:00",
+      "resolved_at": "2026-08-09T00:00:00+05:00"
+    },
+    {
+      "id": "IMPL-0015",
+      "status": "closed",
+      "severity": "info",
+      "type": "lesson_production",
+      "iteration": "production-v0.3.1",
+      "title": "Lesson 2 generated for BA/SA distinction",
+      "description": "Generated PROF-BA-SA lesson package. The lesson explains BA and SA as typical analytical focuses, shows the path from business problem to requirements and system specification, uses the internal Compliance system as practice, and leaves canonical project artifacts unchanged.",
+      "evidence": [
+        "output/M01/PROF-BA-SA/lecture.md",
+        "runs/20260809T100139Z_PROF-BA-SA_8c72f6/99-package/lesson-manifest.json",
+        "course/progress.yaml next_candidate=PROF-BA-SA-BOUNDARY"
+      ],
+      "created_at": "2026-08-09T00:00:00+05:00",
+      "resolved_at": "2026-08-09T00:00:00+05:00"
     }
   ]
 }
