@@ -1,0 +1,41 @@
+{
+  "id": "SQL-LIMIT",
+  "title": "Ограничение выборки",
+  "course_order": 61,
+  "purpose": "Задать базовое понимание темы «Ограничение выборки» в логике курса системного анализа.",
+  "scope": {
+    "include": [
+      "Ограничение выборки"
+    ],
+    "exclude": [
+      "углубление за пределы базового уровня курса"
+    ]
+  },
+  "prerequisites": {
+    "topics": [
+      "SQL-ORDER-BY"
+    ]
+  },
+  "previous_topics": [
+    "SQL-ORDER-BY"
+  ],
+  "next_topics": [
+    "SQL-DISTINCT"
+  ],
+  "project": {
+    "stage": "course_foundation",
+    "case": "Связать тему со сквозным проектом Compliance, если это методически уместно.",
+    "expected_artifacts": []
+  },
+  "author_notes": [
+    "Seed passport. Требует авторского уточнения перед production-quality выпуском."
+  ],
+  "sources": {
+    "primary": [],
+    "secondary": [
+      "SRC-AUTHOR-MATERIALS"
+    ],
+    "examples": [],
+    "allow_external_research": false
+  }
+}

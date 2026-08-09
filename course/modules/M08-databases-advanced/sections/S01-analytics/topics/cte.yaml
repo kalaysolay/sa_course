@@ -1,0 +1,41 @@
+{
+  "id": "SQL-CTE",
+  "title": "Подзапросы / CTE — на необходимом аналитику уровне",
+  "course_order": 68,
+  "purpose": "Задать базовое понимание темы «Подзапросы / CTE — на необходимом аналитику уровне» в логике курса системного анализа.",
+  "scope": {
+    "include": [
+      "Подзапросы / CTE — на необходимом аналитику уровне"
+    ],
+    "exclude": [
+      "углубление за пределы базового уровня курса"
+    ]
+  },
+  "prerequisites": {
+    "topics": [
+      "SQL-JOIN-ADVANCED"
+    ]
+  },
+  "previous_topics": [
+    "SQL-JOIN-ADVANCED"
+  ],
+  "next_topics": [
+    "SQL-INSERT"
+  ],
+  "project": {
+    "stage": "course_foundation",
+    "case": "Связать тему со сквозным проектом Compliance, если это методически уместно.",
+    "expected_artifacts": []
+  },
+  "author_notes": [
+    "Seed passport. Требует авторского уточнения перед production-quality выпуском."
+  ],
+  "sources": {
+    "primary": [],
+    "secondary": [
+      "SRC-AUTHOR-MATERIALS"
+    ],
+    "examples": [],
+    "allow_external_research": false
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "id": "ARCH-STORAGE",
+  "title": "Файловое/объектное хранилище — обзор",
+  "course_order": 31,
+  "purpose": "Задать базовое понимание темы «Файловое/объектное хранилище — обзор» в логике курса системного анализа.",
+  "scope": {
+    "include": [
+      "Файловое/объектное хранилище — обзор"
+    ],
+    "exclude": [
+      "углубление за пределы базового уровня курса"
+    ]
+  },
+  "prerequisites": {
+    "topics": [
+      "ARCH-CACHE"
+    ]
+  },
+  "previous_topics": [
+    "ARCH-CACHE"
+  ],
+  "next_topics": [
+    "ARCH-SYNC"
+  ],
+  "project": {
+    "stage": "course_foundation",
+    "case": "Связать тему со сквозным проектом Compliance, если это методически уместно.",
+    "expected_artifacts": []
+  },
+  "author_notes": [
+    "Seed passport. Требует авторского уточнения перед production-quality выпуском."
+  ],
+  "sources": {
+    "primary": [],
+    "secondary": [
+      "SRC-AUTHOR-MATERIALS"
+    ],
+    "examples": [],
+    "allow_external_research": false
+  }
+}

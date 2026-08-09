@@ -1,0 +1,11 @@
+{
+  "type": "object",
+  "required": [
+    "course_id",
+    "summary",
+    "last_completed",
+    "next_candidate",
+    "topics"
+  ],
+  "additionalProperties": true
+}

@@ -1,0 +1,37 @@
+{
+  "id": "PROF-ROLE",
+  "title": "Роль системного аналитика и его типовые задачи",
+  "course_order": 1,
+  "purpose": "Задать базовое понимание темы «Роль системного аналитика и его типовые задачи» в логике курса системного анализа.",
+  "scope": {
+    "include": [
+      "Роль системного аналитика и его типовые задачи"
+    ],
+    "exclude": [
+      "углубление за пределы базового уровня курса"
+    ]
+  },
+  "prerequisites": {
+    "topics": []
+  },
+  "previous_topics": [],
+  "next_topics": [
+    "PROF-LIFECYCLE"
+  ],
+  "project": {
+    "stage": "course_foundation",
+    "case": "Связать тему со сквозным проектом Compliance, если это методически уместно.",
+    "expected_artifacts": []
+  },
+  "author_notes": [
+    "Seed passport. Требует авторского уточнения перед production-quality выпуском."
+  ],
+  "sources": {
+    "primary": [],
+    "secondary": [
+      "SRC-AUTHOR-MATERIALS"
+    ],
+    "examples": [],
+    "allow_external_research": false
+  }
+}

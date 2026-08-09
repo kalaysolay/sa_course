@@ -1,0 +1,7 @@
+{
+  "type": "object",
+  "required": [
+    "sources"
+  ],
+  "additionalProperties": true
+}

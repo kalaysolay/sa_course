@@ -1,0 +1,48 @@
+{
+  "sources": [
+    {
+      "id": "SRC-WIEGERS-REQUIREMENTS",
+      "type": "book",
+      "title": "Software Requirements",
+      "authors": [
+        "Karl Wiegers",
+        "Joy Beatty"
+      ],
+      "availability": "missing",
+      "location": {
+        "type": "local_file",
+        "path": "references/books/requirements/software-requirements.pdf"
+      }
+    },
+    {
+      "id": "SRC-PUT-ANALYTIKA",
+      "type": "book",
+      "title": "Путь аналитика",
+      "availability": "missing",
+      "location": {
+        "type": "local_file",
+        "path": "references/books/business-analysis/put-analitika.pdf"
+      }
+    },
+    {
+      "id": "SRC-AUTHOR-MATERIALS",
+      "type": "author_material",
+      "title": "Авторские материалы курса",
+      "availability": "available",
+      "location": {
+        "type": "directory",
+        "path": "references/author-materials"
+      }
+    },
+    {
+      "id": "REF-MY-STAKEHOLDER-DOC-01",
+      "type": "artifact_example",
+      "title": "Пример реестра заинтересованных лиц",
+      "availability": "missing",
+      "location": {
+        "type": "local_file",
+        "path": "references/artifact-examples/stakeholder-registers/stakeholders-example.md"
+      }
+    }
+  ]
+}

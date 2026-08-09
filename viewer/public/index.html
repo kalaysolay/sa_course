@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Course Viewer</title>
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <header class="sidebar-header">
+          <div>
+            <p class="eyebrow">Course Viewer</p>
+            <h1>Лекции</h1>
+          </div>
+          <button id="refreshButton" class="icon-button" type="button" title="Обновить список" aria-label="Обновить список">
+            <span aria-hidden="true">↻</span>
+          </button>
+        </header>
+
+        <form id="rootForm" class="root-form">
+          <label for="rootInput">Папка курса</label>
+          <div class="root-row">
+            <input id="rootInput" name="root" type="text" autocomplete="off">
+            <button type="submit" title="Открыть папку" aria-label="Открыть папку">
+              <span aria-hidden="true">→</span>
+            </button>
+            <button id="folderButton" type="button" title="Выбрать папку" aria-label="Выбрать папку">
+              <span aria-hidden="true">...</span>
+            </button>
+          </div>
+          <input id="folderInput" type="file" webkitdirectory multiple hidden>
+        </form>
+
+        <div class="list-meta">
+          <span id="lectureCount">0 лекций</span>
+          <span id="statusText">Загрузка</span>
+        </div>
+
+        <nav id="lectureList" class="lecture-list" aria-label="Список лекций"></nav>
+      </aside>
+
+      <main class="content">
+        <article class="viewer">
+          <header class="lecture-header">
+            <div>
+              <p id="lecturePath" class="lecture-path">Выберите лекцию</p>
+              <h2 id="lectureTitle">Контент появится здесь</h2>
+            </div>
+            <div id="materialLinks" class="materials"></div>
+          </header>
+          <div id="markdownContent" class="markdown empty-state">
+            В выбранной папке будут показаны найденные Markdown-лекции.
+          </div>
+        </article>
+      </main>
+    </div>
+
+    <script src="./app.js" type="module"></script>
+  </body>
+</html>

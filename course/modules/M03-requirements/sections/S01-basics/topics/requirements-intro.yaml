@@ -1,0 +1,41 @@
+{
+  "id": "REQ-INTRO",
+  "title": "Что такое требования и какие они бывают",
+  "course_order": 12,
+  "purpose": "Задать базовое понимание темы «Что такое требования и какие они бывают» в логике курса системного анализа.",
+  "scope": {
+    "include": [
+      "Что такое требования и какие они бывают"
+    ],
+    "exclude": [
+      "углубление за пределы базового уровня курса"
+    ]
+  },
+  "prerequisites": {
+    "topics": [
+      "SDLC-LIFECYCLE"
+    ]
+  },
+  "previous_topics": [
+    "SDLC-LIFECYCLE"
+  ],
+  "next_topics": [
+    "REQ-FNFR"
+  ],
+  "project": {
+    "stage": "course_foundation",
+    "case": "Связать тему со сквозным проектом Compliance, если это методически уместно.",
+    "expected_artifacts": []
+  },
+  "author_notes": [
+    "Seed passport. Требует авторского уточнения перед production-quality выпуском."
+  ],
+  "sources": {
+    "primary": [],
+    "secondary": [
+      "SRC-AUTHOR-MATERIALS"
+    ],
+    "examples": [],
+    "allow_external_research": false
+  }
+}

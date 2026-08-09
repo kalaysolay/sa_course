@@ -1,0 +1,8 @@
+{
+  "type": "object",
+  "required": [
+    "topicId",
+    "items"
+  ],
+  "additionalProperties": true
+}

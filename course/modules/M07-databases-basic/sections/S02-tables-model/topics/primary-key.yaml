@@ -1,0 +1,41 @@
+{
+  "id": "DB-PK",
+  "title": "Первичный ключ",
+  "course_order": 50,
+  "purpose": "Задать базовое понимание темы «Первичный ключ» в логике курса системного анализа.",
+  "scope": {
+    "include": [
+      "Первичный ключ"
+    ],
+    "exclude": [
+      "углубление за пределы базового уровня курса"
+    ]
+  },
+  "prerequisites": {
+    "topics": [
+      "DB-NULL"
+    ]
+  },
+  "previous_topics": [
+    "DB-NULL"
+  ],
+  "next_topics": [
+    "DB-FK"
+  ],
+  "project": {
+    "stage": "course_foundation",
+    "case": "Связать тему со сквозным проектом Compliance, если это методически уместно.",
+    "expected_artifacts": []
+  },
+  "author_notes": [
+    "Seed passport. Требует авторского уточнения перед production-quality выпуском."
+  ],
+  "sources": {
+    "primary": [],
+    "secondary": [
+      "SRC-AUTHOR-MATERIALS"
+    ],
+    "examples": [],
+    "allow_external_research": false
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "publisher": {
+    "version": "0.3"
+  },
+  "revisions": {
+    "lecture": 3,
+    "assessment": 2,
+    "project_artifacts": 3
+  },
+  "review": {
+    "block_on": [
+      "critical",
+      "major"
+    ],
+    "max_minor_for_auto_approve": 5
+  },
+  "features": {
+    "visuals": false,
+    "google_drive_publish": false,
+    "whole_module_generation": false,
+    "experimental_project_artifacts": true,
+    "experimental_project_auto_merge": false
+  },
+  "course_progress": {
+    "auto_update": true,
+    "maintain_human_readable_progress": true,
+    "block_on_major_gap": true,
+    "never_silently_skip_topic": true
+  },
+  "curriculum": {
+    "author_controlled": true,
+    "require_topic_passport": true
+  },
+  "sources": {
+    "registry_required": true
+  },
+  "logging": {
+    "events_jsonl": true,
+    "keep_drafts": true,
+    "keep_reviews": true
+  },
+  "llm": {
+    "default_adapter": "codex",
+    "openai": {
+      "model": "gpt-5.6-terra",
+      "reasoning_effort": "medium",
+      "temperature": 0.3,
+      "api_key_env": "OPENAI_API_KEY"
+    },
+    "codex": {
+      "task_packet_dir": "codex-tasks",
+      "external_api_required": false,
+      "execution_surface": "Codex/ChatGPT desktop app",
+      "supports_multi_agent_dispatch": true
+    }
+  }
+}

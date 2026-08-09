@@ -1,0 +1,41 @@
+{
+  "id": "DEV-MODELS",
+  "title": "Модели управления разработкой ПО",
+  "course_order": 8,
+  "purpose": "Задать базовое понимание темы «Модели управления разработкой ПО» в логике курса системного анализа.",
+  "scope": {
+    "include": [
+      "Модели управления разработкой ПО"
+    ],
+    "exclude": [
+      "углубление за пределы базового уровня курса"
+    ]
+  },
+  "prerequisites": {
+    "topics": [
+      "TEAM-ROLES"
+    ]
+  },
+  "previous_topics": [
+    "TEAM-ROLES"
+  ],
+  "next_topics": [
+    "AGILE-METHODS"
+  ],
+  "project": {
+    "stage": "course_foundation",
+    "case": "Связать тему со сквозным проектом Compliance, если это методически уместно.",
+    "expected_artifacts": []
+  },
+  "author_notes": [
+    "Seed passport. Требует авторского уточнения перед production-quality выпуском."
+  ],
+  "sources": {
+    "primary": [],
+    "secondary": [
+      "SRC-AUTHOR-MATERIALS"
+    ],
+    "examples": [],
+    "allow_external_research": false
+  }
+}

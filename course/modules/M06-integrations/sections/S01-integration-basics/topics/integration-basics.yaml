@@ -1,0 +1,41 @@
+{
+  "id": "INT-BASICS",
+  "title": "Способы интеграции систем",
+  "course_order": 36,
+  "purpose": "Задать базовое понимание темы «Способы интеграции систем» в логике курса системного анализа.",
+  "scope": {
+    "include": [
+      "Способы интеграции систем"
+    ],
+    "exclude": [
+      "углубление за пределы базового уровня курса"
+    ]
+  },
+  "prerequisites": {
+    "topics": [
+      "SEC-AUTHORIZATION"
+    ]
+  },
+  "previous_topics": [
+    "SEC-AUTHORIZATION"
+  ],
+  "next_topics": [
+    "INT-REST"
+  ],
+  "project": {
+    "stage": "course_foundation",
+    "case": "Связать тему со сквозным проектом Compliance, если это методически уместно.",
+    "expected_artifacts": []
+  },
+  "author_notes": [
+    "Seed passport. Требует авторского уточнения перед production-quality выпуском."
+  ],
+  "sources": {
+    "primary": [],
+    "secondary": [
+      "SRC-AUTHOR-MATERIALS"
+    ],
+    "examples": [],
+    "allow_external_research": false
+  }
+}

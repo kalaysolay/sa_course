@@ -1,0 +1,41 @@
+{
+  "id": "DB-TABLES",
+  "title": "Таблицы, строки и столбцы",
+  "course_order": 47,
+  "purpose": "Задать базовое понимание темы «Таблицы, строки и столбцы» в логике курса системного анализа.",
+  "scope": {
+    "include": [
+      "Таблицы, строки и столбцы"
+    ],
+    "exclude": [
+      "углубление за пределы базового уровня курса"
+    ]
+  },
+  "prerequisites": {
+    "topics": [
+      "DB-PSQL"
+    ]
+  },
+  "previous_topics": [
+    "DB-PSQL"
+  ],
+  "next_topics": [
+    "DB-DATA-TYPES"
+  ],
+  "project": {
+    "stage": "course_foundation",
+    "case": "Связать тему со сквозным проектом Compliance, если это методически уместно.",
+    "expected_artifacts": []
+  },
+  "author_notes": [
+    "Seed passport. Требует авторского уточнения перед production-quality выпуском."
+  ],
+  "sources": {
+    "primary": [],
+    "secondary": [
+      "SRC-AUTHOR-MATERIALS"
+    ],
+    "examples": [],
+    "allow_external_research": false
+  }
+}

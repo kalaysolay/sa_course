@@ -1,0 +1,32 @@
+{
+  "course": {
+    "id": "system-analysis",
+    "title": "Системный анализ на практике",
+    "language": "ru",
+    "project": "compliance"
+  },
+  "audience": {
+    "level": "beginner",
+    "assumed_it_background": "none"
+  },
+  "curriculum": {
+    "file": "curriculum.yaml"
+  },
+  "progress": {
+    "file": "progress.yaml"
+  },
+  "gaps": {
+    "file": "gap-registry.yaml"
+  },
+  "sources": {
+    "registry": "../references/source-registry.yaml"
+  },
+  "principles": [
+    "practice_first",
+    "explain_before_formalize",
+    "one_end_to_end_project",
+    "business_to_system_analysis",
+    "no_unexplained_terms",
+    "curriculum_is_author_controlled"
+  ]
+}

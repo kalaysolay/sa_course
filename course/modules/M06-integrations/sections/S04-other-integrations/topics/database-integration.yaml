@@ -1,0 +1,41 @@
+{
+  "id": "INT-DATABASE",
+  "title": "Интеграция через базы данных",
+  "course_order": 41,
+  "purpose": "Задать базовое понимание темы «Интеграция через базы данных» в логике курса системного анализа.",
+  "scope": {
+    "include": [
+      "Интеграция через базы данных"
+    ],
+    "exclude": [
+      "углубление за пределы базового уровня курса"
+    ]
+  },
+  "prerequisites": {
+    "topics": [
+      "INT-FILES"
+    ]
+  },
+  "previous_topics": [
+    "INT-FILES"
+  ],
+  "next_topics": [
+    "INT-API-DESIGN"
+  ],
+  "project": {
+    "stage": "course_foundation",
+    "case": "Связать тему со сквозным проектом Compliance, если это методически уместно.",
+    "expected_artifacts": []
+  },
+  "author_notes": [
+    "Seed passport. Требует авторского уточнения перед production-quality выпуском."
+  ],
+  "sources": {
+    "primary": [],
+    "secondary": [
+      "SRC-AUTHOR-MATERIALS"
+    ],
+    "examples": [],
+    "allow_external_research": false
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "id": "DB-DATA-TYPES",
+  "title": "Основные типы данных",
+  "course_order": 48,
+  "purpose": "Задать базовое понимание темы «Основные типы данных» в логике курса системного анализа.",
+  "scope": {
+    "include": [
+      "Основные типы данных"
+    ],
+    "exclude": [
+      "углубление за пределы базового уровня курса"
+    ]
+  },
+  "prerequisites": {
+    "topics": [
+      "DB-TABLES"
+    ]
+  },
+  "previous_topics": [
+    "DB-TABLES"
+  ],
+  "next_topics": [
+    "DB-NULL"
+  ],
+  "project": {
+    "stage": "course_foundation",
+    "case": "Связать тему со сквозным проектом Compliance, если это методически уместно.",
+    "expected_artifacts": []
+  },
+  "author_notes": [
+    "Seed passport. Требует авторского уточнения перед production-quality выпуском."
+  ],
+  "sources": {
+    "primary": [],
+    "secondary": [
+      "SRC-AUTHOR-MATERIALS"
+    ],
+    "examples": [],
+    "allow_external_research": false
+  }
+}

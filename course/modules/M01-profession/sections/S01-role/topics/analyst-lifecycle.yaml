@@ -1,0 +1,41 @@
+{
+  "id": "PROF-LIFECYCLE",
+  "title": "Жизненный цикл работы аналитика",
+  "course_order": 2,
+  "purpose": "Задать базовое понимание темы «Жизненный цикл работы аналитика» в логике курса системного анализа.",
+  "scope": {
+    "include": [
+      "Жизненный цикл работы аналитика"
+    ],
+    "exclude": [
+      "углубление за пределы базового уровня курса"
+    ]
+  },
+  "prerequisites": {
+    "topics": [
+      "PROF-ROLE"
+    ]
+  },
+  "previous_topics": [
+    "PROF-ROLE"
+  ],
+  "next_topics": [
+    "PROF-SKILLS"
+  ],
+  "project": {
+    "stage": "course_foundation",
+    "case": "Связать тему со сквозным проектом Compliance, если это методически уместно.",
+    "expected_artifacts": []
+  },
+  "author_notes": [
+    "Seed passport. Требует авторского уточнения перед production-quality выпуском."
+  ],
+  "sources": {
+    "primary": [],
+    "secondary": [
+      "SRC-AUTHOR-MATERIALS"
+    ],
+    "examples": [],
+    "allow_external_research": false
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "id": "SQL-GROUP-BY",
+  "title": "GROUP BY",
+  "course_order": 65,
+  "purpose": "Задать базовое понимание темы «GROUP BY» в логике курса системного анализа.",
+  "scope": {
+    "include": [
+      "GROUP BY"
+    ],
+    "exclude": [
+      "углубление за пределы базового уровня курса"
+    ]
+  },
+  "prerequisites": {
+    "topics": [
+      "SQL-AGGREGATES"
+    ]
+  },
+  "previous_topics": [
+    "SQL-AGGREGATES"
+  ],
+  "next_topics": [
+    "SQL-HAVING"
+  ],
+  "project": {
+    "stage": "course_foundation",
+    "case": "Связать тему со сквозным проектом Compliance, если это методически уместно.",
+    "expected_artifacts": []
+  },
+  "author_notes": [
+    "Seed passport. Требует авторского уточнения перед production-quality выпуском."
+  ],
+  "sources": {
+    "primary": [],
+    "secondary": [
+      "SRC-AUTHOR-MATERIALS"
+    ],
+    "examples": [],
+    "allow_external_research": false
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "type": "object",
+  "required": [
+    "course_id",
+    "modules"
+  ],
+  "additionalProperties": true
+}

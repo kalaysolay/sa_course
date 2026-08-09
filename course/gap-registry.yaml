@@ -1,0 +1,21 @@
+{
+  "gaps": [
+    {
+      "id": "GAP-0001",
+      "status": "open",
+      "severity": "minor",
+      "type": "source_gap",
+      "detected_during": {
+        "topic_id": "REQ-STAKEHOLDERS",
+        "run_id": "20260809T042330Z_REQ-STAKEHOLDERS_1525ea"
+      },
+      "description": "Primary source SRC-WIEGERS-REQUIREMENTS зарегистрирован, но недоступен.",
+      "affected_topics": [
+        "REQ-STAKEHOLDERS"
+      ],
+      "suggested_action": "Добавить локальный источник или подтвердить продолжение на secondary sources.",
+      "created_at": "2026-08-09T04:23:30.557Z",
+      "resolved_at": null
+    }
+  ]
+}

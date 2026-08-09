@@ -1,0 +1,15 @@
+{
+  "name": "course-publisher",
+  "version": "0.3.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "bootstrap": "node ./scripts/bootstrap-seed.mjs",
+    "publisher": "node ./scripts/publisher.mjs",
+    "viewer": "node ./viewer/server.mjs",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

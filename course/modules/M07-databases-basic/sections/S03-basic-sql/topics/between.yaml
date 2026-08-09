@@ -1,0 +1,41 @@
+{
+  "id": "SQL-BETWEEN",
+  "title": "BETWEEN",
+  "course_order": 58,
+  "purpose": "Задать базовое понимание темы «BETWEEN» в логике курса системного анализа.",
+  "scope": {
+    "include": [
+      "BETWEEN"
+    ],
+    "exclude": [
+      "углубление за пределы базового уровня курса"
+    ]
+  },
+  "prerequisites": {
+    "topics": [
+      "SQL-IN"
+    ]
+  },
+  "previous_topics": [
+    "SQL-IN"
+  ],
+  "next_topics": [
+    "SQL-LIKE"
+  ],
+  "project": {
+    "stage": "course_foundation",
+    "case": "Связать тему со сквозным проектом Compliance, если это методически уместно.",
+    "expected_artifacts": []
+  },
+  "author_notes": [
+    "Seed passport. Требует авторского уточнения перед production-quality выпуском."
+  ],
+  "sources": {
+    "primary": [],
+    "secondary": [
+      "SRC-AUTHOR-MATERIALS"
+    ],
+    "examples": [],
+    "allow_external_research": false
+  }
+}

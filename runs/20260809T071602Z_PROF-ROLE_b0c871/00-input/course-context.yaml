@@ -1,0 +1,12 @@
+{
+  "module": "M01",
+  "section": "M01-S01",
+  "topic": {
+    "id": "PROF-ROLE",
+    "slug": "analyst-role",
+    "title": "Роль системного аналитика и его типовые задачи",
+    "order": 1,
+    "course_order": 1,
+    "passport": "course/modules/M01-profession/sections/S01-role/topics/analyst-role.yaml"
+  }
+}

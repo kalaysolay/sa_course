@@ -1,0 +1,41 @@
+{
+  "id": "REQ-ELICITATION",
+  "title": "Способы выявления требований",
+  "course_order": 15,
+  "purpose": "Задать базовое понимание темы «Способы выявления требований» в логике курса системного анализа.",
+  "scope": {
+    "include": [
+      "Способы выявления требований"
+    ],
+    "exclude": [
+      "углубление за пределы базового уровня курса"
+    ]
+  },
+  "prerequisites": {
+    "topics": [
+      "REQ-STAKEHOLDERS"
+    ]
+  },
+  "previous_topics": [
+    "REQ-STAKEHOLDERS"
+  ],
+  "next_topics": [
+    "REQ-MODELING"
+  ],
+  "project": {
+    "stage": "course_foundation",
+    "case": "Связать тему со сквозным проектом Compliance, если это методически уместно.",
+    "expected_artifacts": []
+  },
+  "author_notes": [
+    "Seed passport. Требует авторского уточнения перед production-quality выпуском."
+  ],
+  "sources": {
+    "primary": [],
+    "secondary": [
+      "SRC-AUTHOR-MATERIALS"
+    ],
+    "examples": [],
+    "allow_external_research": false
+  }
+}

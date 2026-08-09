@@ -1,0 +1,41 @@
+{
+  "id": "TEAM-ROLES",
+  "title": "Команда разработки и роли участников",
+  "course_order": 7,
+  "purpose": "Задать базовое понимание темы «Команда разработки и роли участников» в логике курса системного анализа.",
+  "scope": {
+    "include": [
+      "Команда разработки и роли участников"
+    ],
+    "exclude": [
+      "углубление за пределы базового уровня курса"
+    ]
+  },
+  "prerequisites": {
+    "topics": [
+      "BASA-ARTIFACTS"
+    ]
+  },
+  "previous_topics": [
+    "BASA-ARTIFACTS"
+  ],
+  "next_topics": [
+    "DEV-MODELS"
+  ],
+  "project": {
+    "stage": "course_foundation",
+    "case": "Связать тему со сквозным проектом Compliance, если это методически уместно.",
+    "expected_artifacts": []
+  },
+  "author_notes": [
+    "Seed passport. Требует авторского уточнения перед production-quality выпуском."
+  ],
+  "sources": {
+    "primary": [],
+    "secondary": [
+      "SRC-AUTHOR-MATERIALS"
+    ],
+    "examples": [],
+    "allow_external_research": false
+  }
+}

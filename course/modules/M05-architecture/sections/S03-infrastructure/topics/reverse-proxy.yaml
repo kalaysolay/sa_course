@@ -1,0 +1,41 @@
+{
+  "id": "ARCH-REVERSE-PROXY",
+  "title": "Reverse proxy и балансировка — обзор",
+  "course_order": 28,
+  "purpose": "Задать базовое понимание темы «Reverse proxy и балансировка — обзор» в логике курса системного анализа.",
+  "scope": {
+    "include": [
+      "Reverse proxy и балансировка — обзор"
+    ],
+    "exclude": [
+      "углубление за пределы базового уровня курса"
+    ]
+  },
+  "prerequisites": {
+    "topics": [
+      "ARCH-MICROSERVICES"
+    ]
+  },
+  "previous_topics": [
+    "ARCH-MICROSERVICES"
+  ],
+  "next_topics": [
+    "ARCH-API-GATEWAY"
+  ],
+  "project": {
+    "stage": "course_foundation",
+    "case": "Связать тему со сквозным проектом Compliance, если это методически уместно.",
+    "expected_artifacts": []
+  },
+  "author_notes": [
+    "Seed passport. Требует авторского уточнения перед production-quality выпуском."
+  ],
+  "sources": {
+    "primary": [],
+    "secondary": [
+      "SRC-AUTHOR-MATERIALS"
+    ],
+    "examples": [],
+    "allow_external_research": false
+  }
+}

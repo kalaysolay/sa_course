@@ -1,0 +1,706 @@
+{
+  "course_id": "system-analysis",
+  "updated_at": "2026-08-09T07:16:02.630Z",
+  "summary": {
+    "total_topics": 98,
+    "completed": 0,
+    "in_progress": 1,
+    "blocked": 0,
+    "needs_revision": 0,
+    "planned": 97
+  },
+  "last_completed": null,
+  "next_candidate": {
+    "topic_id": "PROF-LIFECYCLE",
+    "course_order": 2
+  },
+  "topics": {
+    "PROF-ROLE": {
+      "course_order": 1,
+      "module_id": "M01",
+      "title": "Роль системного аналитика и его типовые задачи",
+      "status": "in_progress",
+      "output": null,
+      "run_id": "20260809T071602Z_PROF-ROLE_b0c871"
+    },
+    "PROF-LIFECYCLE": {
+      "course_order": 2,
+      "module_id": "M01",
+      "title": "Жизненный цикл работы аналитика",
+      "status": "planned",
+      "output": null
+    },
+    "PROF-SKILLS": {
+      "course_order": 3,
+      "module_id": "M01",
+      "title": "Навыки и компетенции системного аналитика",
+      "status": "planned",
+      "output": null
+    },
+    "BASA-BOUNDARY": {
+      "course_order": 4,
+      "module_id": "M01",
+      "title": "Где заканчивается бизнес-анализ и начинается системный анализ",
+      "status": "planned",
+      "output": null
+    },
+    "BASA-RESULTS": {
+      "course_order": 5,
+      "module_id": "M01",
+      "title": "Какие результаты возникают по пути анализа",
+      "status": "planned",
+      "output": null
+    },
+    "BASA-ARTIFACTS": {
+      "course_order": 6,
+      "module_id": "M01",
+      "title": "Какие артефакты возникают по пути анализа",
+      "status": "planned",
+      "output": null
+    },
+    "TEAM-ROLES": {
+      "course_order": 7,
+      "module_id": "M02",
+      "title": "Команда разработки и роли участников",
+      "status": "planned",
+      "output": null
+    },
+    "DEV-MODELS": {
+      "course_order": 8,
+      "module_id": "M02",
+      "title": "Модели управления разработкой ПО",
+      "status": "planned",
+      "output": null
+    },
+    "AGILE-METHODS": {
+      "course_order": 9,
+      "module_id": "M02",
+      "title": "Гибкие методологии",
+      "status": "planned",
+      "output": null
+    },
+    "SDLC-STAGES": {
+      "course_order": 10,
+      "module_id": "M02",
+      "title": "Этапы разработки ПО",
+      "status": "planned",
+      "output": null
+    },
+    "SDLC-LIFECYCLE": {
+      "course_order": 11,
+      "module_id": "M02",
+      "title": "Жизненный цикл ПО",
+      "status": "planned",
+      "output": null
+    },
+    "REQ-INTRO": {
+      "course_order": 12,
+      "module_id": "M03",
+      "title": "Что такое требования и какие они бывают",
+      "status": "planned",
+      "output": null
+    },
+    "REQ-FNFR": {
+      "course_order": 13,
+      "module_id": "M03",
+      "title": "Функциональные и нефункциональные требования",
+      "status": "planned",
+      "output": null
+    },
+    "REQ-STAKEHOLDERS": {
+      "course_order": 14,
+      "module_id": "M03",
+      "title": "Заинтересованные лица",
+      "status": "planned",
+      "output": null
+    },
+    "REQ-ELICITATION": {
+      "course_order": 15,
+      "module_id": "M03",
+      "title": "Способы выявления требований",
+      "status": "planned",
+      "output": null
+    },
+    "REQ-MODELING": {
+      "course_order": 16,
+      "module_id": "M03",
+      "title": "Моделирование и формализация требований",
+      "status": "planned",
+      "output": null
+    },
+    "REQ-SPECIFICATION": {
+      "course_order": 17,
+      "module_id": "M03",
+      "title": "Спецификация и документирование требований",
+      "status": "planned",
+      "output": null
+    },
+    "REQ-MANAGEMENT": {
+      "course_order": 18,
+      "module_id": "M03",
+      "title": "Управление требованиями",
+      "status": "planned",
+      "output": null
+    },
+    "UML-USE-CASE": {
+      "course_order": 19,
+      "module_id": "M04",
+      "title": "UML. Диаграмма сценариев использования",
+      "status": "planned",
+      "output": null
+    },
+    "UML-ACTIVITY": {
+      "course_order": 20,
+      "module_id": "M04",
+      "title": "UML. Диаграмма активности",
+      "status": "planned",
+      "output": null
+    },
+    "UML-STATE": {
+      "course_order": 21,
+      "module_id": "M04",
+      "title": "UML. Диаграмма состояний",
+      "status": "planned",
+      "output": null
+    },
+    "UML-SEQUENCE": {
+      "course_order": 22,
+      "module_id": "M04",
+      "title": "UML. Диаграмма последовательностей",
+      "status": "planned",
+      "output": null
+    },
+    "ARCH-IS-TYPES": {
+      "course_order": 23,
+      "module_id": "M05",
+      "title": "Различные типы ИС: веб, десктоп, мобильные",
+      "status": "planned",
+      "output": null
+    },
+    "ARCH-BASIC-SCHEMA": {
+      "course_order": 24,
+      "module_id": "M05",
+      "title": "Базовая схема client → frontend → backend → database",
+      "status": "planned",
+      "output": null
+    },
+    "ARCH-STYLES": {
+      "course_order": 25,
+      "module_id": "M05",
+      "title": "Виды архитектуры информационных систем",
+      "status": "planned",
+      "output": null
+    },
+    "ARCH-MONOLITH": {
+      "course_order": 26,
+      "module_id": "M05",
+      "title": "Монолит",
+      "status": "planned",
+      "output": null
+    },
+    "ARCH-MICROSERVICES": {
+      "course_order": 27,
+      "module_id": "M05",
+      "title": "Микросервисы",
+      "status": "planned",
+      "output": null
+    },
+    "ARCH-REVERSE-PROXY": {
+      "course_order": 28,
+      "module_id": "M05",
+      "title": "Reverse proxy и балансировка — обзор",
+      "status": "planned",
+      "output": null
+    },
+    "ARCH-API-GATEWAY": {
+      "course_order": 29,
+      "module_id": "M05",
+      "title": "API Gateway — обзор",
+      "status": "planned",
+      "output": null
+    },
+    "ARCH-CACHE": {
+      "course_order": 30,
+      "module_id": "M05",
+      "title": "Кэш — обзор",
+      "status": "planned",
+      "output": null
+    },
+    "ARCH-STORAGE": {
+      "course_order": 31,
+      "module_id": "M05",
+      "title": "Файловое/объектное хранилище — обзор",
+      "status": "planned",
+      "output": null
+    },
+    "ARCH-SYNC": {
+      "course_order": 32,
+      "module_id": "M05",
+      "title": "Синхронное взаимодействие",
+      "status": "planned",
+      "output": null
+    },
+    "ARCH-ASYNC": {
+      "course_order": 33,
+      "module_id": "M05",
+      "title": "Асинхронное взаимодействие",
+      "status": "planned",
+      "output": null
+    },
+    "SEC-AUTHENTICATION": {
+      "course_order": 34,
+      "module_id": "M05",
+      "title": "Аутентификация",
+      "status": "planned",
+      "output": null
+    },
+    "SEC-AUTHORIZATION": {
+      "course_order": 35,
+      "module_id": "M05",
+      "title": "Авторизация",
+      "status": "planned",
+      "output": null
+    },
+    "INT-BASICS": {
+      "course_order": 36,
+      "module_id": "M06",
+      "title": "Способы интеграции систем",
+      "status": "planned",
+      "output": null
+    },
+    "INT-REST": {
+      "course_order": 37,
+      "module_id": "M06",
+      "title": "REST",
+      "status": "planned",
+      "output": null
+    },
+    "INT-SOAP": {
+      "course_order": 38,
+      "module_id": "M06",
+      "title": "SOAP",
+      "status": "planned",
+      "output": null
+    },
+    "INT-MQ": {
+      "course_order": 39,
+      "module_id": "M06",
+      "title": "Очереди сообщений / Message Queue",
+      "status": "planned",
+      "output": null
+    },
+    "INT-FILES": {
+      "course_order": 40,
+      "module_id": "M06",
+      "title": "Интеграция через файлы",
+      "status": "planned",
+      "output": null
+    },
+    "INT-DATABASE": {
+      "course_order": 41,
+      "module_id": "M06",
+      "title": "Интеграция через базы данных",
+      "status": "planned",
+      "output": null
+    },
+    "INT-API-DESIGN": {
+      "course_order": 42,
+      "module_id": "M06",
+      "title": "Проектирование API и взаимодействия приложений",
+      "status": "planned",
+      "output": null
+    },
+    "DB-INTRO": {
+      "course_order": 43,
+      "module_id": "M07",
+      "title": "Введение",
+      "status": "planned",
+      "output": null
+    },
+    "DB-RELATIONAL": {
+      "course_order": 44,
+      "module_id": "M07",
+      "title": "Реляционные базы данных",
+      "status": "planned",
+      "output": null
+    },
+    "DB-STRUCTURE": {
+      "course_order": 45,
+      "module_id": "M07",
+      "title": "Структура баз данных",
+      "status": "planned",
+      "output": null
+    },
+    "DB-PSQL": {
+      "course_order": 46,
+      "module_id": "M07",
+      "title": "Подключение к PostgreSQL с помощью psql",
+      "status": "planned",
+      "output": null
+    },
+    "DB-TABLES": {
+      "course_order": 47,
+      "module_id": "M07",
+      "title": "Таблицы, строки и столбцы",
+      "status": "planned",
+      "output": null
+    },
+    "DB-DATA-TYPES": {
+      "course_order": 48,
+      "module_id": "M07",
+      "title": "Основные типы данных",
+      "status": "planned",
+      "output": null
+    },
+    "DB-NULL": {
+      "course_order": 49,
+      "module_id": "M07",
+      "title": "NULL и особые значения",
+      "status": "planned",
+      "output": null
+    },
+    "DB-PK": {
+      "course_order": 50,
+      "module_id": "M07",
+      "title": "Первичный ключ",
+      "status": "planned",
+      "output": null
+    },
+    "DB-FK": {
+      "course_order": 51,
+      "module_id": "M07",
+      "title": "Внешний ключ",
+      "status": "planned",
+      "output": null
+    },
+    "DB-RELATIONSHIPS": {
+      "course_order": 52,
+      "module_id": "M07",
+      "title": "Связи 1:1, 1:N, M:N",
+      "status": "planned",
+      "output": null
+    },
+    "SQL-LANGUAGE": {
+      "course_order": 53,
+      "module_id": "M07",
+      "title": "Язык SQL",
+      "status": "planned",
+      "output": null
+    },
+    "SQL-SELECT": {
+      "course_order": 54,
+      "module_id": "M07",
+      "title": "SELECT",
+      "status": "planned",
+      "output": null
+    },
+    "SQL-WHERE": {
+      "course_order": 55,
+      "module_id": "M07",
+      "title": "WHERE",
+      "status": "planned",
+      "output": null
+    },
+    "SQL-AND-OR": {
+      "course_order": 56,
+      "module_id": "M07",
+      "title": "AND / OR",
+      "status": "planned",
+      "output": null
+    },
+    "SQL-IN": {
+      "course_order": 57,
+      "module_id": "M07",
+      "title": "IN",
+      "status": "planned",
+      "output": null
+    },
+    "SQL-BETWEEN": {
+      "course_order": 58,
+      "module_id": "M07",
+      "title": "BETWEEN",
+      "status": "planned",
+      "output": null
+    },
+    "SQL-LIKE": {
+      "course_order": 59,
+      "module_id": "M07",
+      "title": "LIKE",
+      "status": "planned",
+      "output": null
+    },
+    "SQL-ORDER-BY": {
+      "course_order": 60,
+      "module_id": "M07",
+      "title": "Сортировка данных",
+      "status": "planned",
+      "output": null
+    },
+    "SQL-LIMIT": {
+      "course_order": 61,
+      "module_id": "M07",
+      "title": "Ограничение выборки",
+      "status": "planned",
+      "output": null
+    },
+    "SQL-DISTINCT": {
+      "course_order": 62,
+      "module_id": "M07",
+      "title": "Уникальные строки",
+      "status": "planned",
+      "output": null
+    },
+    "SQL-JOIN-BASIC": {
+      "course_order": 63,
+      "module_id": "M07",
+      "title": "Базовые JOIN",
+      "status": "planned",
+      "output": null
+    },
+    "SQL-AGGREGATES": {
+      "course_order": 64,
+      "module_id": "M08",
+      "title": "Агрегатные функции",
+      "status": "planned",
+      "output": null
+    },
+    "SQL-GROUP-BY": {
+      "course_order": 65,
+      "module_id": "M08",
+      "title": "GROUP BY",
+      "status": "planned",
+      "output": null
+    },
+    "SQL-HAVING": {
+      "course_order": 66,
+      "module_id": "M08",
+      "title": "HAVING",
+      "status": "planned",
+      "output": null
+    },
+    "SQL-JOIN-ADVANCED": {
+      "course_order": 67,
+      "module_id": "M08",
+      "title": "Более сложные JOIN",
+      "status": "planned",
+      "output": null
+    },
+    "SQL-CTE": {
+      "course_order": 68,
+      "module_id": "M08",
+      "title": "Подзапросы / CTE — на необходимом аналитику уровне",
+      "status": "planned",
+      "output": null
+    },
+    "SQL-INSERT": {
+      "course_order": 69,
+      "module_id": "M08",
+      "title": "INSERT",
+      "status": "planned",
+      "output": null
+    },
+    "SQL-UPDATE": {
+      "course_order": 70,
+      "module_id": "M08",
+      "title": "UPDATE",
+      "status": "planned",
+      "output": null
+    },
+    "SQL-DELETE": {
+      "course_order": 71,
+      "module_id": "M08",
+      "title": "DELETE",
+      "status": "planned",
+      "output": null
+    },
+    "SQL-CREATE-TABLE": {
+      "course_order": 72,
+      "module_id": "M08",
+      "title": "CREATE TABLE",
+      "status": "planned",
+      "output": null
+    },
+    "SQL-CONSTRAINTS": {
+      "course_order": 73,
+      "module_id": "M08",
+      "title": "Основные ограничения полей",
+      "status": "planned",
+      "output": null
+    },
+    "SQL-ALTER-TABLE": {
+      "course_order": 74,
+      "module_id": "M08",
+      "title": "ALTER TABLE",
+      "status": "planned",
+      "output": null
+    },
+    "SQL-IDENTITY": {
+      "course_order": 75,
+      "module_id": "M08",
+      "title": "Identity / sequence / автоинкремент",
+      "status": "planned",
+      "output": null
+    },
+    "SQL-INDEXES": {
+      "course_order": 76,
+      "module_id": "M08",
+      "title": "Индексы — концептуально",
+      "status": "planned",
+      "output": null
+    },
+    "DB-TRANSACTION": {
+      "course_order": 77,
+      "module_id": "M08",
+      "title": "Что такое транзакция",
+      "status": "planned",
+      "output": null
+    },
+    "DB-ACID": {
+      "course_order": 78,
+      "module_id": "M08",
+      "title": "ACID",
+      "status": "planned",
+      "output": null
+    },
+    "DB-COMMIT-ROLLBACK": {
+      "course_order": 79,
+      "module_id": "M08",
+      "title": "COMMIT / ROLLBACK",
+      "status": "planned",
+      "output": null
+    },
+    "DB-ISOLATION": {
+      "course_order": 80,
+      "module_id": "M08",
+      "title": "Изоляция — базовая модель",
+      "status": "planned",
+      "output": null
+    },
+    "DB-LOCKS": {
+      "course_order": 81,
+      "module_id": "M08",
+      "title": "Блокировки — концептуально",
+      "status": "planned",
+      "output": null
+    },
+    "REQ-QUALITY-ATOMICITY": {
+      "course_order": 82,
+      "module_id": "M09",
+      "title": "Атомарность",
+      "status": "planned",
+      "output": null
+    },
+    "REQ-QUALITY-COMPLETENESS": {
+      "course_order": 83,
+      "module_id": "M09",
+      "title": "Полнота",
+      "status": "planned",
+      "output": null
+    },
+    "REQ-QUALITY-AMBIGUITY": {
+      "course_order": 84,
+      "module_id": "M09",
+      "title": "Однозначность",
+      "status": "planned",
+      "output": null
+    },
+    "REQ-QUALITY-CONSISTENCY": {
+      "course_order": 85,
+      "module_id": "M09",
+      "title": "Консистентность",
+      "status": "planned",
+      "output": null
+    },
+    "REQ-QUALITY-VERIFIABILITY": {
+      "course_order": 86,
+      "module_id": "M09",
+      "title": "Проверяемость",
+      "status": "planned",
+      "output": null
+    },
+    "REQ-QUALITY-FEASIBILITY": {
+      "course_order": 87,
+      "module_id": "M09",
+      "title": "Выполнимость",
+      "status": "planned",
+      "output": null
+    },
+    "REQ-QUALITY-BREVITY": {
+      "course_order": 88,
+      "module_id": "M09",
+      "title": "Краткость без потери смысла",
+      "status": "planned",
+      "output": null
+    },
+    "REQ-REVIEW-HOWTO": {
+      "course_order": 89,
+      "module_id": "M09",
+      "title": "Как проводить ревью",
+      "status": "planned",
+      "output": null
+    },
+    "REQ-REVIEW-DEFECTS": {
+      "course_order": 90,
+      "module_id": "M09",
+      "title": "Типовые дефекты требований",
+      "status": "planned",
+      "output": null
+    },
+    "REQ-REVIEW-SEVERITY": {
+      "course_order": 91,
+      "module_id": "M09",
+      "title": "Critical / Major / Minor замечания",
+      "status": "planned",
+      "output": null
+    },
+    "REQ-TRACEABILITY": {
+      "course_order": 92,
+      "module_id": "M09",
+      "title": "Traceability",
+      "status": "planned",
+      "output": null
+    },
+    "REQ-CROSS-CONSISTENCY": {
+      "course_order": 93,
+      "module_id": "M09",
+      "title": "Поиск противоречий между требованиями, моделями, API и данными",
+      "status": "planned",
+      "output": null
+    },
+    "AI-PLACEHOLDER": {
+      "course_order": 94,
+      "module_id": "M10",
+      "title": "LLM, prompts, tools, skills, MCP, агенты, review",
+      "status": "planned",
+      "output": null
+    },
+    "FINAL-SPEC-PACKAGE": {
+      "course_order": 95,
+      "module_id": "M11",
+      "title": "Подготовка итогового пакета спецификации Compliance",
+      "status": "planned",
+      "output": null
+    },
+    "FINAL-CODING-AGENTS": {
+      "course_order": 96,
+      "module_id": "M11",
+      "title": "Передача спецификации coding agents",
+      "status": "planned",
+      "output": null
+    },
+    "FINAL-IMPLEMENTATION-AMBIGUITIES": {
+      "course_order": 97,
+      "module_id": "M11",
+      "title": "Разбор неоднозначностей и ошибок реализации",
+      "status": "planned",
+      "output": null
+    },
+    "FINAL-ACCEPTANCE": {
+      "course_order": 98,
+      "module_id": "M11",
+      "title": "Приёмка результата относительно требований",
+      "status": "planned",
+      "output": null
+    }
+  }
+}

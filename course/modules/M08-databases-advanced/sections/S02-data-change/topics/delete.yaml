@@ -1,0 +1,41 @@
+{
+  "id": "SQL-DELETE",
+  "title": "DELETE",
+  "course_order": 71,
+  "purpose": "Задать базовое понимание темы «DELETE» в логике курса системного анализа.",
+  "scope": {
+    "include": [
+      "DELETE"
+    ],
+    "exclude": [
+      "углубление за пределы базового уровня курса"
+    ]
+  },
+  "prerequisites": {
+    "topics": [
+      "SQL-UPDATE"
+    ]
+  },
+  "previous_topics": [
+    "SQL-UPDATE"
+  ],
+  "next_topics": [
+    "SQL-CREATE-TABLE"
+  ],
+  "project": {
+    "stage": "course_foundation",
+    "case": "Связать тему со сквозным проектом Compliance, если это методически уместно.",
+    "expected_artifacts": []
+  },
+  "author_notes": [
+    "Seed passport. Требует авторского уточнения перед production-quality выпуском."
+  ],
+  "sources": {
+    "primary": [],
+    "secondary": [
+      "SRC-AUTHOR-MATERIALS"
+    ],
+    "examples": [],
+    "allow_external_research": false
+  }
+}

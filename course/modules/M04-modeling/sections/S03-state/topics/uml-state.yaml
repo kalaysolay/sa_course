@@ -1,0 +1,41 @@
+{
+  "id": "UML-STATE",
+  "title": "UML. Диаграмма состояний",
+  "course_order": 21,
+  "purpose": "Задать базовое понимание темы «UML. Диаграмма состояний» в логике курса системного анализа.",
+  "scope": {
+    "include": [
+      "UML. Диаграмма состояний"
+    ],
+    "exclude": [
+      "углубление за пределы базового уровня курса"
+    ]
+  },
+  "prerequisites": {
+    "topics": [
+      "UML-ACTIVITY"
+    ]
+  },
+  "previous_topics": [
+    "UML-ACTIVITY"
+  ],
+  "next_topics": [
+    "UML-SEQUENCE"
+  ],
+  "project": {
+    "stage": "course_foundation",
+    "case": "Связать тему со сквозным проектом Compliance, если это методически уместно.",
+    "expected_artifacts": []
+  },
+  "author_notes": [
+    "Seed passport. Требует авторского уточнения перед production-quality выпуском."
+  ],
+  "sources": {
+    "primary": [],
+    "secondary": [
+      "SRC-AUTHOR-MATERIALS"
+    ],
+    "examples": [],
+    "allow_external_research": false
+  }
+}

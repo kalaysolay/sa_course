@@ -1,0 +1,41 @@
+{
+  "id": "SQL-ORDER-BY",
+  "title": "Сортировка данных",
+  "course_order": 60,
+  "purpose": "Задать базовое понимание темы «Сортировка данных» в логике курса системного анализа.",
+  "scope": {
+    "include": [
+      "Сортировка данных"
+    ],
+    "exclude": [
+      "углубление за пределы базового уровня курса"
+    ]
+  },
+  "prerequisites": {
+    "topics": [
+      "SQL-LIKE"
+    ]
+  },
+  "previous_topics": [
+    "SQL-LIKE"
+  ],
+  "next_topics": [
+    "SQL-LIMIT"
+  ],
+  "project": {
+    "stage": "course_foundation",
+    "case": "Связать тему со сквозным проектом Compliance, если это методически уместно.",
+    "expected_artifacts": []
+  },
+  "author_notes": [
+    "Seed passport. Требует авторского уточнения перед production-quality выпуском."
+  ],
+  "sources": {
+    "primary": [],
+    "secondary": [
+      "SRC-AUTHOR-MATERIALS"
+    ],
+    "examples": [],
+    "allow_external_research": false
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "id": "REQ-QUALITY-BREVITY",
+  "title": "Краткость без потери смысла",
+  "course_order": 88,
+  "purpose": "Задать базовое понимание темы «Краткость без потери смысла» в логике курса системного анализа.",
+  "scope": {
+    "include": [
+      "Краткость без потери смысла"
+    ],
+    "exclude": [
+      "углубление за пределы базового уровня курса"
+    ]
+  },
+  "prerequisites": {
+    "topics": [
+      "REQ-QUALITY-FEASIBILITY"
+    ]
+  },
+  "previous_topics": [
+    "REQ-QUALITY-FEASIBILITY"
+  ],
+  "next_topics": [
+    "REQ-REVIEW-HOWTO"
+  ],
+  "project": {
+    "stage": "course_foundation",
+    "case": "Связать тему со сквозным проектом Compliance, если это методически уместно.",
+    "expected_artifacts": []
+  },
+  "author_notes": [
+    "Seed passport. Требует авторского уточнения перед production-quality выпуском."
+  ],
+  "sources": {
+    "primary": [],
+    "secondary": [
+      "SRC-AUTHOR-MATERIALS"
+    ],
+    "examples": [],
+    "allow_external_research": false
+  }
+}

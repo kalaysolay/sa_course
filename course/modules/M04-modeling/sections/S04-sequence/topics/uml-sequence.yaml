@@ -1,0 +1,41 @@
+{
+  "id": "UML-SEQUENCE",
+  "title": "UML. Диаграмма последовательностей",
+  "course_order": 22,
+  "purpose": "Задать базовое понимание темы «UML. Диаграмма последовательностей» в логике курса системного анализа.",
+  "scope": {
+    "include": [
+      "UML. Диаграмма последовательностей"
+    ],
+    "exclude": [
+      "углубление за пределы базового уровня курса"
+    ]
+  },
+  "prerequisites": {
+    "topics": [
+      "UML-STATE"
+    ]
+  },
+  "previous_topics": [
+    "UML-STATE"
+  ],
+  "next_topics": [
+    "ARCH-IS-TYPES"
+  ],
+  "project": {
+    "stage": "course_foundation",
+    "case": "Связать тему со сквозным проектом Compliance, если это методически уместно.",
+    "expected_artifacts": []
+  },
+  "author_notes": [
+    "Seed passport. Требует авторского уточнения перед production-quality выпуском."
+  ],
+  "sources": {
+    "primary": [],
+    "secondary": [
+      "SRC-AUTHOR-MATERIALS"
+    ],
+    "examples": [],
+    "allow_external_research": false
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "type": "object",
+  "required": [
+    "reviewer",
+    "artifact",
+    "verdict",
+    "summary",
+    "issues"
+  ],
+  "additionalProperties": true
+}

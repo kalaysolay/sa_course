@@ -1,0 +1,16 @@
+{
+  "type": "object",
+  "required": [
+    "topicId",
+    "title",
+    "moduleId",
+    "sectionId",
+    "audienceLevel",
+    "learningOutcomes",
+    "mustCover",
+    "doNotCover",
+    "projectUsage",
+    "assessmentRequirements"
+  ],
+  "additionalProperties": true
+}

@@ -1,0 +1,1175 @@
+{
+  "course_id": "system-analysis",
+  "curriculum_status": "draft",
+  "ownership": "author",
+  "agents_can_modify": false,
+  "agents_can_report_gaps": true,
+  "notes": [
+    "Seed curriculum from Course Publisher spec v0.3.",
+    "Several compound early baseline titles are split only to preserve the MVP contract: REQ-STAKEHOLDERS has course_order 14."
+  ],
+  "modules": [
+    {
+      "id": "M01",
+      "slug": "M01-profession",
+      "title": "О профессии системного аналитика",
+      "order": 1,
+      "sections": [
+        {
+          "id": "M01-S01",
+          "slug": "S01-role",
+          "title": "Роль аналитика",
+          "order": 1,
+          "topics": [
+            {
+              "id": "PROF-ROLE",
+              "slug": "analyst-role",
+              "title": "Роль системного аналитика и его типовые задачи",
+              "order": 1,
+              "course_order": 1,
+              "passport": "course/modules/M01-profession/sections/S01-role/topics/analyst-role.yaml"
+            },
+            {
+              "id": "PROF-LIFECYCLE",
+              "slug": "analyst-lifecycle",
+              "title": "Жизненный цикл работы аналитика",
+              "order": 2,
+              "course_order": 2,
+              "passport": "course/modules/M01-profession/sections/S01-role/topics/analyst-lifecycle.yaml"
+            },
+            {
+              "id": "PROF-SKILLS",
+              "slug": "analyst-skills",
+              "title": "Навыки и компетенции системного аналитика",
+              "order": 3,
+              "course_order": 3,
+              "passport": "course/modules/M01-profession/sections/S01-role/topics/analyst-skills.yaml"
+            }
+          ]
+        },
+        {
+          "id": "M01-S02",
+          "slug": "S02-ba-sa",
+          "title": "БА и СА в одном проекте",
+          "order": 2,
+          "topics": [
+            {
+              "id": "BASA-BOUNDARY",
+              "slug": "ba-sa-boundary",
+              "title": "Где заканчивается бизнес-анализ и начинается системный анализ",
+              "order": 1,
+              "course_order": 4,
+              "passport": "course/modules/M01-profession/sections/S02-ba-sa/topics/ba-sa-boundary.yaml"
+            },
+            {
+              "id": "BASA-RESULTS",
+              "slug": "ba-sa-results",
+              "title": "Какие результаты возникают по пути анализа",
+              "order": 2,
+              "course_order": 5,
+              "passport": "course/modules/M01-profession/sections/S02-ba-sa/topics/ba-sa-results.yaml"
+            },
+            {
+              "id": "BASA-ARTIFACTS",
+              "slug": "ba-sa-artifacts",
+              "title": "Какие артефакты возникают по пути анализа",
+              "order": 3,
+              "course_order": 6,
+              "passport": "course/modules/M01-profession/sections/S02-ba-sa/topics/ba-sa-artifacts.yaml"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "M02",
+      "slug": "M02-process",
+      "title": "Процесс разработки ПО",
+      "order": 2,
+      "sections": [
+        {
+          "id": "M02-S01",
+          "slug": "S01-team",
+          "title": "Команда",
+          "order": 1,
+          "topics": [
+            {
+              "id": "TEAM-ROLES",
+              "slug": "team-roles",
+              "title": "Команда разработки и роли участников",
+              "order": 1,
+              "course_order": 7,
+              "passport": "course/modules/M02-process/sections/S01-team/topics/team-roles.yaml"
+            }
+          ]
+        },
+        {
+          "id": "M02-S02",
+          "slug": "S02-development-management",
+          "title": "Организация разработки",
+          "order": 2,
+          "topics": [
+            {
+              "id": "DEV-MODELS",
+              "slug": "development-models",
+              "title": "Модели управления разработкой ПО",
+              "order": 1,
+              "course_order": 8,
+              "passport": "course/modules/M02-process/sections/S02-development-management/topics/development-models.yaml"
+            },
+            {
+              "id": "AGILE-METHODS",
+              "slug": "agile-methods",
+              "title": "Гибкие методологии",
+              "order": 2,
+              "course_order": 9,
+              "passport": "course/modules/M02-process/sections/S02-development-management/topics/agile-methods.yaml"
+            }
+          ]
+        },
+        {
+          "id": "M02-S03",
+          "slug": "S03-sdlc",
+          "title": "Жизненный цикл ПО",
+          "order": 3,
+          "topics": [
+            {
+              "id": "SDLC-STAGES",
+              "slug": "sdlc-stages",
+              "title": "Этапы разработки ПО",
+              "order": 1,
+              "course_order": 10,
+              "passport": "course/modules/M02-process/sections/S03-sdlc/topics/sdlc-stages.yaml"
+            },
+            {
+              "id": "SDLC-LIFECYCLE",
+              "slug": "sdlc-lifecycle",
+              "title": "Жизненный цикл ПО",
+              "order": 2,
+              "course_order": 11,
+              "passport": "course/modules/M02-process/sections/S03-sdlc/topics/sdlc-lifecycle.yaml"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "M03",
+      "slug": "M03-requirements",
+      "title": "Требования к ПО",
+      "order": 3,
+      "sections": [
+        {
+          "id": "M03-S01",
+          "slug": "S01-basics",
+          "title": "Основы требований",
+          "order": 1,
+          "topics": [
+            {
+              "id": "REQ-INTRO",
+              "slug": "requirements-intro",
+              "title": "Что такое требования и какие они бывают",
+              "order": 1,
+              "course_order": 12,
+              "passport": "course/modules/M03-requirements/sections/S01-basics/topics/requirements-intro.yaml"
+            },
+            {
+              "id": "REQ-FNFR",
+              "slug": "functional-nonfunctional-requirements",
+              "title": "Функциональные и нефункциональные требования",
+              "order": 2,
+              "course_order": 13,
+              "passport": "course/modules/M03-requirements/sections/S01-basics/topics/functional-nonfunctional-requirements.yaml"
+            }
+          ]
+        },
+        {
+          "id": "M03-S02",
+          "slug": "S02-elicitation",
+          "title": "Заинтересованные лица и выявление требований",
+          "order": 2,
+          "topics": [
+            {
+              "id": "REQ-STAKEHOLDERS",
+              "slug": "stakeholders",
+              "title": "Заинтересованные лица",
+              "order": 1,
+              "course_order": 14,
+              "passport": "course/modules/M03-requirements/sections/S02-elicitation/topics/stakeholders.yaml"
+            },
+            {
+              "id": "REQ-ELICITATION",
+              "slug": "elicitation-methods",
+              "title": "Способы выявления требований",
+              "order": 2,
+              "course_order": 15,
+              "passport": "course/modules/M03-requirements/sections/S02-elicitation/topics/elicitation-methods.yaml"
+            }
+          ]
+        },
+        {
+          "id": "M03-S03",
+          "slug": "S03-formalization",
+          "title": "Формализация",
+          "order": 3,
+          "topics": [
+            {
+              "id": "REQ-MODELING",
+              "slug": "requirements-modeling",
+              "title": "Моделирование и формализация требований",
+              "order": 1,
+              "course_order": 16,
+              "passport": "course/modules/M03-requirements/sections/S03-formalization/topics/requirements-modeling.yaml"
+            }
+          ]
+        },
+        {
+          "id": "M03-S04",
+          "slug": "S04-specification",
+          "title": "Спецификация",
+          "order": 4,
+          "topics": [
+            {
+              "id": "REQ-SPECIFICATION",
+              "slug": "requirements-specification",
+              "title": "Спецификация и документирование требований",
+              "order": 1,
+              "course_order": 17,
+              "passport": "course/modules/M03-requirements/sections/S04-specification/topics/requirements-specification.yaml"
+            }
+          ]
+        },
+        {
+          "id": "M03-S05",
+          "slug": "S05-management",
+          "title": "Управление",
+          "order": 5,
+          "topics": [
+            {
+              "id": "REQ-MANAGEMENT",
+              "slug": "requirements-management",
+              "title": "Управление требованиями",
+              "order": 1,
+              "course_order": 18,
+              "passport": "course/modules/M03-requirements/sections/S05-management/topics/requirements-management.yaml"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "M04",
+      "slug": "M04-modeling",
+      "title": "Моделирование процессов и поведения",
+      "order": 4,
+      "sections": [
+        {
+          "id": "M04-S01",
+          "slug": "S01-use-cases",
+          "title": "Сценарии использования",
+          "order": 1,
+          "topics": [
+            {
+              "id": "UML-USE-CASE",
+              "slug": "uml-use-case",
+              "title": "UML. Диаграмма сценариев использования",
+              "order": 1,
+              "course_order": 19,
+              "passport": "course/modules/M04-modeling/sections/S01-use-cases/topics/uml-use-case.yaml"
+            }
+          ]
+        },
+        {
+          "id": "M04-S02",
+          "slug": "S02-activities",
+          "title": "Процессы",
+          "order": 2,
+          "topics": [
+            {
+              "id": "UML-ACTIVITY",
+              "slug": "uml-activity",
+              "title": "UML. Диаграмма активности",
+              "order": 1,
+              "course_order": 20,
+              "passport": "course/modules/M04-modeling/sections/S02-activities/topics/uml-activity.yaml"
+            }
+          ]
+        },
+        {
+          "id": "M04-S03",
+          "slug": "S03-state",
+          "title": "Жизненный цикл объекта",
+          "order": 3,
+          "topics": [
+            {
+              "id": "UML-STATE",
+              "slug": "uml-state",
+              "title": "UML. Диаграмма состояний",
+              "order": 1,
+              "course_order": 21,
+              "passport": "course/modules/M04-modeling/sections/S03-state/topics/uml-state.yaml"
+            }
+          ]
+        },
+        {
+          "id": "M04-S04",
+          "slug": "S04-sequence",
+          "title": "Взаимодействие компонентов",
+          "order": 4,
+          "topics": [
+            {
+              "id": "UML-SEQUENCE",
+              "slug": "uml-sequence",
+              "title": "UML. Диаграмма последовательностей",
+              "order": 1,
+              "course_order": 22,
+              "passport": "course/modules/M04-modeling/sections/S04-sequence/topics/uml-sequence.yaml"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "M05",
+      "slug": "M05-architecture",
+      "title": "Архитектура информационных систем",
+      "order": 5,
+      "sections": [
+        {
+          "id": "M05-S01",
+          "slug": "S01-information-systems",
+          "title": "Что такое информационная система",
+          "order": 1,
+          "topics": [
+            {
+              "id": "ARCH-IS-TYPES",
+              "slug": "is-types",
+              "title": "Различные типы ИС: веб, десктоп, мобильные",
+              "order": 1,
+              "course_order": 23,
+              "passport": "course/modules/M05-architecture/sections/S01-information-systems/topics/is-types.yaml"
+            },
+            {
+              "id": "ARCH-BASIC-SCHEMA",
+              "slug": "basic-schema",
+              "title": "Базовая схема client → frontend → backend → database",
+              "order": 2,
+              "course_order": 24,
+              "passport": "course/modules/M05-architecture/sections/S01-information-systems/topics/basic-schema.yaml"
+            }
+          ]
+        },
+        {
+          "id": "M05-S02",
+          "slug": "S02-architectural-styles",
+          "title": "Архитектурные стили",
+          "order": 2,
+          "topics": [
+            {
+              "id": "ARCH-STYLES",
+              "slug": "architecture-styles",
+              "title": "Виды архитектуры информационных систем",
+              "order": 1,
+              "course_order": 25,
+              "passport": "course/modules/M05-architecture/sections/S02-architectural-styles/topics/architecture-styles.yaml"
+            },
+            {
+              "id": "ARCH-MONOLITH",
+              "slug": "monolith",
+              "title": "Монолит",
+              "order": 2,
+              "course_order": 26,
+              "passport": "course/modules/M05-architecture/sections/S02-architectural-styles/topics/monolith.yaml"
+            },
+            {
+              "id": "ARCH-MICROSERVICES",
+              "slug": "microservices",
+              "title": "Микросервисы",
+              "order": 3,
+              "course_order": 27,
+              "passport": "course/modules/M05-architecture/sections/S02-architectural-styles/topics/microservices.yaml"
+            }
+          ]
+        },
+        {
+          "id": "M05-S03",
+          "slug": "S03-infrastructure",
+          "title": "Основные инфраструктурные компоненты",
+          "order": 3,
+          "topics": [
+            {
+              "id": "ARCH-REVERSE-PROXY",
+              "slug": "reverse-proxy",
+              "title": "Reverse proxy и балансировка — обзор",
+              "order": 1,
+              "course_order": 28,
+              "passport": "course/modules/M05-architecture/sections/S03-infrastructure/topics/reverse-proxy.yaml"
+            },
+            {
+              "id": "ARCH-API-GATEWAY",
+              "slug": "api-gateway",
+              "title": "API Gateway — обзор",
+              "order": 2,
+              "course_order": 29,
+              "passport": "course/modules/M05-architecture/sections/S03-infrastructure/topics/api-gateway.yaml"
+            },
+            {
+              "id": "ARCH-CACHE",
+              "slug": "cache",
+              "title": "Кэш — обзор",
+              "order": 3,
+              "course_order": 30,
+              "passport": "course/modules/M05-architecture/sections/S03-infrastructure/topics/cache.yaml"
+            },
+            {
+              "id": "ARCH-STORAGE",
+              "slug": "storage",
+              "title": "Файловое/объектное хранилище — обзор",
+              "order": 4,
+              "course_order": 31,
+              "passport": "course/modules/M05-architecture/sections/S03-infrastructure/topics/storage.yaml"
+            }
+          ]
+        },
+        {
+          "id": "M05-S04",
+          "slug": "S04-interaction",
+          "title": "Взаимодействие",
+          "order": 4,
+          "topics": [
+            {
+              "id": "ARCH-SYNC",
+              "slug": "sync-interaction",
+              "title": "Синхронное взаимодействие",
+              "order": 1,
+              "course_order": 32,
+              "passport": "course/modules/M05-architecture/sections/S04-interaction/topics/sync-interaction.yaml"
+            },
+            {
+              "id": "ARCH-ASYNC",
+              "slug": "async-interaction",
+              "title": "Асинхронное взаимодействие",
+              "order": 2,
+              "course_order": 33,
+              "passport": "course/modules/M05-architecture/sections/S04-interaction/topics/async-interaction.yaml"
+            }
+          ]
+        },
+        {
+          "id": "M05-S05",
+          "slug": "S05-access-security",
+          "title": "Безопасность доступа",
+          "order": 5,
+          "topics": [
+            {
+              "id": "SEC-AUTHENTICATION",
+              "slug": "authentication",
+              "title": "Аутентификация",
+              "order": 1,
+              "course_order": 34,
+              "passport": "course/modules/M05-architecture/sections/S05-access-security/topics/authentication.yaml"
+            },
+            {
+              "id": "SEC-AUTHORIZATION",
+              "slug": "authorization",
+              "title": "Авторизация",
+              "order": 2,
+              "course_order": 35,
+              "passport": "course/modules/M05-architecture/sections/S05-access-security/topics/authorization.yaml"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "M06",
+      "slug": "M06-integrations",
+      "title": "Интеграции",
+      "order": 6,
+      "sections": [
+        {
+          "id": "M06-S01",
+          "slug": "S01-integration-basics",
+          "title": "Основы интеграций",
+          "order": 1,
+          "topics": [
+            {
+              "id": "INT-BASICS",
+              "slug": "integration-basics",
+              "title": "Способы интеграции систем",
+              "order": 1,
+              "course_order": 36,
+              "passport": "course/modules/M06-integrations/sections/S01-integration-basics/topics/integration-basics.yaml"
+            }
+          ]
+        },
+        {
+          "id": "M06-S02",
+          "slug": "S02-sync-api",
+          "title": "Синхронные API",
+          "order": 2,
+          "topics": [
+            {
+              "id": "INT-REST",
+              "slug": "rest",
+              "title": "REST",
+              "order": 1,
+              "course_order": 37,
+              "passport": "course/modules/M06-integrations/sections/S02-sync-api/topics/rest.yaml"
+            },
+            {
+              "id": "INT-SOAP",
+              "slug": "soap",
+              "title": "SOAP",
+              "order": 2,
+              "course_order": 38,
+              "passport": "course/modules/M06-integrations/sections/S02-sync-api/topics/soap.yaml"
+            }
+          ]
+        },
+        {
+          "id": "M06-S03",
+          "slug": "S03-async-messaging",
+          "title": "Асинхронный обмен",
+          "order": 3,
+          "topics": [
+            {
+              "id": "INT-MQ",
+              "slug": "message-queue",
+              "title": "Очереди сообщений / Message Queue",
+              "order": 1,
+              "course_order": 39,
+              "passport": "course/modules/M06-integrations/sections/S03-async-messaging/topics/message-queue.yaml"
+            }
+          ]
+        },
+        {
+          "id": "M06-S04",
+          "slug": "S04-other-integrations",
+          "title": "Другие способы интеграции",
+          "order": 4,
+          "topics": [
+            {
+              "id": "INT-FILES",
+              "slug": "file-integration",
+              "title": "Интеграция через файлы",
+              "order": 1,
+              "course_order": 40,
+              "passport": "course/modules/M06-integrations/sections/S04-other-integrations/topics/file-integration.yaml"
+            },
+            {
+              "id": "INT-DATABASE",
+              "slug": "database-integration",
+              "title": "Интеграция через базы данных",
+              "order": 2,
+              "course_order": 41,
+              "passport": "course/modules/M06-integrations/sections/S04-other-integrations/topics/database-integration.yaml"
+            }
+          ]
+        },
+        {
+          "id": "M06-S05",
+          "slug": "S05-contract-design",
+          "title": "Проектирование контрактов",
+          "order": 5,
+          "topics": [
+            {
+              "id": "INT-API-DESIGN",
+              "slug": "api-design",
+              "title": "Проектирование API и взаимодействия приложений",
+              "order": 1,
+              "course_order": 42,
+              "passport": "course/modules/M06-integrations/sections/S05-contract-design/topics/api-design.yaml"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "M07",
+      "slug": "M07-databases-basic",
+      "title": "Базы данных — базовый уровень",
+      "order": 7,
+      "sections": [
+        {
+          "id": "M07-S01",
+          "slug": "S01-basics",
+          "title": "Основы",
+          "order": 1,
+          "topics": [
+            {
+              "id": "DB-INTRO",
+              "slug": "db-intro",
+              "title": "Введение",
+              "order": 1,
+              "course_order": 43,
+              "passport": "course/modules/M07-databases-basic/sections/S01-basics/topics/db-intro.yaml"
+            },
+            {
+              "id": "DB-RELATIONAL",
+              "slug": "relational-db",
+              "title": "Реляционные базы данных",
+              "order": 2,
+              "course_order": 44,
+              "passport": "course/modules/M07-databases-basic/sections/S01-basics/topics/relational-db.yaml"
+            },
+            {
+              "id": "DB-STRUCTURE",
+              "slug": "db-structure",
+              "title": "Структура баз данных",
+              "order": 3,
+              "course_order": 45,
+              "passport": "course/modules/M07-databases-basic/sections/S01-basics/topics/db-structure.yaml"
+            },
+            {
+              "id": "DB-PSQL",
+              "slug": "psql",
+              "title": "Подключение к PostgreSQL с помощью psql",
+              "order": 4,
+              "course_order": 46,
+              "passport": "course/modules/M07-databases-basic/sections/S01-basics/topics/psql.yaml"
+            }
+          ]
+        },
+        {
+          "id": "M07-S02",
+          "slug": "S02-tables-model",
+          "title": "Таблицы и модель данных",
+          "order": 2,
+          "topics": [
+            {
+              "id": "DB-TABLES",
+              "slug": "tables",
+              "title": "Таблицы, строки и столбцы",
+              "order": 1,
+              "course_order": 47,
+              "passport": "course/modules/M07-databases-basic/sections/S02-tables-model/topics/tables.yaml"
+            },
+            {
+              "id": "DB-DATA-TYPES",
+              "slug": "data-types",
+              "title": "Основные типы данных",
+              "order": 2,
+              "course_order": 48,
+              "passport": "course/modules/M07-databases-basic/sections/S02-tables-model/topics/data-types.yaml"
+            },
+            {
+              "id": "DB-NULL",
+              "slug": "null-values",
+              "title": "NULL и особые значения",
+              "order": 3,
+              "course_order": 49,
+              "passport": "course/modules/M07-databases-basic/sections/S02-tables-model/topics/null-values.yaml"
+            },
+            {
+              "id": "DB-PK",
+              "slug": "primary-key",
+              "title": "Первичный ключ",
+              "order": 4,
+              "course_order": 50,
+              "passport": "course/modules/M07-databases-basic/sections/S02-tables-model/topics/primary-key.yaml"
+            },
+            {
+              "id": "DB-FK",
+              "slug": "foreign-key",
+              "title": "Внешний ключ",
+              "order": 5,
+              "course_order": 51,
+              "passport": "course/modules/M07-databases-basic/sections/S02-tables-model/topics/foreign-key.yaml"
+            },
+            {
+              "id": "DB-RELATIONSHIPS",
+              "slug": "relationships",
+              "title": "Связи 1:1, 1:N, M:N",
+              "order": 6,
+              "course_order": 52,
+              "passport": "course/modules/M07-databases-basic/sections/S02-tables-model/topics/relationships.yaml"
+            }
+          ]
+        },
+        {
+          "id": "M07-S03",
+          "slug": "S03-basic-sql",
+          "title": "Базовый SQL",
+          "order": 3,
+          "topics": [
+            {
+              "id": "SQL-LANGUAGE",
+              "slug": "sql-language",
+              "title": "Язык SQL",
+              "order": 1,
+              "course_order": 53,
+              "passport": "course/modules/M07-databases-basic/sections/S03-basic-sql/topics/sql-language.yaml"
+            },
+            {
+              "id": "SQL-SELECT",
+              "slug": "select",
+              "title": "SELECT",
+              "order": 2,
+              "course_order": 54,
+              "passport": "course/modules/M07-databases-basic/sections/S03-basic-sql/topics/select.yaml"
+            },
+            {
+              "id": "SQL-WHERE",
+              "slug": "where",
+              "title": "WHERE",
+              "order": 3,
+              "course_order": 55,
+              "passport": "course/modules/M07-databases-basic/sections/S03-basic-sql/topics/where.yaml"
+            },
+            {
+              "id": "SQL-AND-OR",
+              "slug": "and-or",
+              "title": "AND / OR",
+              "order": 4,
+              "course_order": 56,
+              "passport": "course/modules/M07-databases-basic/sections/S03-basic-sql/topics/and-or.yaml"
+            },
+            {
+              "id": "SQL-IN",
+              "slug": "in",
+              "title": "IN",
+              "order": 5,
+              "course_order": 57,
+              "passport": "course/modules/M07-databases-basic/sections/S03-basic-sql/topics/in.yaml"
+            },
+            {
+              "id": "SQL-BETWEEN",
+              "slug": "between",
+              "title": "BETWEEN",
+              "order": 6,
+              "course_order": 58,
+              "passport": "course/modules/M07-databases-basic/sections/S03-basic-sql/topics/between.yaml"
+            },
+            {
+              "id": "SQL-LIKE",
+              "slug": "like",
+              "title": "LIKE",
+              "order": 7,
+              "course_order": 59,
+              "passport": "course/modules/M07-databases-basic/sections/S03-basic-sql/topics/like.yaml"
+            },
+            {
+              "id": "SQL-ORDER-BY",
+              "slug": "order-by",
+              "title": "Сортировка данных",
+              "order": 8,
+              "course_order": 60,
+              "passport": "course/modules/M07-databases-basic/sections/S03-basic-sql/topics/order-by.yaml"
+            },
+            {
+              "id": "SQL-LIMIT",
+              "slug": "limit",
+              "title": "Ограничение выборки",
+              "order": 9,
+              "course_order": 61,
+              "passport": "course/modules/M07-databases-basic/sections/S03-basic-sql/topics/limit.yaml"
+            },
+            {
+              "id": "SQL-DISTINCT",
+              "slug": "distinct",
+              "title": "Уникальные строки",
+              "order": 10,
+              "course_order": 62,
+              "passport": "course/modules/M07-databases-basic/sections/S03-basic-sql/topics/distinct.yaml"
+            },
+            {
+              "id": "SQL-JOIN-BASIC",
+              "slug": "basic-join",
+              "title": "Базовые JOIN",
+              "order": 11,
+              "course_order": 63,
+              "passport": "course/modules/M07-databases-basic/sections/S03-basic-sql/topics/basic-join.yaml"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "M08",
+      "slug": "M08-databases-advanced",
+      "title": "Базы данных — продвинутый уровень",
+      "order": 8,
+      "sections": [
+        {
+          "id": "M08-S01",
+          "slug": "S01-analytics",
+          "title": "Аналитические запросы",
+          "order": 1,
+          "topics": [
+            {
+              "id": "SQL-AGGREGATES",
+              "slug": "aggregates",
+              "title": "Агрегатные функции",
+              "order": 1,
+              "course_order": 64,
+              "passport": "course/modules/M08-databases-advanced/sections/S01-analytics/topics/aggregates.yaml"
+            },
+            {
+              "id": "SQL-GROUP-BY",
+              "slug": "group-by",
+              "title": "GROUP BY",
+              "order": 2,
+              "course_order": 65,
+              "passport": "course/modules/M08-databases-advanced/sections/S01-analytics/topics/group-by.yaml"
+            },
+            {
+              "id": "SQL-HAVING",
+              "slug": "having",
+              "title": "HAVING",
+              "order": 3,
+              "course_order": 66,
+              "passport": "course/modules/M08-databases-advanced/sections/S01-analytics/topics/having.yaml"
+            },
+            {
+              "id": "SQL-JOIN-ADVANCED",
+              "slug": "advanced-join",
+              "title": "Более сложные JOIN",
+              "order": 4,
+              "course_order": 67,
+              "passport": "course/modules/M08-databases-advanced/sections/S01-analytics/topics/advanced-join.yaml"
+            },
+            {
+              "id": "SQL-CTE",
+              "slug": "cte",
+              "title": "Подзапросы / CTE — на необходимом аналитику уровне",
+              "order": 5,
+              "course_order": 68,
+              "passport": "course/modules/M08-databases-advanced/sections/S01-analytics/topics/cte.yaml"
+            }
+          ]
+        },
+        {
+          "id": "M08-S02",
+          "slug": "S02-data-change",
+          "title": "Изменение данных",
+          "order": 2,
+          "topics": [
+            {
+              "id": "SQL-INSERT",
+              "slug": "insert",
+              "title": "INSERT",
+              "order": 1,
+              "course_order": 69,
+              "passport": "course/modules/M08-databases-advanced/sections/S02-data-change/topics/insert.yaml"
+            },
+            {
+              "id": "SQL-UPDATE",
+              "slug": "update",
+              "title": "UPDATE",
+              "order": 2,
+              "course_order": 70,
+              "passport": "course/modules/M08-databases-advanced/sections/S02-data-change/topics/update.yaml"
+            },
+            {
+              "id": "SQL-DELETE",
+              "slug": "delete",
+              "title": "DELETE",
+              "order": 3,
+              "course_order": 71,
+              "passport": "course/modules/M08-databases-advanced/sections/S02-data-change/topics/delete.yaml"
+            }
+          ]
+        },
+        {
+          "id": "M08-S03",
+          "slug": "S03-ddl",
+          "title": "DDL и ограничения",
+          "order": 3,
+          "topics": [
+            {
+              "id": "SQL-CREATE-TABLE",
+              "slug": "create-table",
+              "title": "CREATE TABLE",
+              "order": 1,
+              "course_order": 72,
+              "passport": "course/modules/M08-databases-advanced/sections/S03-ddl/topics/create-table.yaml"
+            },
+            {
+              "id": "SQL-CONSTRAINTS",
+              "slug": "constraints",
+              "title": "Основные ограничения полей",
+              "order": 2,
+              "course_order": 73,
+              "passport": "course/modules/M08-databases-advanced/sections/S03-ddl/topics/constraints.yaml"
+            },
+            {
+              "id": "SQL-ALTER-TABLE",
+              "slug": "alter-table",
+              "title": "ALTER TABLE",
+              "order": 3,
+              "course_order": 74,
+              "passport": "course/modules/M08-databases-advanced/sections/S03-ddl/topics/alter-table.yaml"
+            },
+            {
+              "id": "SQL-IDENTITY",
+              "slug": "identity-sequence",
+              "title": "Identity / sequence / автоинкремент",
+              "order": 4,
+              "course_order": 75,
+              "passport": "course/modules/M08-databases-advanced/sections/S03-ddl/topics/identity-sequence.yaml"
+            },
+            {
+              "id": "SQL-INDEXES",
+              "slug": "indexes",
+              "title": "Индексы — концептуально",
+              "order": 5,
+              "course_order": 76,
+              "passport": "course/modules/M08-databases-advanced/sections/S03-ddl/topics/indexes.yaml"
+            }
+          ]
+        },
+        {
+          "id": "M08-S04",
+          "slug": "S04-transactions",
+          "title": "Транзакционность",
+          "order": 4,
+          "topics": [
+            {
+              "id": "DB-TRANSACTION",
+              "slug": "transaction",
+              "title": "Что такое транзакция",
+              "order": 1,
+              "course_order": 77,
+              "passport": "course/modules/M08-databases-advanced/sections/S04-transactions/topics/transaction.yaml"
+            },
+            {
+              "id": "DB-ACID",
+              "slug": "acid",
+              "title": "ACID",
+              "order": 2,
+              "course_order": 78,
+              "passport": "course/modules/M08-databases-advanced/sections/S04-transactions/topics/acid.yaml"
+            },
+            {
+              "id": "DB-COMMIT-ROLLBACK",
+              "slug": "commit-rollback",
+              "title": "COMMIT / ROLLBACK",
+              "order": 3,
+              "course_order": 79,
+              "passport": "course/modules/M08-databases-advanced/sections/S04-transactions/topics/commit-rollback.yaml"
+            },
+            {
+              "id": "DB-ISOLATION",
+              "slug": "isolation",
+              "title": "Изоляция — базовая модель",
+              "order": 4,
+              "course_order": 80,
+              "passport": "course/modules/M08-databases-advanced/sections/S04-transactions/topics/isolation.yaml"
+            },
+            {
+              "id": "DB-LOCKS",
+              "slug": "locks",
+              "title": "Блокировки — концептуально",
+              "order": 5,
+              "course_order": 81,
+              "passport": "course/modules/M08-databases-advanced/sections/S04-transactions/topics/locks.yaml"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "M09",
+      "slug": "M09-quality",
+      "title": "Качество требований и спецификации",
+      "order": 9,
+      "sections": [
+        {
+          "id": "M09-S01",
+          "slug": "S01-quality-criteria",
+          "title": "Критерии качества",
+          "order": 1,
+          "topics": [
+            {
+              "id": "REQ-QUALITY-ATOMICITY",
+              "slug": "atomicity",
+              "title": "Атомарность",
+              "order": 1,
+              "course_order": 82,
+              "passport": "course/modules/M09-quality/sections/S01-quality-criteria/topics/atomicity.yaml"
+            },
+            {
+              "id": "REQ-QUALITY-COMPLETENESS",
+              "slug": "completeness",
+              "title": "Полнота",
+              "order": 2,
+              "course_order": 83,
+              "passport": "course/modules/M09-quality/sections/S01-quality-criteria/topics/completeness.yaml"
+            },
+            {
+              "id": "REQ-QUALITY-AMBIGUITY",
+              "slug": "ambiguity",
+              "title": "Однозначность",
+              "order": 3,
+              "course_order": 84,
+              "passport": "course/modules/M09-quality/sections/S01-quality-criteria/topics/ambiguity.yaml"
+            },
+            {
+              "id": "REQ-QUALITY-CONSISTENCY",
+              "slug": "consistency",
+              "title": "Консистентность",
+              "order": 4,
+              "course_order": 85,
+              "passport": "course/modules/M09-quality/sections/S01-quality-criteria/topics/consistency.yaml"
+            },
+            {
+              "id": "REQ-QUALITY-VERIFIABILITY",
+              "slug": "verifiability",
+              "title": "Проверяемость",
+              "order": 5,
+              "course_order": 86,
+              "passport": "course/modules/M09-quality/sections/S01-quality-criteria/topics/verifiability.yaml"
+            },
+            {
+              "id": "REQ-QUALITY-FEASIBILITY",
+              "slug": "feasibility",
+              "title": "Выполнимость",
+              "order": 6,
+              "course_order": 87,
+              "passport": "course/modules/M09-quality/sections/S01-quality-criteria/topics/feasibility.yaml"
+            },
+            {
+              "id": "REQ-QUALITY-BREVITY",
+              "slug": "brevity",
+              "title": "Краткость без потери смысла",
+              "order": 7,
+              "course_order": 88,
+              "passport": "course/modules/M09-quality/sections/S01-quality-criteria/topics/brevity.yaml"
+            }
+          ]
+        },
+        {
+          "id": "M09-S02",
+          "slug": "S02-review",
+          "title": "Ревью требований",
+          "order": 2,
+          "topics": [
+            {
+              "id": "REQ-REVIEW-HOWTO",
+              "slug": "review-howto",
+              "title": "Как проводить ревью",
+              "order": 1,
+              "course_order": 89,
+              "passport": "course/modules/M09-quality/sections/S02-review/topics/review-howto.yaml"
+            },
+            {
+              "id": "REQ-REVIEW-DEFECTS",
+              "slug": "review-defects",
+              "title": "Типовые дефекты требований",
+              "order": 2,
+              "course_order": 90,
+              "passport": "course/modules/M09-quality/sections/S02-review/topics/review-defects.yaml"
+            },
+            {
+              "id": "REQ-REVIEW-SEVERITY",
+              "slug": "review-severity",
+              "title": "Critical / Major / Minor замечания",
+              "order": 3,
+              "course_order": 91,
+              "passport": "course/modules/M09-quality/sections/S02-review/topics/review-severity.yaml"
+            }
+          ]
+        },
+        {
+          "id": "M09-S03",
+          "slug": "S03-consistency",
+          "title": "Согласованность спецификации",
+          "order": 3,
+          "topics": [
+            {
+              "id": "REQ-TRACEABILITY",
+              "slug": "traceability",
+              "title": "Traceability",
+              "order": 1,
+              "course_order": 92,
+              "passport": "course/modules/M09-quality/sections/S03-consistency/topics/traceability.yaml"
+            },
+            {
+              "id": "REQ-CROSS-CONSISTENCY",
+              "slug": "cross-consistency",
+              "title": "Поиск противоречий между требованиями, моделями, API и данными",
+              "order": 2,
+              "course_order": 93,
+              "passport": "course/modules/M09-quality/sections/S03-consistency/topics/cross-consistency.yaml"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "M10",
+      "slug": "M10-ai",
+      "title": "AI для аналитика",
+      "order": 10,
+      "sections": [
+        {
+          "id": "M10-S01",
+          "slug": "S01-placeholder",
+          "title": "Содержание проектируется после основной части курса",
+          "order": 1,
+          "topics": [
+            {
+              "id": "AI-PLACEHOLDER",
+              "slug": "ai-placeholder",
+              "title": "LLM, prompts, tools, skills, MCP, агенты, review",
+              "order": 1,
+              "course_order": 94,
+              "status": "placeholder",
+              "passport": "course/modules/M10-ai/sections/S01-placeholder/topics/ai-placeholder.yaml"
+            }
+          ]
+        }
+      ],
+      "status": "PLACEHOLDER"
+    },
+    {
+      "id": "M11",
+      "slug": "M11-final-project",
+      "title": "Финальный проект: реализация системы coding agents",
+      "order": 11,
+      "sections": [
+        {
+          "id": "M11-S01",
+          "slug": "S01-spec-handoff",
+          "title": "Передача спецификации в разработку",
+          "order": 1,
+          "topics": [
+            {
+              "id": "FINAL-SPEC-PACKAGE",
+              "slug": "final-spec-package",
+              "title": "Подготовка итогового пакета спецификации Compliance",
+              "order": 1,
+              "course_order": 95,
+              "passport": "course/modules/M11-final-project/sections/S01-spec-handoff/topics/final-spec-package.yaml"
+            },
+            {
+              "id": "FINAL-CODING-AGENTS",
+              "slug": "coding-agents-handoff",
+              "title": "Передача спецификации coding agents",
+              "order": 2,
+              "course_order": 96,
+              "passport": "course/modules/M11-final-project/sections/S01-spec-handoff/topics/coding-agents-handoff.yaml"
+            },
+            {
+              "id": "FINAL-IMPLEMENTATION-AMBIGUITIES",
+              "slug": "implementation-ambiguities",
+              "title": "Разбор неоднозначностей и ошибок реализации",
+              "order": 3,
+              "course_order": 97,
+              "passport": "course/modules/M11-final-project/sections/S01-spec-handoff/topics/implementation-ambiguities.yaml"
+            },
+            {
+              "id": "FINAL-ACCEPTANCE",
+              "slug": "acceptance",
+              "title": "Приёмка результата относительно требований",
+              "order": 4,
+              "course_order": 98,
+              "passport": "course/modules/M11-final-project/sections/S01-spec-handoff/topics/acceptance.yaml"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

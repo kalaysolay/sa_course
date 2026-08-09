@@ -1,0 +1,136 @@
+{
+  "journal_type": "implementation_gap_style",
+  "updated_at": "2026-08-09T00:00:00+05:00",
+  "entries": [
+    {
+      "id": "IMPL-0001",
+      "status": "closed",
+      "severity": "info",
+      "type": "iteration_complete",
+      "iteration": 4,
+      "title": "Assessment flow upgraded",
+      "description": "Assessment Author now creates stakeholder-specific knowledge, application, communication-plan, and project-case items. Assessment Reviewer validates LO coverage, knowledge/application balance, and project exercise presence.",
+      "evidence": [
+        "tests: iteration 4 Assessment Author creates LO coverage matrix and project exercise",
+        "tests: iteration 4 Assessment Reviewer rejects missing project exercise and revision loop recovers"
+      ],
+      "created_at": "2026-08-09T00:00:00+05:00",
+      "resolved_at": "2026-08-09T00:00:00+05:00"
+    },
+    {
+      "id": "IMPL-0002",
+      "status": "closed",
+      "severity": "info",
+      "type": "iteration_complete",
+      "iteration": 5,
+      "title": "Experimental project artifact flow upgraded",
+      "description": "Project Artifact flow now writes before/proposed/approved snapshots, creates diffs, validates proposed stakeholders.md, supports revision loop, and keeps canonical project/compliance unchanged.",
+      "evidence": [
+        "tests: iteration 5 Project Artifact flow writes before proposed approved and diff without canonical merge",
+        "tests: iteration 5 Project Artifact Reviewer rejects incomplete stakeholders.md and revision loop recovers"
+      ],
+      "created_at": "2026-08-09T00:00:00+05:00",
+      "resolved_at": "2026-08-09T00:00:00+05:00"
+    },
+    {
+      "id": "IMPL-0003",
+      "status": "closed",
+      "severity": "info",
+      "type": "iteration_complete",
+      "iteration": 6,
+      "title": "Hardening pass started",
+      "description": "Run metadata now records workflow, adapter, and prompt-version identifiers. Orchestrator validates assessment and project-change schemas, applies deterministic lecture quality gates, and supports additional stop/resume checkpoints.",
+      "evidence": [
+        "tests: iteration 6 Run metadata and checkpoints are written",
+        "node --test: 23 pass / 0 fail"
+      ],
+      "created_at": "2026-08-09T00:00:00+05:00",
+      "resolved_at": "2026-08-09T00:00:00+05:00"
+    },
+    {
+      "id": "IMPL-0004",
+      "status": "open",
+      "severity": "minor",
+      "type": "technical_debt",
+      "iteration": 6,
+      "title": "Resume semantics are checkpoint-capable but not fully skip-based",
+      "description": "Resume can continue controlled stopped runs, including LECTURE_APPROVED, but the current monolithic orchestrator still recomputes deterministic earlier stages instead of proving every completed stage is skipped.",
+      "suggested_action": "Refactor continueRunInternal into explicit stage functions with artifact-existence checks before production LLM adapters are connected.",
+      "created_at": "2026-08-09T00:00:00+05:00",
+      "resolved_at": null
+    },
+    {
+      "id": "IMPL-0005",
+      "status": "open",
+      "severity": "minor",
+      "type": "technical_debt",
+      "iteration": 6,
+      "title": "JSON-compatible YAML is intentional for zero-dependency MVP",
+      "description": "Seed .yaml files are JSON-compatible YAML so Node can parse them without external dependencies. This is pragmatic for the skeleton, but a real YAML parser may be preferable later.",
+      "suggested_action": "Introduce a small YAML parser dependency only when schema validation and author-edited YAML need native YAML syntax.",
+      "created_at": "2026-08-09T00:00:00+05:00",
+      "resolved_at": null
+    },
+    {
+      "id": "IMPL-0006",
+      "status": "closed",
+      "severity": "info",
+      "type": "adapter_added",
+      "iteration": "post-v0.3",
+      "title": "OpenAI Responses API adapter added",
+      "description": "Added OpenAIAdapter behind --adapter openai. FakeAgentAdapter remains the default for deterministic tests. The adapter calls the Responses API through a zero-dependency Node worker and supports model/reasoning/temperature CLI overrides.",
+      "evidence": [
+        "tests: OpenAI adapter CLI flags are parsed without changing fake default",
+        "tests: OpenAI adapter fails fast when OPENAI_API_KEY is missing",
+        "node --test: 25 pass / 0 fail"
+      ],
+      "created_at": "2026-08-09T00:00:00+05:00",
+      "resolved_at": "2026-08-09T00:00:00+05:00"
+    },
+    {
+      "id": "IMPL-0007",
+      "status": "closed",
+      "severity": "info",
+      "type": "decision_record",
+      "iteration": "post-v0.3",
+      "title": "External OpenAI API is optional, not primary",
+      "description": "User clarified that production work should run through the Codex/ChatGPT desktop app, so missing OPENAI_API_KEY is no longer a blocker for real lecture generation. OpenAIAdapter remains optional for future headless automation only.",
+      "suggested_action": "Use Codex-native preparation commands and app agents for production runs.",
+      "created_at": "2026-08-09T00:00:00+05:00",
+      "resolved_at": "2026-08-09T00:00:00+05:00"
+    },
+    {
+      "id": "IMPL-0008",
+      "status": "closed",
+      "severity": "info",
+      "type": "iteration_complete",
+      "iteration": "codex-native-readiness",
+      "title": "Codex-native production task packets added",
+      "description": "Added Codex/ChatGPT app production path that creates CODEX_TASKS_READY runs with input context, dispatch manifest, and role-specific task packets for multi-agent lesson generation without external API credentials.",
+      "evidence": [
+        "src/codexTaskPackets.mjs",
+        "Orchestrator.prepareCodexRun and prepareCodexNext",
+        "CLI: /prepare-codex-next, /prepare-codex-lesson, --adapter codex",
+        "docs/codex-native-workflow.md",
+        "tests: Codex-native prepare creates task packets without OPENAI_API_KEY"
+      ],
+      "created_at": "2026-08-09T00:00:00+05:00",
+      "resolved_at": "2026-08-09T00:00:00+05:00"
+    },
+    {
+      "id": "IMPL-0009",
+      "status": "closed",
+      "severity": "info",
+      "type": "decision_record",
+      "iteration": "codex-native-readiness",
+      "title": "Production baseline reset to lesson 1",
+      "description": "Test seed 1..13 completed is not production state. Real production now starts from course_order 1, PROF-ROLE.",
+      "evidence": [
+        "course/progress.yaml last_completed=null",
+        "runs/20260809T071602Z_PROF-ROLE_b0c871/codex-tasks/codex-manifest.json"
+      ],
+      "created_at": "2026-08-09T00:00:00+05:00",
+      "resolved_at": "2026-08-09T00:00:00+05:00"
+    }
+  ]
+}

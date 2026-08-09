@@ -1,0 +1,8 @@
+{
+  "project_id": "compliance",
+  "current_stage": "business_analysis",
+  "completed_artifacts": [],
+  "planned_artifacts": [
+    "business-analysis/stakeholders.md"
+  ]
+}

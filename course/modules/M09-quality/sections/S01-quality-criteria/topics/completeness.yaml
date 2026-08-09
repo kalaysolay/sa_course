@@ -1,0 +1,41 @@
+{
+  "id": "REQ-QUALITY-COMPLETENESS",
+  "title": "Полнота",
+  "course_order": 83,
+  "purpose": "Задать базовое понимание темы «Полнота» в логике курса системного анализа.",
+  "scope": {
+    "include": [
+      "Полнота"
+    ],
+    "exclude": [
+      "углубление за пределы базового уровня курса"
+    ]
+  },
+  "prerequisites": {
+    "topics": [
+      "REQ-QUALITY-ATOMICITY"
+    ]
+  },
+  "previous_topics": [
+    "REQ-QUALITY-ATOMICITY"
+  ],
+  "next_topics": [
+    "REQ-QUALITY-AMBIGUITY"
+  ],
+  "project": {
+    "stage": "course_foundation",
+    "case": "Связать тему со сквозным проектом Compliance, если это методически уместно.",
+    "expected_artifacts": []
+  },
+  "author_notes": [
+    "Seed passport. Требует авторского уточнения перед production-quality выпуском."
+  ],
+  "sources": {
+    "primary": [],
+    "secondary": [
+      "SRC-AUTHOR-MATERIALS"
+    ],
+    "examples": [],
+    "allow_external_research": false
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "id": "REQ-QUALITY-AMBIGUITY",
+  "title": "Однозначность",
+  "course_order": 84,
+  "purpose": "Задать базовое понимание темы «Однозначность» в логике курса системного анализа.",
+  "scope": {
+    "include": [
+      "Однозначность"
+    ],
+    "exclude": [
+      "углубление за пределы базового уровня курса"
+    ]
+  },
+  "prerequisites": {
+    "topics": [
+      "REQ-QUALITY-COMPLETENESS"
+    ]
+  },
+  "previous_topics": [
+    "REQ-QUALITY-COMPLETENESS"
+  ],
+  "next_topics": [
+    "REQ-QUALITY-CONSISTENCY"
+  ],
+  "project": {
+    "stage": "course_foundation",
+    "case": "Связать тему со сквозным проектом Compliance, если это методически уместно.",
+    "expected_artifacts": []
+  },
+  "author_notes": [
+    "Seed passport. Требует авторского уточнения перед production-quality выпуском."
+  ],
+  "sources": {
+    "primary": [],
+    "secondary": [
+      "SRC-AUTHOR-MATERIALS"
+    ],
+    "examples": [],
+    "allow_external_research": false
+  }
+}

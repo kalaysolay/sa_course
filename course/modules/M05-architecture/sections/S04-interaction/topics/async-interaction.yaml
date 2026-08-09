@@ -1,0 +1,41 @@
+{
+  "id": "ARCH-ASYNC",
+  "title": "Асинхронное взаимодействие",
+  "course_order": 33,
+  "purpose": "Задать базовое понимание темы «Асинхронное взаимодействие» в логике курса системного анализа.",
+  "scope": {
+    "include": [
+      "Асинхронное взаимодействие"
+    ],
+    "exclude": [
+      "углубление за пределы базового уровня курса"
+    ]
+  },
+  "prerequisites": {
+    "topics": [
+      "ARCH-SYNC"
+    ]
+  },
+  "previous_topics": [
+    "ARCH-SYNC"
+  ],
+  "next_topics": [
+    "SEC-AUTHENTICATION"
+  ],
+  "project": {
+    "stage": "course_foundation",
+    "case": "Связать тему со сквозным проектом Compliance, если это методически уместно.",
+    "expected_artifacts": []
+  },
+  "author_notes": [
+    "Seed passport. Требует авторского уточнения перед production-quality выпуском."
+  ],
+  "sources": {
+    "primary": [],
+    "secondary": [
+      "SRC-AUTHOR-MATERIALS"
+    ],
+    "examples": [],
+    "allow_external_research": false
+  }
+}
