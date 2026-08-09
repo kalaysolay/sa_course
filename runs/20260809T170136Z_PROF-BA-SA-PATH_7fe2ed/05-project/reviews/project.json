@@ -1,0 +1,7 @@
+{
+  "reviewer": "Project Artifact Reviewer",
+  "artifact": "05-project/project-change.json",
+  "verdict": "APPROVED",
+  "summary": "No canonical project artifact is required for PROF-BA-SA-PATH. The lesson correctly uses the Compliance project as a route-map context only.",
+  "issues": []
+}

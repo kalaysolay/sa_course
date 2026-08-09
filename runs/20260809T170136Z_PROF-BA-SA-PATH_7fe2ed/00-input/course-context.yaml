@@ -1,0 +1,12 @@
+{
+  "module": "M01",
+  "section": "M01-S03",
+  "topic": {
+    "id": "PROF-BA-SA-PATH",
+    "slug": "ba-sa-path",
+    "title": "От бизнес-проблемы до системной спецификации",
+    "order": 1,
+    "course_order": 7,
+    "passport": "course/modules/M01-profession/sections/S03-course-path/topics/ba-sa-path.yaml"
+  }
+}

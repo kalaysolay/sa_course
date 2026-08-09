@@ -1,0 +1,11 @@
+{
+  "reviewer": "Subject Reviewer",
+  "artifact": "03-lecture/final.md",
+  "verdict": "APPROVED",
+  "summary": "The lecture correctly explains the beginner path from business problem to system specification and uses the internal Compliance system throughout. BA and SA are presented as practical lenses rather than rigid job boundaries.",
+  "issues": [],
+  "positiveNotes": [
+    "The Compliance route is explicit: requests, statuses, officer workspace, dashboards, SSO context and future course development.",
+    "The lesson avoids KYC or external-customer framing."
+  ]
+}

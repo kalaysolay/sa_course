@@ -1,6 +1,6 @@
 {
   "journal_type": "implementation_gap_style",
-  "updated_at": "2026-08-09T21:26:00+05:00",
+  "updated_at": "2026-08-09T22:08:00+05:00",
   "entries": [
     {
       "id": "IMPL-0001",
@@ -297,6 +297,23 @@
       ],
       "created_at": "2026-08-09T21:26:00+05:00",
       "resolved_at": "2026-08-09T21:26:00+05:00"
+    },
+    {
+      "id": "IMPL-0020",
+      "status": "closed",
+      "severity": "info",
+      "type": "lesson_production",
+      "iteration": "production-v0.3.1",
+      "title": "Lesson 7 generated for BA/SA path to system specification",
+      "description": "Generated PROF-BA-SA-PATH lesson package with an experimental friendlier conference-talk style. The lesson maps the route from raw business request to problem framing, users, processes, requirements, system models, data, interfaces and specification, using the internal Compliance system as practice.",
+      "evidence": [
+        "output/M01/PROF-BA-SA-PATH/lecture.md",
+        "runs/20260809T170136Z_PROF-BA-SA-PATH_7fe2ed/99-package/lesson-manifest.json",
+        "course/progress.yaml next_candidate=PROF-ARTIFACTS",
+        "course/course-style.md style experiment note"
+      ],
+      "created_at": "2026-08-09T22:08:00+05:00",
+      "resolved_at": "2026-08-09T22:08:00+05:00"
     }
   ]
 }

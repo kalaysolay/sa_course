@@ -1,22 +1,22 @@
 {
   "course_id": "system-analysis",
-  "updated_at": "2026-08-09T16:23:38.011Z",
+  "updated_at": "2026-08-09T17:09:26.483Z",
   "summary": {
     "total_topics": 98,
-    "completed": 6,
+    "completed": 7,
     "in_progress": 0,
     "blocked": 0,
     "needs_revision": 0,
-    "planned": 92
+    "planned": 91
   },
   "last_completed": {
-    "topic_id": "PROF-SKILLS",
-    "course_order": 6,
-    "run_id": "20260809T161109Z_PROF-SKILLS_b07baa"
+    "topic_id": "PROF-BA-SA-PATH",
+    "course_order": 7,
+    "run_id": "20260809T170136Z_PROF-BA-SA-PATH_7fe2ed"
   },
   "next_candidate": {
-    "topic_id": "PROF-BA-SA-PATH",
-    "course_order": 7
+    "topic_id": "PROF-ARTIFACTS",
+    "course_order": 8
   },
   "topics": {
     "PROF-ANALYST-TYPES": {
@@ -74,8 +74,9 @@
       "course_order": 7,
       "module_id": "M01",
       "title": "От бизнес-проблемы до системной спецификации",
-      "status": "planned",
-      "output": null
+      "status": "completed",
+      "output": "output/M01/PROF-BA-SA-PATH/",
+      "run_id": "20260809T170136Z_PROF-BA-SA-PATH_7fe2ed"
     },
     "PROF-ARTIFACTS": {
       "course_order": 8,
