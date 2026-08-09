@@ -1,0 +1,7 @@
+{
+  "reviewer": "coverage-reviewer",
+  "artifact": "03-lecture/final.md",
+  "verdict": "APPROVED",
+  "summary": "Лекция покрывает include-scope: контекстная граница, типичные зоны BA/SA, малые и средние проекты, договоренности в команде и пример Compliance-проекта. Exclude-scope не нарушен.",
+  "issues": []
+}

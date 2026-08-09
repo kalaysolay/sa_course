@@ -233,6 +233,22 @@
       ],
       "created_at": "2026-08-09T00:00:00+05:00",
       "resolved_at": "2026-08-09T00:00:00+05:00"
+    },
+    {
+      "id": "IMPL-0016",
+      "status": "closed",
+      "severity": "info",
+      "type": "lesson_production",
+      "iteration": "production-v0.3.1",
+      "title": "Lesson 3 generated for BA/SA responsibility boundary",
+      "description": "Generated PROF-BA-SA-BOUNDARY lesson package. The lesson explains that the BA/SA boundary is a practical team agreement, shows why it is blurred on small and medium projects, and uses the internal Compliance system to practice responsibility agreements without creating canonical project artifacts.",
+      "evidence": [
+        "output/M01/PROF-BA-SA-BOUNDARY/lecture.md",
+        "runs/20260809T102228Z_PROF-BA-SA-BOUNDARY_0d03d1/99-package/lesson-manifest.json",
+        "course/progress.yaml next_candidate=PROF-ROLE"
+      ],
+      "created_at": "2026-08-09T00:00:00+05:00",
+      "resolved_at": "2026-08-09T00:00:00+05:00"
     }
   ]
 }

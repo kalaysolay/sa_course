@@ -1,0 +1,12 @@
+{
+  "module": "M01",
+  "section": "M01-S01",
+  "topic": {
+    "id": "PROF-BA-SA-BOUNDARY",
+    "slug": "ba-sa-boundary",
+    "title": "Где проходит граница между БА и СА и почему на практике она размыта",
+    "order": 3,
+    "course_order": 3,
+    "passport": "course/modules/M01-profession/sections/S01-role/topics/ba-sa-boundary.yaml"
+  }
+}

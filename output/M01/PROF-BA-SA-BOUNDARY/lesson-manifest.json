@@ -1,0 +1,27 @@
+{
+  "topicId": "PROF-BA-SA-BOUNDARY",
+  "runId": "20260809T102228Z_PROF-BA-SA-BOUNDARY_0d03d1",
+  "status": "COMPLETED",
+  "learningOutcomes": [
+    "PROF-BA-SA-BOUNDARY-LO1",
+    "PROF-BA-SA-BOUNDARY-LO2",
+    "PROF-BA-SA-BOUNDARY-LO3",
+    "PROF-BA-SA-BOUNDARY-LO4",
+    "PROF-BA-SA-BOUNDARY-LO5"
+  ],
+  "files": {
+    "lecture": "lecture.md",
+    "exercises": "exercises.md",
+    "answers": "answers.md",
+    "sources": "sources.md"
+  },
+  "projectChanges": [],
+  "reviews": {
+    "subject": "APPROVED",
+    "coverage": "APPROVED",
+    "methodology": "APPROVED",
+    "editorial": "APPROVED",
+    "assessment": "APPROVED",
+    "project": "APPROVED"
+  }
+}

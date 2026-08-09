@@ -1,0 +1,12 @@
+[
+  {
+    "id": "SRC-AUTHOR-MATERIALS",
+    "type": "author_material",
+    "title": "Авторские материалы курса",
+    "availability": "available",
+    "location": {
+      "type": "directory",
+      "path": "references/author-materials"
+    }
+  }
+]

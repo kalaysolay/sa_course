@@ -1,0 +1,8 @@
+{"ts":"2026-08-09T10:22:28.655Z","event":"RUN_CREATED","topicId":"PROF-BA-SA-BOUNDARY"}
+{"ts":"2026-08-09T10:22:28.664Z","event":"STATE_CHANGED","status":"TOPIC_RESOLVED"}
+{"ts":"2026-08-09T10:22:28.671Z","event":"STATE_CHANGED","status":"PROGRESS_CHECKED"}
+{"ts":"2026-08-09T10:22:28.678Z","event":"STATE_CHANGED","status":"CONTEXT_READY"}
+{"ts":"2026-08-09T10:22:28.700Z","event":"CODEX_TASKS_CREATED","taskDir":"codex-tasks","taskCount":9}
+{"ts":"2026-08-09T10:22:28.702Z","event":"STATE_CHANGED","status":"CODEX_TASKS_READY"}
+{"at":"2026-08-09T10:36:26.978Z","event":"manual_codex_package_completed","topicId":"PROF-BA-SA-BOUNDARY","output":"output/M01/PROF-BA-SA-BOUNDARY/"}
+{"at":"2026-08-09T10:37:23.292Z","event":"manual_codex_package_completed","topicId":"PROF-BA-SA-BOUNDARY","output":"output/M01/PROF-BA-SA-BOUNDARY/"}

@@ -1,12 +1,12 @@
 # Course Progress
 
-Готово: 2 / 98 тем.
+Готово: 3 / 98 тем.
 
 Последняя готовая тема:
-2. PROF-BA-SA
+3. PROF-BA-SA-BOUNDARY
 
 Следующая:
-3. PROF-BA-SA-BOUNDARY
+4. PROF-ROLE
 
 Открытые GAP:
 - см. course/gap-registry.yaml

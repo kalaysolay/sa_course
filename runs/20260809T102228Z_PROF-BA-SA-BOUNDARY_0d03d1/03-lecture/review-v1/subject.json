@@ -1,0 +1,7 @@
+{
+  "reviewer": "subject-reviewer",
+  "artifact": "03-lecture/final.md",
+  "verdict": "APPROVED",
+  "summary": "Фактических ошибок не найдено: BA/SA описаны как типичные фокусы, SA не сведен к разработчику, BA не сведен к записыванию пожеланий, Compliance-кейс остается внутренней корпоративной системой.",
+  "issues": []
+}
