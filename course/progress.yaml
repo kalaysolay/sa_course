@@ -1,22 +1,22 @@
 {
   "course_id": "system-analysis",
-  "updated_at": "2026-08-09T11:36:35.101Z",
+  "updated_at": "2026-08-09T15:09:26.106Z",
   "summary": {
     "total_topics": 98,
-    "completed": 4,
+    "completed": 5,
     "in_progress": 0,
     "blocked": 0,
     "needs_revision": 0,
-    "planned": 94
+    "planned": 93
   },
   "last_completed": {
-    "topic_id": "PROF-ROLE",
-    "course_order": 4,
-    "run_id": "20260809T112619Z_PROF-ROLE_6c6b73"
+    "topic_id": "PROF-LIFECYCLE",
+    "course_order": 5,
+    "run_id": "20260809T145925Z_PROF-LIFECYCLE_aab1d3"
   },
   "next_candidate": {
-    "topic_id": "PROF-LIFECYCLE",
-    "course_order": 5
+    "topic_id": "PROF-SKILLS",
+    "course_order": 6
   },
   "topics": {
     "PROF-ANALYST-TYPES": {
@@ -58,8 +58,9 @@
       "course_order": 5,
       "module_id": "M01",
       "title": "Жизненный цикл работы аналитика в проекте",
-      "status": "planned",
-      "output": null
+      "status": "completed",
+      "output": "output/M01/PROF-LIFECYCLE/",
+      "run_id": "20260809T145925Z_PROF-LIFECYCLE_aab1d3"
     },
     "PROF-SKILLS": {
       "course_order": 6,

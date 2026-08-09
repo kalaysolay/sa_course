@@ -1,0 +1,7 @@
+{
+  "reviewer": "coverage-reviewer",
+  "artifact": "03-lecture/final.md",
+  "verdict": "APPROVED",
+  "summary": "Лекция покрывает include-scope: вход в задачу, проблему и границы, сбор и проверку информации, артефакты, согласование, сопровождение разработки и изменений, итерационность.",
+  "issues": []
+}

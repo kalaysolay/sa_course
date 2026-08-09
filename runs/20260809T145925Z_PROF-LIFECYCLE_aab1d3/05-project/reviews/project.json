@@ -1,0 +1,7 @@
+{
+  "reviewer": "project-artifact-reviewer",
+  "artifact": "05-project/project-change.json",
+  "verdict": "APPROVED",
+  "summary": "Проектная часть корректна: канонические артефакты не меняются, Compliance используется как учебная практика, KYC-сценарий запрещен.",
+  "issues": []
+}

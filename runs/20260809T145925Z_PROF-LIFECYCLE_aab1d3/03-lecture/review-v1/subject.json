@@ -1,0 +1,7 @@
+{
+  "reviewer": "subject-reviewer",
+  "artifact": "03-lecture/final.md",
+  "verdict": "APPROVED",
+  "summary": "Фактических ошибок не найдено: урок описывает жизненный цикл работы аналитика, не подменяет его SDLC разработки и сохраняет Compliance как внутреннюю систему.",
+  "issues": []
+}

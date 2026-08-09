@@ -1,0 +1,12 @@
+{
+  "module": "M01",
+  "section": "M01-S02",
+  "topic": {
+    "id": "PROF-LIFECYCLE",
+    "slug": "analyst-lifecycle",
+    "title": "Жизненный цикл работы аналитика в проекте",
+    "order": 2,
+    "course_order": 5,
+    "passport": "course/modules/M01-profession/sections/S02-ba-sa/topics/analyst-lifecycle.yaml"
+  }
+}

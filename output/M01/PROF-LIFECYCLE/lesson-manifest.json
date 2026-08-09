@@ -1,0 +1,28 @@
+{
+  "topicId": "PROF-LIFECYCLE",
+  "runId": "20260809T145925Z_PROF-LIFECYCLE_aab1d3",
+  "status": "COMPLETED",
+  "learningOutcomes": [
+    "PROF-LIFECYCLE-LO1",
+    "PROF-LIFECYCLE-LO2",
+    "PROF-LIFECYCLE-LO3",
+    "PROF-LIFECYCLE-LO4",
+    "PROF-LIFECYCLE-LO5",
+    "PROF-LIFECYCLE-LO6"
+  ],
+  "files": {
+    "lecture": "lecture.md",
+    "exercises": "exercises.md",
+    "answers": "answers.md",
+    "sources": "sources.md"
+  },
+  "projectChanges": [],
+  "reviews": {
+    "subject": "APPROVED",
+    "coverage": "APPROVED",
+    "methodology": "APPROVED",
+    "editorial": "APPROVED",
+    "assessment": "APPROVED",
+    "project": "APPROVED"
+  }
+}
