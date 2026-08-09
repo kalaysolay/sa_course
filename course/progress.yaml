@@ -1,99 +1,97 @@
 {
   "course_id": "system-analysis",
-  "updated_at": "2026-08-09T07:41:37.072Z",
+  "updated_at": "2026-08-09T09:21:34.337Z",
   "summary": {
     "total_topics": 98,
-    "completed": 1,
+    "completed": 0,
     "in_progress": 0,
     "blocked": 0,
     "needs_revision": 0,
-    "planned": 97
+    "planned": 98
   },
-  "last_completed": {
-    "topic_id": "PROF-ROLE",
-    "course_order": 1,
-    "run_id": "20260809T071602Z_PROF-ROLE_b0c871"
-  },
+  "last_completed": null,
   "next_candidate": {
-    "topic_id": "PROF-LIFECYCLE",
-    "course_order": 2
+    "topic_id": "PROF-ANALYST-TYPES",
+    "course_order": 1
   },
   "topics": {
-    "PROF-ROLE": {
+    "PROF-ANALYST-TYPES": {
       "course_order": 1,
       "module_id": "M01",
-      "title": "Роль системного аналитика и его типовые задачи",
-      "status": "completed",
-      "output": "output/M01/PROF-ROLE/",
-      "run_id": "20260809T071602Z_PROF-ROLE_b0c871"
+      "title": "Какие бывают аналитики в IT",
+      "status": "planned",
+      "output": null
     },
-    "PROF-LIFECYCLE": {
+    "PROF-BA-SA": {
       "course_order": 2,
       "module_id": "M01",
-      "title": "Жизненный цикл работы аналитика",
+      "title": "Бизнес-аналитик и системный аналитик — в чем разница",
+      "status": "planned",
+      "output": null
+    },
+    "PROF-BA-SA-BOUNDARY": {
+      "course_order": 3,
+      "module_id": "M01",
+      "title": "Где проходит граница между БА и СА и почему на практике она размыта",
+      "status": "planned",
+      "output": null
+    },
+    "PROF-ROLE": {
+      "course_order": 4,
+      "module_id": "M01",
+      "title": "Типовые задачи бизнес- и системного аналитика",
+      "status": "planned",
+      "output": null,
+      "previous_run_id": "20260809T071602Z_PROF-ROLE_b0c871",
+      "previous_output": "output/M01/PROF-ROLE/",
+      "note": "Superseded by curriculum patch v0.3.1; keep run/output history, regenerate according to new course order later."
+    },
+    "PROF-LIFECYCLE": {
+      "course_order": 5,
+      "module_id": "M01",
+      "title": "Жизненный цикл работы аналитика в проекте",
       "status": "planned",
       "output": null
     },
     "PROF-SKILLS": {
-      "course_order": 3,
-      "module_id": "M01",
-      "title": "Навыки и компетенции системного аналитика",
-      "status": "planned",
-      "output": null
-    },
-    "BASA-BOUNDARY": {
-      "course_order": 4,
-      "module_id": "M01",
-      "title": "Где заканчивается бизнес-анализ и начинается системный анализ",
-      "status": "planned",
-      "output": null
-    },
-    "BASA-RESULTS": {
-      "course_order": 5,
-      "module_id": "M01",
-      "title": "Какие результаты возникают по пути анализа",
-      "status": "planned",
-      "output": null
-    },
-    "BASA-ARTIFACTS": {
       "course_order": 6,
       "module_id": "M01",
-      "title": "Какие артефакты возникают по пути анализа",
+      "title": "Навыки и компетенции аналитика",
+      "status": "planned",
+      "output": null
+    },
+    "PROF-BA-SA-PATH": {
+      "course_order": 7,
+      "module_id": "M01",
+      "title": "От бизнес-проблемы до системной спецификации",
+      "status": "planned",
+      "output": null
+    },
+    "PROF-ARTIFACTS": {
+      "course_order": 8,
+      "module_id": "M01",
+      "title": "Какие результаты и артефакты возникают по пути",
       "status": "planned",
       "output": null
     },
     "TEAM-ROLES": {
-      "course_order": 7,
+      "course_order": 9,
       "module_id": "M02",
       "title": "Команда разработки и роли участников",
       "status": "planned",
       "output": null
     },
     "DEV-MODELS": {
-      "course_order": 8,
+      "course_order": 10,
       "module_id": "M02",
-      "title": "Модели управления разработкой ПО",
-      "status": "planned",
-      "output": null
-    },
-    "AGILE-METHODS": {
-      "course_order": 9,
-      "module_id": "M02",
-      "title": "Гибкие методологии",
+      "title": "Модели управления разработкой ПО и гибкие методологии",
       "status": "planned",
       "output": null
     },
     "SDLC-STAGES": {
-      "course_order": 10,
-      "module_id": "M02",
-      "title": "Этапы разработки ПО",
-      "status": "planned",
-      "output": null
-    },
-    "SDLC-LIFECYCLE": {
       "course_order": 11,
       "module_id": "M02",
-      "title": "Жизненный цикл ПО",
+      "title": "Этапы разработки и жизненного цикла ПО",
       "status": "planned",
       "output": null
     },

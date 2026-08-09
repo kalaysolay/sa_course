@@ -165,6 +165,25 @@
       ],
       "created_at": "2026-08-09T00:00:00+05:00",
       "resolved_at": "2026-08-09T00:00:00+05:00"
+    },
+    {
+      "id": "IMPL-0012",
+      "status": "closed",
+      "severity": "info",
+      "type": "curriculum_patch",
+      "iteration": "curriculum-v0.3.1",
+      "title": "Curriculum patch v0.3.1 applied",
+      "description": "Updated content seed data only: Module 1 now starts with the map of analytical roles in IT, BA/SA distinction, blurred boundary, analyst work, and the course path from business problem to system specification. Module 2 is compressed to three topics so REQ-INTRO, REQ-FNFR, and REQ-STAKEHOLDERS keep course_order 12, 13, and 14. Production progress was reset to regenerate lesson 1 from PROF-ANALYST-TYPES while preserving old run/output history.",
+      "evidence": [
+        "course-publisher-spec-v0.3.1.md",
+        "course/curriculum.yaml",
+        "course/progress.yaml next_candidate=PROF-ANALYST-TYPES",
+        "course/modules/M01-profession",
+        "course/audience.md",
+        "course/course-style.md"
+      ],
+      "created_at": "2026-08-09T00:00:00+05:00",
+      "resolved_at": "2026-08-09T00:00:00+05:00"
     }
   ]
 }

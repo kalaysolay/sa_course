@@ -1,12 +1,12 @@
 # Course Progress
 
-Готово: 1 / 98 тем.
+Готово: 0 / 98 тем.
 
 Последняя готовая тема:
-1. PROF-ROLE
+нет
 
 Следующая:
-2. PROF-LIFECYCLE
+1. PROF-ANALYST-TYPES
 
 Открытые GAP:
 - см. course/gap-registry.yaml

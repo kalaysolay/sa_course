@@ -5,77 +5,101 @@
   "agents_can_modify": false,
   "agents_can_report_gaps": true,
   "notes": [
-    "Seed curriculum from Course Publisher spec v0.3.",
-    "Several compound early baseline titles are split only to preserve the MVP contract: REQ-STAKEHOLDERS has course_order 14."
+    "Seed curriculum from Course Publisher spec v0.3.1.",
+    "Patch v0.3.1 changes only the starting Curriculum: Module 1 introduces analytical roles before requirements and preserves REQ-STAKEHOLDERS at course_order 14."
   ],
   "modules": [
     {
       "id": "M01",
       "slug": "M01-profession",
-      "title": "О профессии системного аналитика",
+      "title": "Профессия аналитика в IT",
       "order": 1,
       "sections": [
         {
           "id": "M01-S01",
           "slug": "S01-role",
-          "title": "Роль аналитика",
+          "title": "Кто такие аналитики",
           "order": 1,
           "topics": [
             {
-              "id": "PROF-ROLE",
-              "slug": "analyst-role",
-              "title": "Роль системного аналитика и его типовые задачи",
+              "id": "PROF-ANALYST-TYPES",
+              "slug": "analyst-types",
+              "title": "Какие бывают аналитики в IT",
               "order": 1,
               "course_order": 1,
-              "passport": "course/modules/M01-profession/sections/S01-role/topics/analyst-role.yaml"
+              "passport": "course/modules/M01-profession/sections/S01-role/topics/analyst-types.yaml"
             },
             {
-              "id": "PROF-LIFECYCLE",
-              "slug": "analyst-lifecycle",
-              "title": "Жизненный цикл работы аналитика",
+              "id": "PROF-BA-SA",
+              "slug": "ba-sa",
+              "title": "Бизнес-аналитик и системный аналитик — в чем разница",
               "order": 2,
               "course_order": 2,
-              "passport": "course/modules/M01-profession/sections/S01-role/topics/analyst-lifecycle.yaml"
+              "passport": "course/modules/M01-profession/sections/S01-role/topics/ba-sa.yaml"
             },
             {
-              "id": "PROF-SKILLS",
-              "slug": "analyst-skills",
-              "title": "Навыки и компетенции системного аналитика",
+              "id": "PROF-BA-SA-BOUNDARY",
+              "slug": "ba-sa-boundary",
+              "title": "Где проходит граница между БА и СА и почему на практике она размыта",
               "order": 3,
               "course_order": 3,
-              "passport": "course/modules/M01-profession/sections/S01-role/topics/analyst-skills.yaml"
+              "passport": "course/modules/M01-profession/sections/S01-role/topics/ba-sa-boundary.yaml"
             }
           ]
         },
         {
           "id": "M01-S02",
           "slug": "S02-ba-sa",
-          "title": "БА и СА в одном проекте",
+          "title": "Работа аналитика",
           "order": 2,
           "topics": [
             {
-              "id": "BASA-BOUNDARY",
-              "slug": "ba-sa-boundary",
-              "title": "Где заканчивается бизнес-анализ и начинается системный анализ",
+              "id": "PROF-ROLE",
+              "slug": "analyst-role",
+              "title": "Типовые задачи бизнес- и системного аналитика",
               "order": 1,
               "course_order": 4,
-              "passport": "course/modules/M01-profession/sections/S02-ba-sa/topics/ba-sa-boundary.yaml"
+              "passport": "course/modules/M01-profession/sections/S02-ba-sa/topics/analyst-role.yaml"
             },
             {
-              "id": "BASA-RESULTS",
-              "slug": "ba-sa-results",
-              "title": "Какие результаты возникают по пути анализа",
+              "id": "PROF-LIFECYCLE",
+              "slug": "analyst-lifecycle",
+              "title": "Жизненный цикл работы аналитика в проекте",
               "order": 2,
               "course_order": 5,
-              "passport": "course/modules/M01-profession/sections/S02-ba-sa/topics/ba-sa-results.yaml"
+              "passport": "course/modules/M01-profession/sections/S02-ba-sa/topics/analyst-lifecycle.yaml"
             },
             {
-              "id": "BASA-ARTIFACTS",
-              "slug": "ba-sa-artifacts",
-              "title": "Какие артефакты возникают по пути анализа",
+              "id": "PROF-SKILLS",
+              "slug": "analyst-skills",
+              "title": "Навыки и компетенции аналитика",
               "order": 3,
               "course_order": 6,
-              "passport": "course/modules/M01-profession/sections/S02-ba-sa/topics/ba-sa-artifacts.yaml"
+              "passport": "course/modules/M01-profession/sections/S02-ba-sa/topics/analyst-skills.yaml"
+            }
+          ]
+        },
+        {
+          "id": "M01-S03",
+          "slug": "S03-course-path",
+          "title": "Наш путь на курсе",
+          "order": 3,
+          "topics": [
+            {
+              "id": "PROF-BA-SA-PATH",
+              "slug": "ba-sa-path",
+              "title": "От бизнес-проблемы до системной спецификации",
+              "order": 1,
+              "course_order": 7,
+              "passport": "course/modules/M01-profession/sections/S03-course-path/topics/ba-sa-path.yaml"
+            },
+            {
+              "id": "PROF-ARTIFACTS",
+              "slug": "artifacts-path",
+              "title": "Какие результаты и артефакты возникают по пути",
+              "order": 2,
+              "course_order": 8,
+              "passport": "course/modules/M01-profession/sections/S03-course-path/topics/artifacts-path.yaml"
             }
           ]
         }
@@ -98,7 +122,7 @@
               "slug": "team-roles",
               "title": "Команда разработки и роли участников",
               "order": 1,
-              "course_order": 7,
+              "course_order": 9,
               "passport": "course/modules/M02-process/sections/S01-team/topics/team-roles.yaml"
             }
           ]
@@ -112,18 +136,10 @@
             {
               "id": "DEV-MODELS",
               "slug": "development-models",
-              "title": "Модели управления разработкой ПО",
+              "title": "Модели управления разработкой ПО и гибкие методологии",
               "order": 1,
-              "course_order": 8,
+              "course_order": 10,
               "passport": "course/modules/M02-process/sections/S02-development-management/topics/development-models.yaml"
-            },
-            {
-              "id": "AGILE-METHODS",
-              "slug": "agile-methods",
-              "title": "Гибкие методологии",
-              "order": 2,
-              "course_order": 9,
-              "passport": "course/modules/M02-process/sections/S02-development-management/topics/agile-methods.yaml"
             }
           ]
         },
@@ -136,18 +152,10 @@
             {
               "id": "SDLC-STAGES",
               "slug": "sdlc-stages",
-              "title": "Этапы разработки ПО",
+              "title": "Этапы разработки и жизненного цикла ПО",
               "order": 1,
-              "course_order": 10,
-              "passport": "course/modules/M02-process/sections/S03-sdlc/topics/sdlc-stages.yaml"
-            },
-            {
-              "id": "SDLC-LIFECYCLE",
-              "slug": "sdlc-lifecycle",
-              "title": "Жизненный цикл ПО",
-              "order": 2,
               "course_order": 11,
-              "passport": "course/modules/M02-process/sections/S03-sdlc/topics/sdlc-lifecycle.yaml"
+              "passport": "course/modules/M02-process/sections/S03-sdlc/topics/sdlc-stages.yaml"
             }
           ]
         }

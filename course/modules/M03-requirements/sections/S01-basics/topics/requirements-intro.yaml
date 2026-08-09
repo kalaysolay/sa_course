@@ -13,11 +13,11 @@
   },
   "prerequisites": {
     "topics": [
-      "SDLC-LIFECYCLE"
+      "SDLC-STAGES"
     ]
   },
   "previous_topics": [
-    "SDLC-LIFECYCLE"
+    "SDLC-STAGES"
   ],
   "next_topics": [
     "REQ-FNFR"
