@@ -1,0 +1,12 @@
+{
+  "module": "M01",
+  "section": "M01-S02",
+  "topic": {
+    "id": "PROF-SKILLS",
+    "slug": "analyst-skills",
+    "title": "Навыки и компетенции аналитика",
+    "order": 3,
+    "course_order": 6,
+    "passport": "course/modules/M01-profession/sections/S02-ba-sa/topics/analyst-skills.yaml"
+  }
+}

@@ -1,12 +1,12 @@
 # Course Progress
 
-Готово: 5 / 98 тем.
+Готово: 6 / 98 тем.
 
 Последняя готовая тема:
-5. PROF-LIFECYCLE
+6. PROF-SKILLS
 
 Следующая:
-6. PROF-SKILLS
+7. PROF-BA-SA-PATH
 
 Открытые GAP:
 - см. course/gap-registry.yaml

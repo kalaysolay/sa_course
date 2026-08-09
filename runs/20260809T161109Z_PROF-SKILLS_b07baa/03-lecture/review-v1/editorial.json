@@ -1,0 +1,11 @@
+{
+  "reviewer": "Editorial Reviewer",
+  "artifact": "03-lecture/draft-v1.md",
+  "verdict": "APPROVED",
+  "summary": "The lecture is readable, cohesive and consistent with the course voice. It uses plain Russian, concrete Compliance examples and avoids unnecessary jargon.",
+  "issues": [],
+  "positiveNotes": [
+    "The opening creates continuity from lesson 5.",
+    "The final section prepares the learner for lesson 7."
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "reviewer": "Subject Reviewer",
+  "artifact": "03-lecture/draft-v1.md",
+  "verdict": "APPROVED",
+  "summary": "The lecture correctly explains beginner-level analyst competencies and ties every skill to the internal Compliance system. It avoids hard BA/SA boundaries and does not drift into KYC or external-client examples.",
+  "issues": [],
+  "positiveNotes": [
+    "Clear distinction between facts, assumptions, open questions and decisions.",
+    "Good beginner framing of modeling as a thinking tool rather than formal notation."
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "reviewer": "Content Critic",
+  "artifact": "01-brief/lesson-brief-v1.json",
+  "verdict": "APPROVED",
+  "summary": "Brief matches the topic passport: it covers communication, structuring, critical thinking, basic modeling, written agreements and uncertainty. It keeps the lesson introductory and uses the internal Compliance project without drifting into KYC or external-client examples.",
+  "issues": [],
+  "positiveNotes": [
+    "Learning outcomes are observable and suitable for beginner assessment.",
+    "Project artifact policy is explicit: no canonical Compliance artifact changes for this foundation lesson."
+  ]
+}

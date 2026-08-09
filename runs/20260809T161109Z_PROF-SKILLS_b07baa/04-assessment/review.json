@@ -1,0 +1,13 @@
+{
+  "reviewer": "Assessment Reviewer",
+  "artifact": "04-assessment/draft-v1.json",
+  "verdict": "APPROVED",
+  "summary": "Assessment checks practical beginner skills: asking questions, structuring notes, finding process gaps and writing a short agreement note. It uses the Compliance case and aligns with the lesson outcomes.",
+  "issues": [],
+  "coverage": {
+    "PROF-SKILLS-LO2": "PROF-SKILLS-Q1",
+    "PROF-SKILLS-LO3": "PROF-SKILLS-Q2",
+    "PROF-SKILLS-LO4": "PROF-SKILLS-Q3",
+    "PROF-SKILLS-LO5": "PROF-SKILLS-Q4"
+  }
+}

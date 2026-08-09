@@ -1,0 +1,28 @@
+{
+  "topicId": "PROF-SKILLS",
+  "runId": "20260809T161109Z_PROF-SKILLS_b07baa",
+  "status": "COMPLETED",
+  "learningOutcomes": [
+    "PROF-SKILLS-LO1",
+    "PROF-SKILLS-LO2",
+    "PROF-SKILLS-LO3",
+    "PROF-SKILLS-LO4",
+    "PROF-SKILLS-LO5",
+    "PROF-SKILLS-LO6"
+  ],
+  "files": {
+    "lecture": "lecture.md",
+    "exercises": "exercises.md",
+    "answers": "answers.md",
+    "sources": "sources.md"
+  },
+  "projectChanges": [],
+  "reviews": {
+    "subject": "APPROVED",
+    "coverage": "APPROVED",
+    "methodology": "APPROVED",
+    "editorial": "APPROVED",
+    "assessment": "APPROVED",
+    "project": "APPROVED"
+  }
+}

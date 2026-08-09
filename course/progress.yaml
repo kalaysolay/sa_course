@@ -1,22 +1,22 @@
 {
   "course_id": "system-analysis",
-  "updated_at": "2026-08-09T15:09:26.106Z",
+  "updated_at": "2026-08-09T16:23:38.011Z",
   "summary": {
     "total_topics": 98,
-    "completed": 5,
+    "completed": 6,
     "in_progress": 0,
     "blocked": 0,
     "needs_revision": 0,
-    "planned": 93
+    "planned": 92
   },
   "last_completed": {
-    "topic_id": "PROF-LIFECYCLE",
-    "course_order": 5,
-    "run_id": "20260809T145925Z_PROF-LIFECYCLE_aab1d3"
+    "topic_id": "PROF-SKILLS",
+    "course_order": 6,
+    "run_id": "20260809T161109Z_PROF-SKILLS_b07baa"
   },
   "next_candidate": {
-    "topic_id": "PROF-SKILLS",
-    "course_order": 6
+    "topic_id": "PROF-BA-SA-PATH",
+    "course_order": 7
   },
   "topics": {
     "PROF-ANALYST-TYPES": {
@@ -66,8 +66,9 @@
       "course_order": 6,
       "module_id": "M01",
       "title": "Навыки и компетенции аналитика",
-      "status": "planned",
-      "output": null
+      "status": "completed",
+      "output": "output/M01/PROF-SKILLS/",
+      "run_id": "20260809T161109Z_PROF-SKILLS_b07baa"
     },
     "PROF-BA-SA-PATH": {
       "course_order": 7,
