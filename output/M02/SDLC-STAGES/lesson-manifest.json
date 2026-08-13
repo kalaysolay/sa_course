@@ -1,0 +1,27 @@
+{
+  "topicId": "SDLC-STAGES",
+  "runId": "manual-20260812-SDLC-STAGES",
+  "status": "COMPLETED",
+  "learningOutcomes": [
+    "SDLC-STAGES-LO1",
+    "SDLC-STAGES-LO2",
+    "SDLC-STAGES-LO3",
+    "SDLC-STAGES-LO4",
+    "SDLC-STAGES-LO5"
+  ],
+  "files": {
+    "lecture": "lecture.md",
+    "exercises": "exercises.md",
+    "answers": "answers.md",
+    "sources": "sources.md"
+  },
+  "projectChanges": [],
+  "reviews": {
+    "subject": "APPROVED",
+    "coverage": "APPROVED",
+    "methodology": "APPROVED",
+    "editorial": "APPROVED",
+    "assessment": "APPROVED",
+    "project": "APPROVED"
+  }
+}

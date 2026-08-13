@@ -1,22 +1,22 @@
 {
   "course_id": "system-analysis",
-  "updated_at": "2026-08-09T20:25:42.420Z",
+  "updated_at": "2026-08-14T00:00:00.000Z",
   "summary": {
     "total_topics": 98,
-    "completed": 8,
+    "completed": 26,
     "in_progress": 0,
     "blocked": 0,
     "needs_revision": 0,
-    "planned": 90
+    "planned": 72
   },
   "last_completed": {
-    "topic_id": "PROF-ARTIFACTS",
-    "course_order": 8,
-    "run_id": "20260809T201933Z_PROF-ARTIFACTS_6a253e"
+    "topic_id": "ARCH-MONOLITH",
+    "course_order": 26,
+    "run_id": "20260813T192100Z_ARCH-MONOLITH_949023"
   },
   "next_candidate": {
-    "topic_id": "TEAM-ROLES",
-    "course_order": 9
+    "topic_id": "ARCH-MICROSERVICES",
+    "course_order": 27
   },
   "topics": {
     "PROF-ANALYST-TYPES": {
@@ -90,127 +90,145 @@
       "course_order": 9,
       "module_id": "M02",
       "title": "Команда разработки и роли участников",
-      "status": "planned",
-      "output": null
+      "status": "completed",
+      "output": "output/M02/TEAM-ROLES/",
+      "run_id": "manual-20260812-TEAM-ROLES"
     },
     "DEV-MODELS": {
       "course_order": 10,
       "module_id": "M02",
       "title": "Модели управления разработкой ПО и гибкие методологии",
-      "status": "planned",
-      "output": null
+      "status": "completed",
+      "output": "output/M02/DEV-MODELS/",
+      "run_id": "manual-20260812-DEV-MODELS"
     },
     "SDLC-STAGES": {
       "course_order": 11,
       "module_id": "M02",
       "title": "Этапы разработки и жизненного цикла ПО",
-      "status": "planned",
-      "output": null
+      "status": "completed",
+      "output": "output/M02/SDLC-STAGES/",
+      "run_id": "manual-20260812-SDLC-STAGES"
     },
     "REQ-INTRO": {
       "course_order": 12,
       "module_id": "M03",
       "title": "Что такое требования и какие они бывают",
-      "status": "planned",
-      "output": null
+      "status": "completed",
+      "output": "output/M03/REQ-INTRO/",
+      "run_id": "manual-20260812-REQ-INTRO"
     },
     "REQ-FNFR": {
       "course_order": 13,
       "module_id": "M03",
       "title": "Функциональные и нефункциональные требования",
-      "status": "planned",
-      "output": null
+      "status": "completed",
+      "output": "output/M03/REQ-FNFR/",
+      "run_id": "manual-20260812-REQ-FNFR"
     },
     "REQ-STAKEHOLDERS": {
       "course_order": 14,
       "module_id": "M03",
       "title": "Заинтересованные лица",
-      "status": "planned",
-      "output": null
+      "status": "completed",
+      "output": "output/M03/REQ-STAKEHOLDERS/",
+      "run_id": "20260809T042330Z_REQ-STAKEHOLDERS_1525ea"
     },
     "REQ-ELICITATION": {
       "course_order": 15,
       "module_id": "M03",
       "title": "Способы выявления требований",
-      "status": "planned",
-      "output": null
+      "status": "completed",
+      "output": "output/M03/REQ-ELICITATION/",
+      "run_id": "manual-20260812-REQ-ELICITATION"
     },
     "REQ-MODELING": {
       "course_order": 16,
       "module_id": "M03",
       "title": "Моделирование и формализация требований",
-      "status": "planned",
-      "output": null
+      "status": "completed",
+      "output": "output/M03/REQ-MODELING/",
+      "run_id": "manual-20260813-REQ-MODELING"
     },
     "REQ-SPECIFICATION": {
       "course_order": 17,
       "module_id": "M03",
       "title": "Спецификация и документирование требований",
-      "status": "planned",
-      "output": null
+      "status": "completed",
+      "output": "output/M03/REQ-SPECIFICATION/",
+      "run_id": "manual-20260813-REQ-SPECIFICATION"
     },
     "REQ-MANAGEMENT": {
       "course_order": 18,
       "module_id": "M03",
       "title": "Управление требованиями",
-      "status": "planned",
-      "output": null
+      "status": "completed",
+      "output": "output/M03/REQ-MANAGEMENT/",
+      "run_id": "manual-20260813-REQ-MANAGEMENT"
     },
     "UML-USE-CASE": {
       "course_order": 19,
       "module_id": "M04",
       "title": "UML. Диаграмма сценариев использования",
-      "status": "planned",
-      "output": null
+      "status": "completed",
+      "output": "output/M04/UML-USE-CASE/",
+      "run_id": "20260812T203456Z_UML-USE-CASE_561207"
     },
     "UML-ACTIVITY": {
       "course_order": 20,
       "module_id": "M04",
       "title": "UML. Диаграмма активности",
-      "status": "planned",
-      "output": null
+      "status": "completed",
+      "output": "output/M04/UML-ACTIVITY/",
+      "run_id": "20260812T203459Z_UML-ACTIVITY_9d7f34"
     },
     "UML-STATE": {
       "course_order": 21,
       "module_id": "M04",
       "title": "UML. Диаграмма состояний",
-      "status": "planned",
-      "output": null
+      "status": "completed",
+      "output": "output/M04/UML-STATE/",
+      "run_id": "20260812T212255Z_UML-STATE_2b1540"
     },
     "UML-SEQUENCE": {
       "course_order": 22,
       "module_id": "M04",
       "title": "UML. Диаграмма последовательностей",
-      "status": "planned",
-      "output": null
+      "status": "completed",
+      "output": "output/M04/UML-SEQUENCE/",
+      "run_id": "20260812T212258Z_UML-SEQUENCE_6940a3"
     },
     "ARCH-IS-TYPES": {
       "course_order": 23,
       "module_id": "M05",
       "title": "Различные типы ИС: веб, десктоп, мобильные",
-      "status": "planned",
-      "output": null
+      "status": "completed",
+      "output": "output/M05/ARCH-IS-TYPES/",
+      "run_id": "20260813T175901Z_ARCH-IS-TYPES_18cc60"
     },
     "ARCH-BASIC-SCHEMA": {
       "course_order": 24,
       "module_id": "M05",
       "title": "Базовая схема client → frontend → backend → database",
-      "status": "planned",
-      "output": null
+      "status": "completed",
+      "output": "output/M05/ARCH-BASIC-SCHEMA/",
+      "run_id": "20260813T175914Z_ARCH-BASIC-SCHEMA_b3a25f"
     },
     "ARCH-STYLES": {
       "course_order": 25,
       "module_id": "M05",
       "title": "Виды архитектуры информационных систем",
-      "status": "planned",
-      "output": null
+      "status": "completed",
+      "output": "output/M05/ARCH-STYLES/",
+      "run_id": "20260813T190941Z_ARCH-STYLES_cacf15"
     },
     "ARCH-MONOLITH": {
       "course_order": 26,
       "module_id": "M05",
       "title": "Монолит",
-      "status": "planned",
-      "output": null
+      "status": "completed",
+      "output": "output/M05/ARCH-MONOLITH/",
+      "run_id": "20260813T192100Z_ARCH-MONOLITH_949023"
     },
     "ARCH-MICROSERVICES": {
       "course_order": 27,

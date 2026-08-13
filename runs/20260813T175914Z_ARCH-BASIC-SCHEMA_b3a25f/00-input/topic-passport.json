@@ -1,0 +1,41 @@
+{
+  "id": "ARCH-BASIC-SCHEMA",
+  "title": "Базовая схема client → frontend → backend → database",
+  "course_order": 24,
+  "purpose": "Задать базовое понимание темы «Базовая схема client → frontend → backend → database» в логике курса системного анализа.",
+  "scope": {
+    "include": [
+      "Базовая схема client → frontend → backend → database"
+    ],
+    "exclude": [
+      "углубление за пределы базового уровня курса"
+    ]
+  },
+  "prerequisites": {
+    "topics": [
+      "ARCH-IS-TYPES"
+    ]
+  },
+  "previous_topics": [
+    "ARCH-IS-TYPES"
+  ],
+  "next_topics": [
+    "ARCH-STYLES"
+  ],
+  "project": {
+    "stage": "course_foundation",
+    "case": "Связать тему со сквозным проектом Compliance, если это методически уместно.",
+    "expected_artifacts": []
+  },
+  "author_notes": [
+    "Seed passport. Требует авторского уточнения перед production-quality выпуском."
+  ],
+  "sources": {
+    "primary": [],
+    "secondary": [
+      "SRC-AUTHOR-MATERIALS"
+    ],
+    "examples": [],
+    "allow_external_research": false
+  }
+}

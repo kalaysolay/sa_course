@@ -27,6 +27,26 @@
     "block_on_major_gap": true,
     "never_silently_skip_topic": true
   },
+  "course_tracker": {
+    "spreadsheet_url": "https://docs.google.com/spreadsheets/d/1She4DAsy9KIQ0uXdMDbTvtDsftT3BNBiorYMScyArew/edit",
+    "spreadsheet_id": "1She4DAsy9KIQ0uXdMDbTvtDsftT3BNBiorYMScyArew",
+    "sheet_name": "План лекций",
+    "topic_id_column": "H",
+    "header_row": 4,
+    "data_start_row": 5,
+    "columns": {
+      "lesson_tree": "A",
+      "lecture_generated": "B",
+      "lecture_edited": "C",
+      "artifacts": "D",
+      "artifact_status": "E",
+      "lesson_status": "F",
+      "course_order": "G",
+      "topic_id": "H",
+      "output": "I",
+      "run_id": "J"
+    }
+  },
   "curriculum": {
     "author_controlled": true,
     "require_topic_passport": true

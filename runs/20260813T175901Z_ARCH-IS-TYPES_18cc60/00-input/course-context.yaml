@@ -1,0 +1,12 @@
+{
+  "module": "M05",
+  "section": "M05-S01",
+  "topic": {
+    "id": "ARCH-IS-TYPES",
+    "slug": "is-types",
+    "title": "Различные типы ИС: веб, десктоп, мобильные",
+    "order": 1,
+    "course_order": 23,
+    "passport": "course/modules/M05-architecture/sections/S01-information-systems/topics/is-types.yaml"
+  }
+}

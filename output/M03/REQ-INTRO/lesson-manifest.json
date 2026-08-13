@@ -1,0 +1,27 @@
+{
+  "topicId": "REQ-INTRO",
+  "runId": "manual-20260812-REQ-INTRO",
+  "status": "COMPLETED",
+  "learningOutcomes": [
+    "REQ-INTRO-LO1",
+    "REQ-INTRO-LO2",
+    "REQ-INTRO-LO3",
+    "REQ-INTRO-LO4",
+    "REQ-INTRO-LO5"
+  ],
+  "files": {
+    "lecture": "lecture.md",
+    "exercises": "exercises.md",
+    "answers": "answers.md",
+    "sources": "sources.md"
+  },
+  "projectChanges": [],
+  "reviews": {
+    "subject": "APPROVED",
+    "coverage": "APPROVED",
+    "methodology": "APPROVED",
+    "editorial": "APPROVED",
+    "assessment": "APPROVED",
+    "project": "APPROVED"
+  }
+}

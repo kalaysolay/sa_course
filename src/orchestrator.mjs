@@ -152,7 +152,18 @@ export class Orchestrator {
       this.setStatus(runDir, run, 'CONTEXT_READY');
 
       const openGaps = loadGaps(this.root).gaps.filter(gap => gap.status === 'open' && (gap.affected_topics || []).includes(topic.id));
-      const tasks = buildCodexTaskPackets({ createdAt: this.now(), run, module, section, topic, passport, sources, openGaps });
+      const publisherConfig = readData(path.join(this.root, 'publisher.yaml'));
+      const tasks = buildCodexTaskPackets({
+        createdAt: this.now(),
+        run,
+        module,
+        section,
+        topic,
+        passport,
+        sources,
+        openGaps,
+        courseTracker: publisherConfig.course_tracker
+      });
       const taskDir = codexTaskDir(runDir);
       ensureDir(taskDir);
       for (const packet of tasks.packets) writeText(path.join(taskDir, packet.file), packet.content);

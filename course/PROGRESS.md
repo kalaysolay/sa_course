@@ -1,12 +1,12 @@
 # Course Progress
 
-Готово: 8 / 98 тем.
+Готово: 24 / 98 тем.
 
 Последняя готовая тема:
-8. PROF-ARTIFACTS
+24. ARCH-BASIC-SCHEMA
 
 Следующая:
-9. TEAM-ROLES
+27. ARCH-MICROSERVICES
 
 Открытые GAP:
 - см. course/gap-registry.yaml

@@ -271,8 +271,13 @@ test('Codex-native prepare creates task packets without OPENAI_API_KEY', () => {
   assert.equal(manifest.mode, 'codex-app');
   assert.equal(manifest.externalApiRequired, false);
   assert.equal(manifest.topicId, 'REQ-STAKEHOLDERS');
+  assert.equal(manifest.taskCount, 10);
+  assert.equal(manifest.courseTracker.spreadsheetId, '1She4DAsy9KIQ0uXdMDbTvtDsftT3BNBiorYMScyArew');
+  assert.equal(manifest.courseTracker.sheetName, 'План лекций');
   assert.ok(fs.existsSync(path.join(result.taskDir, '00-dispatch.md')));
   assert.ok(fs.existsSync(path.join(result.taskDir, '01-methodologist.md')));
+  assert.ok(fs.existsSync(path.join(result.taskDir, '10-tracker-updater.md')));
+  assert.match(fs.readFileSync(path.join(result.taskDir, '10-tracker-updater.md'), 'utf8'), /Google Sheets Tracker Update/);
   assert.ok(fs.existsSync(path.join(result.runDir, '00-input', 'topic-passport.json')));
   const progress = readData(path.join(root, 'course', 'progress.yaml'));
   assert.equal(progress.topics['REQ-STAKEHOLDERS'].status, 'in_progress');

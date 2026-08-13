@@ -1,0 +1,27 @@
+{
+  "topicId": "REQ-FNFR",
+  "runId": "manual-20260812-REQ-FNFR",
+  "status": "COMPLETED",
+  "learningOutcomes": [
+    "REQ-FNFR-LO1",
+    "REQ-FNFR-LO2",
+    "REQ-FNFR-LO3",
+    "REQ-FNFR-LO4",
+    "REQ-FNFR-LO5"
+  ],
+  "files": {
+    "lecture": "lecture.md",
+    "exercises": "exercises.md",
+    "answers": "answers.md",
+    "sources": "sources.md"
+  },
+  "projectChanges": [],
+  "reviews": {
+    "subject": "APPROVED",
+    "coverage": "APPROVED",
+    "methodology": "APPROVED",
+    "editorial": "APPROVED",
+    "assessment": "APPROVED",
+    "project": "APPROVED"
+  }
+}

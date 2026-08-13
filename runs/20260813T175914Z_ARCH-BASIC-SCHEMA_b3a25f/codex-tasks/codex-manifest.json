@@ -1,0 +1,94 @@
+{
+  "mode": "codex-app",
+  "externalApiRequired": false,
+  "runId": "20260813T175914Z_ARCH-BASIC-SCHEMA_b3a25f",
+  "topicId": "ARCH-BASIC-SCHEMA",
+  "topicTitle": "Базовая схема client → frontend → backend → database",
+  "courseOrder": 24,
+  "workflowVersion": "0.3-iteration-6",
+  "createdAt": "2026-08-13T17:59:14.941Z",
+  "courseTracker": {
+    "spreadsheetUrl": "https://docs.google.com/spreadsheets/d/1She4DAsy9KIQ0uXdMDbTvtDsftT3BNBiorYMScyArew/edit",
+    "spreadsheetId": "1She4DAsy9KIQ0uXdMDbTvtDsftT3BNBiorYMScyArew",
+    "sheetName": "План лекций",
+    "topicIdColumn": "H",
+    "headerRow": 4,
+    "dataStartRow": 5,
+    "columns": {
+      "lessonTree": "A",
+      "lectureGenerated": "B",
+      "lectureEdited": "C",
+      "artifacts": "D",
+      "artifactStatus": "E",
+      "lessonStatus": "F",
+      "courseOrder": "G",
+      "topicId": "H",
+      "output": "I",
+      "runId": "J"
+    }
+  },
+  "taskCount": 10,
+  "dispatch": "codex-tasks/00-dispatch.md",
+  "tasks": [
+    {
+      "id": "01-methodologist",
+      "role": "Methodologist",
+      "taskFile": "codex-tasks/01-methodologist.md",
+      "expectedOutput": "01-brief/lesson-brief-v1.json"
+    },
+    {
+      "id": "02-scope-critic",
+      "role": "Content Critic",
+      "taskFile": "codex-tasks/02-scope-critic.md",
+      "expectedOutput": "01-brief/scope-review-v1.json"
+    },
+    {
+      "id": "03-researcher",
+      "role": "Researcher",
+      "taskFile": "codex-tasks/03-researcher.md",
+      "expectedOutput": "02-research/source-pack.md"
+    },
+    {
+      "id": "04-writer",
+      "role": "Lecture Writer",
+      "taskFile": "codex-tasks/04-writer.md",
+      "expectedOutput": "03-lecture/draft-v1.md"
+    },
+    {
+      "id": "05-review-panel",
+      "role": "Review Panel",
+      "taskFile": "codex-tasks/05-review-panel.md",
+      "expectedOutput": "03-lecture/review-v1/"
+    },
+    {
+      "id": "06-assessment",
+      "role": "Assessment Author",
+      "taskFile": "codex-tasks/06-assessment.md",
+      "expectedOutput": "04-assessment/draft-v1.json"
+    },
+    {
+      "id": "07-assessment-reviewer",
+      "role": "Assessment Reviewer",
+      "taskFile": "codex-tasks/07-assessment-reviewer.md",
+      "expectedOutput": "04-assessment/review-v1.json"
+    },
+    {
+      "id": "08-project-artifacts",
+      "role": "Project Artifact Author",
+      "taskFile": "codex-tasks/08-project-artifacts.md",
+      "expectedOutput": "05-project/proposed/"
+    },
+    {
+      "id": "09-project-reviewer",
+      "role": "Project Artifact Reviewer",
+      "taskFile": "codex-tasks/09-project-reviewer.md",
+      "expectedOutput": "05-project/reviews/project-v1.json"
+    },
+    {
+      "id": "10-tracker-updater",
+      "role": "Course Tracker Updater",
+      "taskFile": "codex-tasks/10-tracker-updater.md",
+      "expectedOutput": "99-package/tracker-update-report.md"
+    }
+  ]
+}

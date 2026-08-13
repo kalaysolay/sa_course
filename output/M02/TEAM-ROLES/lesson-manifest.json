@@ -1,0 +1,27 @@
+{
+  "topicId": "TEAM-ROLES",
+  "runId": "manual-20260812-TEAM-ROLES",
+  "status": "COMPLETED",
+  "learningOutcomes": [
+    "TEAM-ROLES-LO1",
+    "TEAM-ROLES-LO2",
+    "TEAM-ROLES-LO3",
+    "TEAM-ROLES-LO4",
+    "TEAM-ROLES-LO5"
+  ],
+  "files": {
+    "lecture": "lecture.md",
+    "exercises": "exercises.md",
+    "answers": "answers.md",
+    "sources": "sources.md"
+  },
+  "projectChanges": [],
+  "reviews": {
+    "subject": "APPROVED",
+    "coverage": "APPROVED",
+    "methodology": "APPROVED",
+    "editorial": "APPROVED",
+    "assessment": "APPROVED",
+    "project": "APPROVED"
+  }
+}

@@ -1,3 +1,13 @@
 # Agent: methodologist
 
 Structured Course Publisher v0.3 role. Output contracts are defined in docs/course-publisher-spec-v0.3.md.
+
+## Briefing Requirements
+
+Design the lesson brief so the writer can produce a real lecture, not a structured outline.
+
+- Recommended structure should describe a narrative path: familiar situation, learner problem, explanation, Compliance example, practical takeaway.
+- Do not ask the writer to cover the topic primarily through comparison tables or long checklists.
+- Put dense checklists, classification lists, and drill-style comparisons into assessment or project practice unless they are essential in the lecture.
+- Include editorial requirements that paragraphs and a continuing scenario are the default form.
+- For architecture and technical foundation topics, explicitly request explanation through the Compliance project before introducing abstractions.

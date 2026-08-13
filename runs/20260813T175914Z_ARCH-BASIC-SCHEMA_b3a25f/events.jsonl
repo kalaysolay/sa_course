@@ -1,0 +1,6 @@
+{"ts":"2026-08-13T17:59:14.924Z","event":"RUN_CREATED","topicId":"ARCH-BASIC-SCHEMA"}
+{"ts":"2026-08-13T17:59:14.931Z","event":"STATE_CHANGED","status":"TOPIC_RESOLVED"}
+{"ts":"2026-08-13T17:59:14.935Z","event":"STATE_CHANGED","status":"PROGRESS_CHECKED"}
+{"ts":"2026-08-13T17:59:14.940Z","event":"STATE_CHANGED","status":"CONTEXT_READY"}
+{"ts":"2026-08-13T17:59:14.950Z","event":"CODEX_TASKS_CREATED","taskDir":"codex-tasks","taskCount":10}
+{"ts":"2026-08-13T17:59:14.951Z","event":"STATE_CHANGED","status":"CODEX_TASKS_READY"}

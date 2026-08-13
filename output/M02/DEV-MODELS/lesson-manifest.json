@@ -1,0 +1,27 @@
+{
+  "topicId": "DEV-MODELS",
+  "runId": "manual-20260812-DEV-MODELS",
+  "status": "COMPLETED",
+  "learningOutcomes": [
+    "DEV-MODELS-LO1",
+    "DEV-MODELS-LO2",
+    "DEV-MODELS-LO3",
+    "DEV-MODELS-LO4",
+    "DEV-MODELS-LO5"
+  ],
+  "files": {
+    "lecture": "lecture.md",
+    "exercises": "exercises.md",
+    "answers": "answers.md",
+    "sources": "sources.md"
+  },
+  "projectChanges": [],
+  "reviews": {
+    "subject": "APPROVED",
+    "coverage": "APPROVED",
+    "methodology": "APPROVED",
+    "editorial": "APPROVED",
+    "assessment": "APPROVED",
+    "project": "APPROVED"
+  }
+}

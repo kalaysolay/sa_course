@@ -1,0 +1,29 @@
+{
+  "topicId": "ARCH-IS-TYPES",
+  "runId": "20260813T175901Z_ARCH-IS-TYPES_18cc60",
+  "status": "COMPLETED",
+  "learningOutcomes": [
+    "ARCH-IS-TYPES-LO1",
+    "ARCH-IS-TYPES-LO2",
+    "ARCH-IS-TYPES-LO3",
+    "ARCH-IS-TYPES-LO4"
+  ],
+  "files": {
+    "lecture": "lecture.md",
+    "exercises": "exercises.md",
+    "answers": "answers.md",
+    "sources": "sources.md"
+  },
+  "projectChanges": [],
+  "projectTasks": [
+    "project/task.md"
+  ],
+  "reviews": {
+    "subject": "APPROVED",
+    "coverage": "APPROVED",
+    "methodology": "APPROVED",
+    "editorial": "APPROVED",
+    "assessment": "APPROVED",
+    "project": "APPROVED"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "topicId": "ARCH-BASIC-SCHEMA",
+  "runId": "20260813T175914Z_ARCH-BASIC-SCHEMA_b3a25f",
+  "status": "COMPLETED",
+  "learningOutcomes": [
+    "ARCH-BASIC-SCHEMA-LO1",
+    "ARCH-BASIC-SCHEMA-LO2",
+    "ARCH-BASIC-SCHEMA-LO3",
+    "ARCH-BASIC-SCHEMA-LO4"
+  ],
+  "files": {
+    "lecture": "lecture.md",
+    "exercises": "exercises.md",
+    "answers": "answers.md",
+    "sources": "sources.md"
+  },
+  "projectChanges": [],
+  "projectTasks": [
+    "project/task.md"
+  ],
+  "reviews": {
+    "subject": "APPROVED",
+    "coverage": "APPROVED",
+    "methodology": "APPROVED",
+    "editorial": "APPROVED",
+    "assessment": "APPROVED",
+    "project": "APPROVED"
+  }
+}

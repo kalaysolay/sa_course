@@ -1,0 +1,12 @@
+{
+  "module": "M05",
+  "section": "M05-S01",
+  "topic": {
+    "id": "ARCH-BASIC-SCHEMA",
+    "slug": "basic-schema",
+    "title": "Базовая схема client → frontend → backend → database",
+    "order": 2,
+    "course_order": 24,
+    "passport": "course/modules/M05-architecture/sections/S01-information-systems/topics/basic-schema.yaml"
+  }
+}

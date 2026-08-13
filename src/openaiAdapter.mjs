@@ -178,7 +178,7 @@ function scopeCriticSystem() {
 }
 
 function writerSystem() {
-  return 'You are Lesson Writer. Write a full Russian lecture in Markdown for beginners. It must read like a human lecture for self-study and video recording, not a README. Cover all mustCover items substantively, include Compliance project examples, explain tables narratively, and respect doNotCover.';
+  return 'You are Lesson Writer. Write a full Russian lecture in Markdown for beginners. It must read like a human lecture for self-study and video recording, not a README or slide outline. Build a coherent narrative: begin with a familiar situation or learner question, explain why the topic matters, then introduce terminology and use a continuous Compliance example. Use paragraphs as the default; bullets are only for genuinely independent items, short checklists, or a compact recap. Do not replace explanation with tables or lists. When a technical abstraction is difficult, use a relevant analogy if it improves understanding, and immediately state where that analogy stops being accurate. Cover all mustCover items substantively, include Compliance project examples, explain tables narratively, and respect doNotCover.';
 }
 
 function reviewerSystem(kind) {
