@@ -189,6 +189,7 @@ function stageMarkdown(stage, ctx, courseTracker) {
   const artifactLines = projectArtifacts.length ? projectArtifacts.map(item => `- ${item}`) : ['- inspect lesson brief/project state'];
   const writerEditorialLines = stage.id === '04-writer'
     ? [
+        `- The first line of the lecture is mandatory and must be exactly: \`# Лекция ${ctx.topic.course_order}. ${ctx.topic.title}\`. Do not replace it with an editorial or marketing-style title.`,
         '- Write a coherent lecture, not a README or slide outline: paragraphs and one continuing scenario are the default.',
         '- Use bullets only for independent items, compact checklists, or the final recap; never replace explanation with a table or list.',
         '- When a technical abstraction is difficult, use a relevant analogy if it helps; state where that analogy stops being accurate.',

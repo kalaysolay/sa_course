@@ -1,4 +1,4 @@
-# Лекция 24. Базовая схема client -> frontend -> backend -> database
+# Лекция 24. Базовая схема client → frontend → backend → database
 
 ## Зачем аналитику эта схема
 

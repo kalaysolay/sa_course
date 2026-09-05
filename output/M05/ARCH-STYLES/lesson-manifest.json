@@ -1,0 +1,23 @@
+{
+  "topicId": "ARCH-STYLES",
+  "runId": "20260813T190941Z_ARCH-STYLES_cacf15",
+  "status": "COMPLETED",
+  "learningOutcomes": ["ARCH-STYLES-LO1", "ARCH-STYLES-LO2", "ARCH-STYLES-LO3", "ARCH-STYLES-LO4"],
+  "files": {
+    "lecture": "lecture.md",
+    "exercises": "exercises.md",
+    "answers": "answers.md",
+    "sources": "sources.md"
+  },
+  "projectChanges": [],
+  "projectTasks": ["project/task.md"],
+  "reviews": {
+    "subject": "APPROVED",
+    "coverage": "APPROVED",
+    "methodology": "APPROVED",
+    "editorial": "APPROVED",
+    "assessment": "APPROVED",
+    "project": "APPROVED"
+  },
+  "sourceCaveat": "Author materials directory is empty; external research was not allowed by the topic passport."
+}

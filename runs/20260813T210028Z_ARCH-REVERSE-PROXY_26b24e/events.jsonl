@@ -1,0 +1,6 @@
+{"ts":"2026-08-13T21:00:28.742Z","event":"RUN_CREATED","topicId":"ARCH-REVERSE-PROXY"}
+{"ts":"2026-08-13T21:00:28.749Z","event":"STATE_CHANGED","status":"TOPIC_RESOLVED"}
+{"ts":"2026-08-13T21:00:28.755Z","event":"STATE_CHANGED","status":"PROGRESS_CHECKED"}
+{"ts":"2026-08-13T21:00:28.759Z","event":"STATE_CHANGED","status":"CONTEXT_READY"}
+{"ts":"2026-08-13T21:00:28.771Z","event":"CODEX_TASKS_CREATED","taskDir":"codex-tasks","taskCount":10}
+{"ts":"2026-08-13T21:00:28.772Z","event":"STATE_CHANGED","status":"CODEX_TASKS_READY"}

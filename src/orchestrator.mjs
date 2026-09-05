@@ -6,7 +6,7 @@ import { flattenTopics, loadCurriculum, passportPath, resolveTopic } from './cur
 import { blockingGapsForTopic, loadGaps, registerGap } from './gaps.mjs';
 import { loadProgress, recomputeProgress, saveProgress, setTopicStatus } from './progress.mjs';
 import { resolveTopicSources } from './sources.mjs';
-import { validateBySchemaName } from './validation.mjs';
+import { expectedLectureHeading, validateBySchemaName, validateLectureHeading } from './validation.mjs';
 import { FakeAgentAdapter } from './fakeAgents.mjs';
 import { buildCodexTaskPackets, codexTaskDir } from './codexTaskPackets.mjs';
 
@@ -305,7 +305,7 @@ export class Orchestrator {
     let lecture = '';
     while (!lectureApproved && revision <= 3) {
       run.revision.lecture = revision;
-      lecture = this.agent.writeLecture({ brief, revision, fixture: options.fixture });
+      lecture = this.agent.writeLecture({ brief, topic, revision, fixture: options.fixture });
       const draftName = `draft-v${revision}.md`;
       writeText(path.join(runDir, '03-lecture', draftName), lecture);
       this.setStatus(runDir, run, 'LECTURE_DRAFTED');
@@ -313,7 +313,8 @@ export class Orchestrator {
         subject: this.agent.subjectReview({ brief, lecture }),
         coverage: this.agent.coverageReview({ brief, lecture }),
         methodology: this.agent.methodologyReview({ brief, lecture }),
-        editorial: this.agent.editorialReview({ brief, lecture })
+        editorial: this.agent.editorialReview({ brief, lecture }),
+        format: this.lectureFormatReview(topic, lecture)
       };
       const reviewDir = path.join(runDir, '03-lecture', `review-v${revision}`);
       ensureDir(reviewDir);
@@ -332,7 +333,7 @@ export class Orchestrator {
       return { runId: run.runId, status: run.status, runDir };
     }
     writeText(path.join(runDir, '03-lecture', 'final.md'), lecture);
-    this.assertDeterministicQuality(brief, lecture);
+    this.assertDeterministicQuality(topic, brief, lecture);
     this.setStatus(runDir, run, 'LECTURE_APPROVED');
     if (maybeStop('LECTURE_APPROVED')) return { runId: run.runId, status: run.status, runDir };
 
@@ -369,6 +370,13 @@ export class Orchestrator {
     const change = this.agent.projectChange({ brief });
     writeData(path.join(runDir, '05-project', 'project-change.json'), change);
     validateBySchemaName(this.root, 'project-change.schema.json', change);
+    const projectTaskPath = path.join(runDir, '05-project', 'task.md');
+    writeText(
+      projectTaskPath,
+      change.changes.length
+        ? `# Project Task\n\nPrepare the proposed analyst artifact changes for this lesson.\n`
+        : '# Project Task\n\nNo analyst artifact change is required for this lesson. Use the lesson-package exercise only; do not change the canonical project documentation.\n'
+    );
     let projectApproved = false;
     let projectReview = null;
     let projectRevision = 1;
@@ -383,7 +391,7 @@ export class Orchestrator {
         else writeText(beforePath, '');
         const proposed = this.agent.projectArtifact({ brief, change: item, revision: projectRevision, fixture: options.fixture });
         proposedArtifacts[item.artifact] = proposed;
-        writeText(path.join(runDir, '05-project', 'task.md'), `# Project Task\n\nCreate proposed artifact: ${item.artifact}\n`);
+        writeText(projectTaskPath, `# Project Task\n\nCreate proposed artifact: ${item.artifact}\n`);
         writeText(path.join(runDir, '05-project', 'proposed', item.artifact), proposed);
         writeText(path.join(runDir, '05-project', 'diff', item.artifact.replace(/[\\/]/g, '__') + `.v${projectRevision}.diff`), proposed.split('\n').map(line => `+${line}`).join('\n'));
       }
@@ -464,8 +472,32 @@ export class Orchestrator {
     return lines.join('\n');
   }
 
-  assertDeterministicQuality(brief, lecture) {
+  lectureFormatReview(topic, lecture) {
+    try {
+      validateLectureHeading(lecture, topic);
+      return { reviewer: 'format', artifact: '03-lecture/draft.md', verdict: 'APPROVED', summary: 'Заголовок лекции соответствует номеру и названию из curriculum.', positiveNotes: [], issues: [] };
+    } catch (error) {
+      return {
+        reviewer: 'format',
+        artifact: '03-lecture/draft.md',
+        verdict: 'REJECTED',
+        summary: 'Заголовок лекции не соответствует обязательному формату.',
+        positiveNotes: [],
+        issues: [{
+          id: 'FMT-LECTURE-HEADING',
+          severity: 'major',
+          category: 'lecture_heading',
+          location: 'line 1',
+          problem: error.message,
+          requiredChange: `Сделать первой строкой: ${expectedLectureHeading(topic)}`
+        }]
+      };
+    }
+  }
+
+  assertDeterministicQuality(topic, brief, lecture) {
     if (!lecture.trim()) throw new Error('QUALITY_GATE_EMPTY_LECTURE');
+    validateLectureHeading(lecture, topic);
     if (lecture.length < 1000) throw new Error('QUALITY_GATE_LECTURE_TOO_SHORT');
     for (const item of brief.mustCover || []) {
       if (!lecture.toLowerCase().includes(item.toLowerCase())) throw new Error(`QUALITY_GATE_MUST_COVER_MISSING: ${item}`);

@@ -2,10 +2,14 @@ const state = {
   mode: location.protocol === 'file:' ? 'files' : 'server',
   root: '',
   lectures: [],
-  selectedId: null,
+  selectedLectureId: null,
+  selectedDocumentId: null,
   files: new Map(),
   assetUrls: new Map()
 };
+
+let diagramSequence = 0;
+let mermaidReady = false;
 
 const elements = {
   rootForm: document.querySelector('#rootForm'),
@@ -81,6 +85,18 @@ function joinPath(...parts) {
   return output.join('/');
 }
 
+function lectureOrder(title) {
+  const match = title.match(/(?:лекция|lecture)\s*(\d+(?:[.,]\d+)?)/i);
+  return match ? Number(match[1].replace(',', '.')) : null;
+}
+
+function compareLectures(a, b) {
+  if (a.order !== null && b.order !== null && a.order !== b.order) return a.order - b.order;
+  if (a.order !== null) return -1;
+  if (b.order !== null) return 1;
+  return a.path.localeCompare(b.path, 'ru', { numeric: true });
+}
+
 function localAssetUrl(baseId, href) {
   if (/^[a-z][a-z0-9+.-]*:/i.test(href) || href.startsWith('/')) return href;
   const assetPath = joinPath(dirname(baseId), href);
@@ -133,6 +149,28 @@ function parseTable(lines, start, baseId) {
   };
 }
 
+function diagramBlock(language, source) {
+  const type = /^(puml|plantuml)$/i.test(language) ? 'plantuml' : 'mermaid';
+  return `
+    <section class="diagram-block" data-diagram-type="${type}" data-diagram-source="${escapeHtml(encodeURIComponent(source))}">
+      <div class="diagram-toolbar" role="group" aria-label="Режим отображения диаграммы">
+        <span class="diagram-kind">${type === 'plantuml' ? 'PlantUML' : 'Mermaid'}</span>
+        <div class="diagram-switch">
+          <button type="button" data-diagram-view="preview" aria-pressed="true">Превью</button>
+          <button type="button" data-diagram-view="code" aria-pressed="false">Код</button>
+        </div>
+      </div>
+      <div class="diagram-preview" aria-live="polite"><span class="diagram-loading">Рендеринг...</span></div>
+      <pre class="diagram-code" hidden><code class="language-${escapeHtml(language)}">${escapeHtml(source)}</code></pre>
+    </section>`;
+}
+
+function isDiagramLanguage(language, source) {
+  return /^(mermaid|flowchart|puml|plantuml)$/i.test(language)
+    || /^(?:flowchart|graph)\s+(?:TB|TD|BT|RL|LR)\b/i.test(source.trim())
+    || /^@start(?:uml|mindmap|wbs|gantt|json|yaml)\b/i.test(source.trim());
+}
+
 function renderMarkdown(markdown, baseId) {
   const lines = markdown.replace(/\r\n/g, '\n').split('\n');
   const html = [];
@@ -156,7 +194,10 @@ function renderMarkdown(markdown, baseId) {
         index += 1;
       }
       index += 1;
-      html.push(`<pre><code class="language-${escapeHtml(language)}">${escapeHtml(code.join('\n'))}</code></pre>`);
+      const source = code.join('\n');
+      html.push(isDiagramLanguage(language, source)
+        ? diagramBlock(language, source)
+        : `<pre><code class="language-${escapeHtml(language)}">${escapeHtml(source)}</code></pre>`);
       continue;
     }
 
@@ -230,6 +271,72 @@ function renderMarkdown(markdown, baseId) {
   return html.join('\n');
 }
 
+async function getMermaid() {
+  const mermaid = globalThis.mermaid;
+  if (!mermaid) throw new Error('Mermaid library is unavailable.');
+  if (!mermaidReady) {
+    mermaid.initialize({
+      startOnLoad: false,
+      securityLevel: 'strict',
+      theme: 'neutral',
+      flowchart: { useMaxWidth: true, htmlLabels: true }
+    });
+    mermaidReady = true;
+  }
+  return mermaid;
+}
+
+function renderPlantUml(source) {
+  const plantUml = globalThis.PlantUMLCore;
+  if (!plantUml) return Promise.reject(new Error('PlantUML library is unavailable.'));
+  return new Promise((resolve, reject) => {
+    plantUml.renderToString(source.split(/\r?\n/), resolve, reject);
+  });
+}
+
+function setDiagramView(block, view) {
+  const preview = block.querySelector('.diagram-preview');
+  const code = block.querySelector('.diagram-code');
+  const showPreview = view === 'preview';
+  preview.hidden = !showPreview;
+  code.hidden = showPreview;
+  for (const button of block.querySelectorAll('[data-diagram-view]')) {
+    button.setAttribute('aria-pressed', String(button.dataset.diagramView === view));
+  }
+}
+
+async function renderDiagram(block) {
+  const source = decodeURIComponent(block.dataset.diagramSource);
+  const preview = block.querySelector('.diagram-preview');
+
+  try {
+    if (block.dataset.diagramType === 'plantuml') {
+      preview.innerHTML = await renderPlantUml(source);
+      return;
+    }
+
+    const mermaid = await getMermaid();
+    diagramSequence += 1;
+    const { svg } = await mermaid.render(`course-diagram-${diagramSequence}`, source);
+    preview.innerHTML = svg;
+  } catch {
+    preview.innerHTML = '<p class="diagram-error">Не удалось построить превью. Проверьте синтаксис или откройте код диаграммы.</p>';
+  }
+}
+
+async function activateDiagrams() {
+  const blocks = Array.from(elements.markdownContent.querySelectorAll('.diagram-block'));
+  for (const block of blocks) {
+    block.addEventListener('click', (event) => {
+      const button = event.target.closest('[data-diagram-view]');
+      if (button) setDiagramView(block, button.dataset.diagramView);
+    });
+  }
+  for (const block of blocks) {
+    await renderDiagram(block);
+  }
+}
+
 function renderList() {
   elements.lectureList.innerHTML = '';
   elements.lectureCount.textContent = pluralizeLecture(state.lectures.length);
@@ -247,7 +354,7 @@ function renderList() {
     button.type = 'button';
     button.className = 'lecture-link';
     button.dataset.id = lecture.id;
-    button.setAttribute('aria-current', lecture.id === state.selectedId ? 'page' : 'false');
+    button.setAttribute('aria-current', lecture.id === state.selectedLectureId ? 'page' : 'false');
     button.innerHTML = `
       <span class="lecture-link-title">${escapeHtml(lecture.title)}</span>
       <span class="lecture-link-path">${escapeHtml(lecture.folder)}</span>
@@ -259,15 +366,19 @@ function renderList() {
 
 function renderMaterials(lecture) {
   elements.materialLinks.innerHTML = '';
-  if (!lecture.materials?.length) return;
+  const documents = [
+    { id: lecture.id, name: 'Лекция', path: lecture.path },
+    ...(lecture.materials || [])
+  ];
 
-  for (const material of lecture.materials) {
+  for (const material of documents) {
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'material-button';
     button.textContent = material.name;
     button.title = material.path;
-    button.addEventListener('click', () => openLecture(material.id));
+    button.setAttribute('aria-pressed', String(material.id === state.selectedDocumentId));
+    button.addEventListener('click', () => openDocument(material.id, lecture.id));
     elements.materialLinks.append(button);
   }
 }
@@ -293,27 +404,34 @@ async function loadLectures() {
   renderList();
   setStatus('Готово');
 
-  if (!state.selectedId && state.lectures[0]) {
+  if (!state.selectedLectureId && state.lectures[0]) {
     await openLecture(state.lectures[0].id);
   }
 }
 
 async function openLecture(id) {
-  state.selectedId = id;
+  state.selectedLectureId = id;
   renderList();
+  await openDocument(id, id);
+}
+
+async function openDocument(id, lectureId = state.selectedLectureId) {
+  state.selectedDocumentId = id;
+  const contextLecture = state.lectures.find((item) => item.id === lectureId);
+  if (!contextLecture) throw new Error('Лекция не найдена');
+  renderMaterials(contextLecture);
   setStatus('Открытие');
 
   if (state.mode === 'files') {
-    const lecture = state.lectures.find((item) => item.id === id);
     const file = state.files.get(id);
-    if (!lecture || !file) throw new Error('Файл лекции не найден');
+    if (!file) throw new Error('Markdown-файл не найден');
 
-    lecture.content = await file.text();
-    elements.lectureTitle.textContent = lecture.title;
-    elements.lecturePath.textContent = lecture.path;
+    const content = await file.text();
+    elements.lectureTitle.textContent = contextLecture.title;
+    elements.lecturePath.textContent = id;
     elements.markdownContent.classList.remove('empty-state');
-    elements.markdownContent.innerHTML = renderMarkdown(lecture.content, lecture.id);
-    renderMaterials(lecture);
+    elements.markdownContent.innerHTML = renderMarkdown(content, id);
+    await activateDiagrams();
     setStatus('Готово');
     return;
   }
@@ -324,12 +442,12 @@ async function openLecture(id) {
     throw new Error(data.error || 'Не удалось открыть лекцию');
   }
 
-  const lecture = await response.json();
-  elements.lectureTitle.textContent = lecture.title;
-  elements.lecturePath.textContent = lecture.path;
+  const document = await response.json();
+  elements.lectureTitle.textContent = contextLecture.title;
+  elements.lecturePath.textContent = document.path;
   elements.markdownContent.classList.remove('empty-state');
-  elements.markdownContent.innerHTML = renderMarkdown(lecture.content, lecture.id);
-  renderMaterials(lecture);
+  elements.markdownContent.innerHTML = renderMarkdown(document.content, document.id);
+  await activateDiagrams();
   setStatus('Готово');
 }
 
@@ -354,7 +472,8 @@ elements.rootForm.addEventListener('submit', async (event) => {
     });
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || 'Не удалось открыть папку');
-    state.selectedId = null;
+    state.selectedLectureId = null;
+    state.selectedDocumentId = null;
     state.root = data.root;
     state.lectures = data.lectures;
     elements.rootInput.value = data.root;
@@ -415,13 +534,15 @@ async function scanSelectedFiles() {
   for (const file of primaryFiles) {
     const filePath = relativeFilePath(file);
     const folder = dirname(filePath) || '.';
+    const title = (await firstHeadingFromFile(file)) ?? (basename(folder) || basename(filePath).replace(/\.md$/i, ''));
     const materials = allMarkdownPaths
       .filter((path) => dirname(path) === folder && path !== filePath)
       .map((path) => ({ id: path, name: basename(path), path }));
 
     lectures.push({
       id: filePath,
-      title: (await firstHeadingFromFile(file)) ?? (basename(folder) || basename(filePath).replace(/\.md$/i, '')),
+      title,
+      order: lectureOrder(title),
       path: filePath,
       folder,
       materialCount: materials.length,
@@ -429,7 +550,10 @@ async function scanSelectedFiles() {
     });
   }
 
-  state.selectedId = null;
+  lectures.sort(compareLectures);
+
+  state.selectedLectureId = null;
+  state.selectedDocumentId = null;
   state.root = files[0]?.webkitRelativePath?.split('/')[0] || 'selected folder';
   state.lectures = lectures;
   elements.rootInput.value = state.root;

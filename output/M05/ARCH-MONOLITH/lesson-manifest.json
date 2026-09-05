@@ -1,0 +1,12 @@
+{
+  "topicId": "ARCH-MONOLITH",
+  "runId": "20260813T192100Z_ARCH-MONOLITH_949023",
+  "status": "COMPLETED",
+  "learningOutcomes": ["ARCH-MONOLITH-LO1", "ARCH-MONOLITH-LO2", "ARCH-MONOLITH-LO3", "ARCH-MONOLITH-LO4"],
+  "files": { "lecture": "lecture.md", "exercises": "exercises.md", "answers": "answers.md", "sources": "sources.md" },
+  "projectChanges": [],
+  "projectTasks": ["project/task.md"],
+  "reviews": { "subject": "APPROVED", "coverage": "APPROVED", "methodology": "APPROVED", "editorial": "APPROVED", "assessment": "APPROVED", "project": "APPROVED" },
+  "sourceCaveat": "Author materials directory is empty; external research was not allowed by the topic passport.",
+  "trackerStatus": "updated"
+}

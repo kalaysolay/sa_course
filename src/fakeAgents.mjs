@@ -91,12 +91,12 @@ export class FakeAgentAdapter {
     ].join('\n');
   }
 
-  writeLecture({ brief, revision = 1, fixture }) {
-    if (brief.topicId === 'REQ-STAKEHOLDERS') return stakeholderLecture({ brief, revision, fixture });
+  writeLecture({ brief, topic, revision = 1, fixture }) {
+    if (brief.topicId === 'REQ-STAKEHOLDERS') return stakeholderLecture({ brief, topic, revision, fixture });
     const omitLast = fixture === 'incomplete-lecture' && revision === 1;
     const mustCover = omitLast ? brief.mustCover.slice(0, -1) : brief.mustCover;
     return [
-      `# ${brief.title}`,
+      `# Лекция ${topic.course_order}. ${brief.title}`,
       '',
       '## Зачем аналитику эта тема',
       '',

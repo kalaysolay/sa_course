@@ -118,6 +118,8 @@ async function buildEntry(filePath, allMarkdown) {
     ?? await readManifestTitle(dir)
     ?? path.basename(dir)
     ?? path.basename(filePath, '.md');
+  const orderMatch = title.match(/(?:лекция|lecture)\s*(\d+(?:[.,]\d+)?)/i);
+  const order = orderMatch ? Number(orderMatch[1].replace(',', '.')) : null;
 
   const siblingFiles = allMarkdown
     .filter((file) => path.dirname(file) === dir && file !== filePath)
@@ -130,6 +132,7 @@ async function buildEntry(filePath, allMarkdown) {
   return {
     id: encodeId(relativeFile),
     title,
+    order,
     path: relativeFile,
     folder: relativeDir,
     materialCount: siblingFiles.length,
@@ -147,7 +150,12 @@ async function scanLectures() {
     lectures.push(await buildEntry(file, allMarkdown));
   }
 
-  lectures.sort((a, b) => collator.compare(a.path, b.path));
+  lectures.sort((a, b) => {
+    if (a.order !== null && b.order !== null && a.order !== b.order) return a.order - b.order;
+    if (a.order !== null) return -1;
+    if (b.order !== null) return 1;
+    return collator.compare(a.path, b.path);
+  });
   cachedScan = { root: currentRoot, count: lectures.length, lectures };
   return cachedScan;
 }

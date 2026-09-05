@@ -1,0 +1,23 @@
+{
+  "topicId": "ARCH-REVERSE-PROXY",
+  "runId": "20260813T210028Z_ARCH-REVERSE-PROXY_26b24e",
+  "status": "COMPLETED",
+  "learningOutcomes": ["ARCH-REVERSE-PROXY-LO1", "ARCH-REVERSE-PROXY-LO2", "ARCH-REVERSE-PROXY-LO3", "ARCH-REVERSE-PROXY-LO4"],
+  "files": {
+    "lecture": "lecture.md",
+    "exercises": "exercises.md",
+    "answers": "answers.md",
+    "sources": "sources.md"
+  },
+  "projectChanges": [],
+  "projectTasks": ["project/task.md"],
+  "reviews": {
+    "subject": "APPROVED",
+    "coverage": "APPROVED",
+    "methodology": "APPROVED",
+    "editorial": "APPROVED",
+    "assessment": "APPROVED",
+    "project": "APPROVED"
+  },
+  "sourceCaveat": "Author materials directory is empty; external research was not allowed by the topic passport."
+}

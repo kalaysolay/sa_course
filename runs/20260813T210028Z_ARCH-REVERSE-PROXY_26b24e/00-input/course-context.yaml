@@ -1,0 +1,12 @@
+{
+  "module": "M05",
+  "section": "M05-S03",
+  "topic": {
+    "id": "ARCH-REVERSE-PROXY",
+    "slug": "reverse-proxy",
+    "title": "Reverse proxy и балансировка — обзор",
+    "order": 1,
+    "course_order": 28,
+    "passport": "course/modules/M05-architecture/sections/S03-infrastructure/topics/reverse-proxy.yaml"
+  }
+}

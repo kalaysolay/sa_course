@@ -1,0 +1,12 @@
+{
+  "module": "M05",
+  "section": "M05-S02",
+  "topic": {
+    "id": "ARCH-MICROSERVICES",
+    "slug": "microservices",
+    "title": "Микросервисы",
+    "order": 3,
+    "course_order": 27,
+    "passport": "course/modules/M05-architecture/sections/S02-architectural-styles/topics/microservices.yaml"
+  }
+}

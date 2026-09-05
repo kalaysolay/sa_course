@@ -1,0 +1,26 @@
+{
+  "project_id": "compliance",
+  "current_stage": "system_analysis_modeling",
+  "completed_artifacts": [
+    "business-analysis/analyst-first-day-notes.md",
+    "business-analysis/stakeholders.md",
+    "business-analysis/elicitation-plan.md",
+    "business-analysis/interview-notes.md",
+    "requirements/requirements-register.md",
+    "requirements/open-questions.md",
+    "specification/technical-assignment.md",
+    "system-analysis/use-case-model.md",
+    "system-analysis/activity-diagrams.md",
+    "system-analysis/state-model.md",
+    "system-analysis/sequence-diagrams.md"
+  ],
+  "planned_artifacts": [
+    "business-analysis/system-context.md",
+    "business-analysis/processes.md",
+    "requirements/requests.md",
+    "requirements/gifts.md",
+    "requirements/declarations.md",
+    "requirements/dashboards.md",
+    "requirements/traceability-matrix.md"
+  ]
+}

@@ -28,14 +28,28 @@
     "expected_artifacts": []
   },
   "author_notes": [
-    "Seed passport. Требует авторского уточнения перед production-quality выпуском."
+    "Использовать официальную документацию PostgreSQL как фактическую основу продуктовой терминологии.",
+    "Не превращать урок в администрирование PostgreSQL и не заходить в команды psql, SQL/DDL или физическое хранение."
   ],
   "sources": {
-    "primary": [],
+    "primary": [
+      "SRC-POSTGRESQL-ARCHITECTURE",
+      "SRC-POSTGRESQL-CLUSTER",
+      "SRC-POSTGRESQL-SCHEMAS",
+      "SRC-POSTGRESQL-PSQL",
+      "SRC-POSTGRESQL-CATALOGS"
+    ],
     "secondary": [
       "SRC-AUTHOR-MATERIALS"
     ],
     "examples": [],
-    "allow_external_research": false
+    "allow_external_research": true
+  },
+  "source_policy": {
+    "on_missing_primary": "block_and_register_major_gap",
+    "external_domains": [
+      "postgresql.org"
+    ],
+    "prefer_official_documentation": true
   }
 }

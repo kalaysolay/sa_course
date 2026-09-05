@@ -21,7 +21,9 @@ export function parseArgs(argv) {
 
 export function runCli(argv, root = process.cwd()) {
   const { command, positional, options } = parseArgs(argv);
-  const codexMode = options.adapter === 'codex';
+  const publishCommands = new Set(['/publish-next', '/continue-course', '/publish-topic', '/publish-lesson']);
+  const publishIntent = publishCommands.has(command) || /продолжай курс|следующ|лекци[яю]\s*№?\s*\d+/i.test([command || '', ...positional].join(' '));
+  const codexMode = options.adapter === 'codex' || (!options.adapter && publishIntent);
   const adapter = options.adapter === 'openai'
     ? new OpenAIAdapter({
         model: options.model,

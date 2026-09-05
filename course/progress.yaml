@@ -1,22 +1,22 @@
 {
   "course_id": "system-analysis",
-  "updated_at": "2026-08-14T00:00:00.000Z",
+  "updated_at": "2026-09-05T17:40:35.425Z",
   "summary": {
     "total_topics": 98,
-    "completed": 26,
+    "completed": 45,
     "in_progress": 0,
     "blocked": 0,
     "needs_revision": 0,
-    "planned": 72
+    "planned": 53
   },
   "last_completed": {
-    "topic_id": "ARCH-MONOLITH",
-    "course_order": 26,
-    "run_id": "20260813T192100Z_ARCH-MONOLITH_949023"
+    "topic_id": "DB-STRUCTURE",
+    "course_order": 45,
+    "run_id": "20260905T123031Z_DB-STRUCTURE_4efcfa"
   },
   "next_candidate": {
-    "topic_id": "ARCH-MICROSERVICES",
-    "course_order": 27
+    "topic_id": "DB-PSQL",
+    "course_order": 46
   },
   "topics": {
     "PROF-ANALYST-TYPES": {
@@ -234,134 +234,153 @@
       "course_order": 27,
       "module_id": "M05",
       "title": "Микросервисы",
-      "status": "planned",
-      "output": null
+      "status": "completed",
+      "output": "output/M05/ARCH-MICROSERVICES/",
+      "run_id": "20260813T210022Z_ARCH-MICROSERVICES_2c7b79"
     },
     "ARCH-REVERSE-PROXY": {
       "course_order": 28,
       "module_id": "M05",
       "title": "Reverse proxy и балансировка — обзор",
-      "status": "planned",
-      "output": null
+      "status": "completed",
+      "output": "output/M05/ARCH-REVERSE-PROXY/",
+      "run_id": "20260813T210028Z_ARCH-REVERSE-PROXY_26b24e"
     },
     "ARCH-API-GATEWAY": {
       "course_order": 29,
       "module_id": "M05",
       "title": "API Gateway — обзор",
-      "status": "planned",
-      "output": null
+      "status": "completed",
+      "output": "output/M05/ARCH-API-GATEWAY/",
+      "run_id": "20260813T214327Z_ARCH-API-GATEWAY_acf23e"
     },
     "ARCH-CACHE": {
       "course_order": 30,
       "module_id": "M05",
       "title": "Кэш — обзор",
-      "status": "planned",
-      "output": null
+      "status": "completed",
+      "output": "output/M05/ARCH-CACHE/",
+      "run_id": "20260813T215354Z_ARCH-CACHE_e4bbf9"
     },
     "ARCH-STORAGE": {
       "course_order": 31,
       "module_id": "M05",
       "title": "Файловое/объектное хранилище — обзор",
-      "status": "planned",
-      "output": null
+      "status": "completed",
+      "output": "output/M05/ARCH-STORAGE/",
+      "run_id": "20260814T084637Z_ARCH-STORAGE_337e62"
     },
     "ARCH-SYNC": {
       "course_order": 32,
       "module_id": "M05",
       "title": "Синхронное взаимодействие",
-      "status": "planned",
-      "output": null
+      "status": "completed",
+      "output": "output/M05/ARCH-SYNC/",
+      "run_id": "20260814T084645Z_ARCH-SYNC_42883a"
     },
     "ARCH-ASYNC": {
       "course_order": 33,
       "module_id": "M05",
       "title": "Асинхронное взаимодействие",
-      "status": "planned",
-      "output": null
+      "status": "completed",
+      "output": "output/M05/ARCH-ASYNC/",
+      "run_id": "20260814T192557Z_ARCH-ASYNC_6923d8"
     },
     "SEC-AUTHENTICATION": {
       "course_order": 34,
       "module_id": "M05",
       "title": "Аутентификация",
-      "status": "planned",
-      "output": null
+      "status": "completed",
+      "output": "output/M06/INT-REST/",
+      "run_id": "20260814T205625Z_SEC-AUTHENTICATION_9009e6"
     },
     "SEC-AUTHORIZATION": {
       "course_order": 35,
       "module_id": "M05",
       "title": "Авторизация",
-      "status": "planned",
-      "output": null
+      "status": "completed",
+      "output": "output/M06/INT-REST/",
+      "run_id": "20260814T205625Z_SEC-AUTHORIZATION_9d87a1"
     },
     "INT-BASICS": {
       "course_order": 36,
       "module_id": "M06",
       "title": "Способы интеграции систем",
-      "status": "planned",
-      "output": null
+      "status": "completed",
+      "output": "output/M06/INT-BASICS/",
+      "run_id": "20260814T212909Z_INT-BASICS_4d7bc1"
     },
     "INT-REST": {
       "course_order": 37,
       "module_id": "M06",
       "title": "REST",
-      "status": "planned",
-      "output": null
+      "status": "completed",
+      "output": "output/M06/INT-REST/",
+      "run_id": "20260815T053035Z_INT-REST_075b32"
     },
     "INT-SOAP": {
       "course_order": 38,
       "module_id": "M06",
       "title": "SOAP",
-      "status": "planned",
-      "output": null
+      "status": "completed",
+      "output": "output/M06/INT-SOAP/",
+      "run_id": "20260818T051353Z_INT-SOAP_d599e9"
     },
     "INT-MQ": {
       "course_order": 39,
       "module_id": "M06",
       "title": "Очереди сообщений / Message Queue",
-      "status": "planned",
-      "output": null
+      "status": "completed",
+      "output": "output/M06/INT-MQ/",
+      "run_id": "20260824T203750Z_INT-MQ_843ade"
     },
     "INT-FILES": {
       "course_order": 40,
       "module_id": "M06",
       "title": "Интеграция через файлы",
-      "status": "planned",
-      "output": null
+      "status": "completed",
+      "output": "output/M06/INT-FILES/",
+      "run_id": "20260825T045808Z_INT-FILES_9fa644"
     },
     "INT-DATABASE": {
       "course_order": 41,
       "module_id": "M06",
       "title": "Интеграция через базы данных",
-      "status": "planned",
-      "output": null
+      "status": "completed",
+      "output": "output/M06/INT-DATABASE/",
+      "run_id": "20260826T192218Z_INT-DATABASE_378826"
     },
     "INT-API-DESIGN": {
       "course_order": 42,
       "module_id": "M06",
       "title": "Проектирование API и взаимодействия приложений",
-      "status": "planned",
-      "output": null
+      "status": "completed",
+      "output": "output/M06/INT-API-DESIGN/",
+      "run_id": "20260827T194221Z_INT-API-DESIGN_e7105b"
     },
     "DB-INTRO": {
       "course_order": 43,
       "module_id": "M07",
       "title": "Введение",
-      "status": "planned",
-      "output": null
+      "status": "completed",
+      "output": "output/M07/DB-INTRO/",
+      "run_id": "20260828T135922Z_DB-INTRO_fe7f60"
     },
     "DB-RELATIONAL": {
       "course_order": 44,
       "module_id": "M07",
       "title": "Реляционные базы данных",
-      "status": "planned",
-      "output": null
+      "status": "completed",
+      "output": "output/M07/DB-RELATIONAL/",
+      "run_id": "20260828T194520Z_DB-RELATIONAL_440c7e"
     },
     "DB-STRUCTURE": {
       "course_order": 45,
       "module_id": "M07",
       "title": "Структура баз данных",
-      "status": "planned",
-      "output": null
+      "status": "completed",
+      "output": "output/M07/DB-STRUCTURE/",
+      "run_id": "20260905T123031Z_DB-STRUCTURE_4efcfa"
     },
     "DB-PSQL": {
       "course_order": 46,

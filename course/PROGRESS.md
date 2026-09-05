@@ -1,12 +1,12 @@
 # Course Progress
 
-Готово: 24 / 98 тем.
+Готово: 45 / 98 тем.
 
 Последняя готовая тема:
-24. ARCH-BASIC-SCHEMA
+45. DB-STRUCTURE
 
 Следующая:
-27. ARCH-MICROSERVICES
+46. DB-PSQL
 
 Открытые GAP:
 - см. course/gap-registry.yaml

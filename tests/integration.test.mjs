@@ -113,6 +113,17 @@ test('REQ-STAKEHOLDERS passes NEW -> COMPLETED on fake agent outputs', () => {
   assert.ok(fs.existsSync(path.join(result.output, 'lesson-manifest.json')));
 });
 
+test('lecture heading is enforced as the curriculum number and title', () => {
+  const root = fixtureRoot();
+  const adapter = new FakeAgentAdapter();
+  adapter.writeLecture = ({ brief }) => `# ${brief.title}\n\nCompliance\n\n${brief.mustCover.join('\n')}`.padEnd(1200, 'x');
+  const result = new Orchestrator(root, adapter).publishTopic('REQ-STAKEHOLDERS');
+  assert.equal(result.status, 'NEEDS_HUMAN_REVIEW');
+  const formatReview = readData(path.join(result.runDir, '03-lecture', 'review-v3', 'format.json'));
+  assert.equal(formatReview.verdict, 'REJECTED');
+  assert.match(formatReview.issues[0].requiredChange, /# Лекция 14\. Заинтересованные лица/);
+});
+
 test('resume continues a controlled stopped run', () => {
   const root = fixtureRoot();
   const orchestrator = new Orchestrator(root);
@@ -291,6 +302,14 @@ test('Codex adapter flag on publish command prepares app tasks', () => {
   const run = readData(path.join(result.runDir, 'run.json'));
   assert.equal(run.adapter.name, 'CodexAppAdapter');
   assert.equal(run.adapter.externalApiRequired, false);
+});
+
+test('publish commands default to Codex task packets instead of fake generation', () => {
+  const root = fixtureRoot();
+  const result = runCli(['/publish-lesson', '14'], root);
+  assert.equal(result.status, 'CODEX_TASKS_READY');
+  const run = readData(path.join(result.runDir, 'run.json'));
+  assert.equal(run.adapter.name, 'CodexAppAdapter');
 });
 test('OpenAI adapter CLI flags are parsed without changing fake default', () => {
   const parsed = parseArgs(['/publish-lesson', '15', '--adapter', 'openai', '--model', 'gpt-5.6-sol', '--reasoning', 'medium', '--temperature', '0.2']);

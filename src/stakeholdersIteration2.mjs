@@ -146,7 +146,7 @@ export function stakeholderScopeIssues({ brief, passport }) {
   return issues;
 }
 
-export function stakeholderLecture({ brief, revision = 1, fixture }) {
+export function stakeholderLecture({ brief, topic, revision = 1, fixture }) {
   const omitCoverage = fixture === 'incomplete-lecture' && revision === 1;
   const registerSection = omitCoverage ? [] : [
     '## Stakeholder Register: не таблица ради таблицы',
@@ -165,7 +165,7 @@ export function stakeholderLecture({ brief, revision = 1, fixture }) {
     'После такой таблицы аналитик уже видит план следующего шага: с кем провести интервью, какие документы запросить, какие решения нужно согласовать и какие риски не закрыты.'
   ];
   const lecture = [
-    `# ${brief.title}`,
+    `# Лекция ${topic.course_order}. ${brief.title}`,
     '',
     '## Первый день аналитика в Compliance-проекте',
     '',

@@ -223,6 +223,12 @@ h2 {
   background: var(--accent-soft);
 }
 
+.material-button[aria-pressed="true"] {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #ffffff;
+}
+
 .markdown {
   color: var(--text);
   font-size: 17px;
@@ -295,6 +301,87 @@ h2 {
   background: transparent;
   color: var(--code-text);
   padding: 0;
+}
+
+.diagram-block {
+  margin: 0 0 22px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  overflow: hidden;
+}
+
+.diagram-toolbar {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid var(--line);
+  padding: 6px 8px 6px 14px;
+  background: var(--panel-muted);
+}
+
+.diagram-kind {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.diagram-switch {
+  display: inline-flex;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--panel);
+  padding: 2px;
+}
+
+.diagram-switch button {
+  min-height: 28px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--muted);
+  padding: 3px 9px;
+  cursor: pointer;
+}
+
+.diagram-switch button[aria-pressed="true"] {
+  background: var(--accent);
+  color: #ffffff;
+}
+
+.diagram-preview {
+  min-height: 180px;
+  display: grid;
+  place-items: center;
+  overflow: auto;
+  padding: 20px;
+}
+
+.diagram-preview[hidden],
+.diagram-code[hidden] {
+  display: none;
+}
+
+.diagram-preview svg,
+.diagram-preview img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border: 0;
+}
+
+.diagram-loading,
+.diagram-error {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.diagram-code {
+  margin: 0 !important;
+  border-radius: 0 !important;
 }
 
 .markdown blockquote {

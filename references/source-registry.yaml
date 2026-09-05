@@ -54,6 +54,71 @@
         "path": "compliance_project_example"
       },
       "notes": "Employee portal and compliance officer/head workspace mockups for the course project."
+    },
+    {
+      "id": "SRC-POSTGRESQL-ARCHITECTURE",
+      "type": "official_documentation",
+      "title": "PostgreSQL 18 Documentation — Architectural Fundamentals",
+      "publisher": "PostgreSQL Global Development Group",
+      "availability": "available",
+      "location": {
+        "type": "web_url",
+        "url": "https://www.postgresql.org/docs/current/tutorial-arch.html"
+      },
+      "verified_version": "PostgreSQL 18",
+      "verified_at": "2026-09-05"
+    },
+    {
+      "id": "SRC-POSTGRESQL-CLUSTER",
+      "type": "official_documentation",
+      "title": "PostgreSQL 18 Documentation — Creating a Database Cluster",
+      "publisher": "PostgreSQL Global Development Group",
+      "availability": "available",
+      "location": {
+        "type": "web_url",
+        "url": "https://www.postgresql.org/docs/current/creating-cluster.html"
+      },
+      "verified_version": "PostgreSQL 18",
+      "verified_at": "2026-09-05"
+    },
+    {
+      "id": "SRC-POSTGRESQL-SCHEMAS",
+      "type": "official_documentation",
+      "title": "PostgreSQL 18 Documentation — Schemas",
+      "publisher": "PostgreSQL Global Development Group",
+      "availability": "available",
+      "location": {
+        "type": "web_url",
+        "url": "https://www.postgresql.org/docs/current/ddl-schemas.html"
+      },
+      "verified_version": "PostgreSQL 18",
+      "verified_at": "2026-09-05"
+    },
+    {
+      "id": "SRC-POSTGRESQL-PSQL",
+      "type": "official_documentation",
+      "title": "PostgreSQL 18 Documentation — psql",
+      "publisher": "PostgreSQL Global Development Group",
+      "availability": "available",
+      "location": {
+        "type": "web_url",
+        "url": "https://www.postgresql.org/docs/current/app-psql.html"
+      },
+      "verified_version": "PostgreSQL 18",
+      "verified_at": "2026-09-05"
+    },
+    {
+      "id": "SRC-POSTGRESQL-CATALOGS",
+      "type": "official_documentation",
+      "title": "PostgreSQL 18 Documentation — System Catalogs Overview",
+      "publisher": "PostgreSQL Global Development Group",
+      "availability": "available",
+      "location": {
+        "type": "web_url",
+        "url": "https://www.postgresql.org/docs/current/catalogs-overview.html"
+      },
+      "verified_version": "PostgreSQL 18",
+      "verified_at": "2026-09-05"
     }
   ]
 }

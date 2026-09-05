@@ -12,7 +12,10 @@
     "system-analysis/use-case-model.md",
     "system-analysis/activity-diagrams.md",
     "system-analysis/state-model.md",
-    "system-analysis/sequence-diagrams.md"
+    "system-analysis/sequence-diagrams.md",
+    "system-analysis/api-contract.md",
+    "system-analysis/integration-checklist.md",
+    "data/database-requirements.md"
   ],
   "planned_artifacts": [
     "business-analysis/system-context.md",

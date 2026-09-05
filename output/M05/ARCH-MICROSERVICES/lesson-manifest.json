@@ -1,0 +1,23 @@
+{
+  "topicId": "ARCH-MICROSERVICES",
+  "runId": "20260813T210022Z_ARCH-MICROSERVICES_2c7b79",
+  "status": "COMPLETED",
+  "learningOutcomes": ["ARCH-MICROSERVICES-LO1", "ARCH-MICROSERVICES-LO2", "ARCH-MICROSERVICES-LO3", "ARCH-MICROSERVICES-LO4"],
+  "files": {
+    "lecture": "lecture.md",
+    "exercises": "exercises.md",
+    "answers": "answers.md",
+    "sources": "sources.md"
+  },
+  "projectChanges": [],
+  "projectTasks": ["project/task.md"],
+  "reviews": {
+    "subject": "APPROVED",
+    "coverage": "APPROVED",
+    "methodology": "APPROVED",
+    "editorial": "APPROVED",
+    "assessment": "APPROVED",
+    "project": "APPROVED"
+  },
+  "sourceCaveat": "Author materials directory is empty; external research was not allowed by the topic passport."
+}

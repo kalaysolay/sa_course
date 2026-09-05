@@ -11,3 +11,5 @@ Design the lesson brief so the writer can produce a real lecture, not a structur
 - Put dense checklists, classification lists, and drill-style comparisons into assessment or project practice unless they are essential in the lecture.
 - Include editorial requirements that paragraphs and a continuing scenario are the default form.
 - For architecture and technical foundation topics, explicitly request explanation through the Compliance project before introducing abstractions.
+- For architecture, integrations, API, databases, infrastructure, components, services, events, queues, routes, or deployment topics, require at least one visual model or diagram in the brief.
+- When the topic needs technical notation, require the writer to decode it for a beginner before relying on it. URL paths, endpoints, domains, service names, event names, table names, ports, and route mappings must not appear as unexplained shorthand.
