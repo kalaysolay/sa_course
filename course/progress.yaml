@@ -1,13 +1,13 @@
 {
   "course_id": "system-analysis",
-  "updated_at": "2026-09-05T17:40:35.425Z",
+  "updated_at": "2026-09-11T04:59:57.932Z",
   "summary": {
     "total_topics": 98,
     "completed": 45,
-    "in_progress": 0,
+    "in_progress": 1,
     "blocked": 0,
     "needs_revision": 0,
-    "planned": 53
+    "planned": 52
   },
   "last_completed": {
     "topic_id": "DB-STRUCTURE",
@@ -15,8 +15,8 @@
     "run_id": "20260905T123031Z_DB-STRUCTURE_4efcfa"
   },
   "next_candidate": {
-    "topic_id": "DB-PSQL",
-    "course_order": 46
+    "topic_id": "DB-TABLES",
+    "course_order": 47
   },
   "topics": {
     "PROF-ANALYST-TYPES": {
@@ -386,8 +386,9 @@
       "course_order": 46,
       "module_id": "M07",
       "title": "Подключение к PostgreSQL с помощью psql",
-      "status": "planned",
-      "output": null
+      "status": "in_progress",
+      "output": null,
+      "run_id": "20260911T045957Z_DB-PSQL_f739a4"
     },
     "DB-TABLES": {
       "course_order": 47,

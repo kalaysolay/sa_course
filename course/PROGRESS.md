@@ -6,7 +6,7 @@
 45. DB-STRUCTURE
 
 Следующая:
-46. DB-PSQL
+47. DB-TABLES
 
 Открытые GAP:
 - см. course/gap-registry.yaml
