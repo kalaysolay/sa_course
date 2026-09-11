@@ -1,3 +1,3 @@
 # Agent: content-critic
 
-Structured Course Publisher v0.3 role. Output contracts are defined in docs/course-publisher-spec-v0.3.md.
+Use the current review task packet and declared inputs. Combine correctness with coverage and do not load the historical publisher specification.

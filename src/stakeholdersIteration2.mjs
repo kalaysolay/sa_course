@@ -251,7 +251,7 @@ export function stakeholderLecture({ brief, topic, revision = 1, fixture }) {
   }
   if (fixture === 'editorial-gap' && revision === 1) {
     return [
-      `# ${brief.title}`,
+      `# Лекция ${topic.course_order}. ${brief.title}`,
       '',
       '- stakeholder',
       '- users',

@@ -156,6 +156,14 @@ export class FakeAgentAdapter {
     return review('APPROVED', 'content-critic', '03-lecture/draft.md', 'Все mustCover элементы присутствуют в лекции.', []);
   }
 
+  contentReview({ brief, lecture }) {
+    return mergeReviews('content', this.subjectReview({ brief, lecture }), this.coverageReview({ brief, lecture }));
+  }
+
+  learningReview({ brief, lecture }) {
+    return mergeReviews('learning', this.methodologyReview({ brief, lecture }), this.editorialReview({ brief, lecture }));
+  }
+
   createAssessment({ brief, revision = 1, fixture }) {
     if (brief.topicId === 'REQ-STAKEHOLDERS') return stakeholderAssessment({ brief, revision, fixture });
     const items = brief.learningOutcomes.map((lo, index) => ({
@@ -240,4 +248,15 @@ export class FakeAgentAdapter {
     if (brief.topicId === 'REQ-STAKEHOLDERS') return stakeholderProjectReview({ brief, change, proposedArtifacts });
     return review('APPROVED', 'project-artifact', '05-project/proposed', 'Proposed artifact соответствует уроку и остается вне canonical project.', []);
   }
+}
+
+function mergeReviews(reviewer, ...reviews) {
+  const issues = reviews.flatMap(item => item.issues || []);
+  return review(
+    issues.some(issue => ['critical', 'major'].includes(issue.severity)) ? 'REJECTED' : 'APPROVED',
+    reviewer,
+    '03-lecture/draft.md',
+    issues.length ? `${reviewer} review found ${issues.length} issue(s).` : `${reviewer} review passed.`,
+    issues
+  );
 }

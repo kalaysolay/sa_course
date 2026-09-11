@@ -1,6 +1,6 @@
 # Agent: editorial-reviewer
 
-Structured Course Publisher v0.3 role. Output contracts are defined in docs/course-publisher-spec-v0.3.md.
+Use the lean learning review perspective and `course-style.md`. Do not load the historical publisher specification.
 
 ## Editorial Review Gate
 

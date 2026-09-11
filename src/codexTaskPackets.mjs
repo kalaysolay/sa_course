@@ -1,4 +1,5 @@
 import path from 'node:path';
+import { expectedProjectArtifacts, requiresProjectStage } from './pipelinePolicy.mjs';
 
 const DEFAULT_COURSE_TRACKER = {
   spreadsheetUrl: 'https://docs.google.com/spreadsheets/d/1She4DAsy9KIQ0uXdMDbTvtDsftT3BNBiorYMScyArew/edit',
@@ -46,71 +47,89 @@ function normalizeCourseTracker(config = {}) {
   };
 }
 
-const STAGES = [
-  {
-    id: '01-methodologist',
-    role: 'Methodologist',
-    outputPath: '01-brief/lesson-brief-v1.json',
-    task: 'Design the lesson brief from the Topic Passport and course context.'
-  },
-  {
-    id: '02-scope-critic',
-    role: 'Content Critic',
-    outputPath: '01-brief/scope-review-v1.json',
-    task: 'Review the lesson brief for scope, prerequisites, project fit, and curriculum gaps.'
-  },
-  {
-    id: '03-researcher',
-    role: 'Researcher',
-    outputPath: '02-research/source-pack.md',
-    task: 'Build a concise source pack with citations, caveats, and unavailable-source notes.'
-  },
-  {
-    id: '04-writer',
-    role: 'Lecture Writer',
-    outputPath: '03-lecture/draft-v1.md',
-    task: 'Write the full lecture draft using the approved brief and source pack.'
-  },
-  {
-    id: '05-review-panel',
-    role: 'Review Panel',
-    outputPath: '03-lecture/review-v1/',
-    task: 'Run subject, coverage, methodology, and editorial reviews as separate JSON files.'
-  },
-  {
-    id: '06-assessment',
-    role: 'Assessment Author',
-    outputPath: '04-assessment/draft-v1.json',
-    task: 'Create exercises, answers, rubric, and learning-outcome coverage for the lesson.'
-  },
-  {
-    id: '07-assessment-reviewer',
-    role: 'Assessment Reviewer',
-    outputPath: '04-assessment/review-v1.json',
-    task: 'Review assessment coverage, correctness, answer quality, and project relevance.'
-  },
-  {
-    id: '08-project-artifacts',
-    role: 'Project Artifact Author',
-    outputPath: '05-project/proposed/',
-    task: 'Draft Compliance project artifact changes requested by the lesson brief.'
-  },
-  {
-    id: '09-project-reviewer',
-    role: 'Project Artifact Reviewer',
-    outputPath: '05-project/reviews/project-v1.json',
-    task: 'Review proposed project artifacts against the lesson, case continuity, and rubric.'
-  },
-  {
-    id: '10-tracker-updater',
-    role: 'Course Tracker Updater',
-    outputPath: '99-package/tracker-update-report.md',
-    task: 'Update the Google Sheets course tracker row for this lesson, or add a row when the topic is absent.'
+function buildStages(ctx) {
+  const limits = ctx.optimization?.output_limits || {};
+  const stages = [
+    {
+      id: '01-plan-research',
+      role: 'Lesson Planner and Researcher',
+      outputs: ['01-brief/lesson-brief-final.json', '02-research/source-pack.md'],
+      inputs: ['00-input/course-context.yaml', '00-input/topic-passport.json', '00-input/source-registry-slice.json', '00-input/audience.md'],
+      task: 'Create a compact lesson brief and a claim-to-source map in one pass.',
+      rules: [
+        `Keep the brief under ${limits.lesson_brief_chars || 6000} characters unless a schema-required field makes that impossible.`,
+        `Keep the source pack under ${limits.source_pack_chars || 5000} characters; record claims, direct links, caveats, and availability instead of retelling sources.`,
+        'Do not read the monolithic publisher specification unless the listed inputs leave a required output field ambiguous.'
+      ]
+    },
+    {
+      id: '02-writer',
+      role: 'Lecture Writer',
+      outputs: ['03-lecture/draft-v1.md'],
+      inputs: ['01-brief/lesson-brief-final.json', '02-research/source-pack.md', '00-input/course-style.md'],
+      task: 'Write one complete Russian lecture draft from the approved compact inputs.',
+      rules: [
+        `The first line must be exactly: \`# Лекция ${ctx.topic.course_order}. ${ctx.topic.title}\`.`,
+        'Use the source pack by reference; do not reproduce it inside the lecture.',
+        'End with direct public source links only. Never link to run-relative files with ../.'
+      ]
+    },
+    {
+      id: '03-lean-review',
+      role: 'Lean Lecture Review',
+      outputs: ['03-lecture/review-v1/content.json', '03-lecture/review-v1/learning.json', '03-lecture/final.md'],
+      inputs: ['01-brief/lesson-brief-final.json', '02-research/source-pack.md', '03-lecture/draft-v1.md', '00-input/course-style.md'],
+      task: 'Read the lecture once and review it from two perspectives: content/coverage and learning/editorial.',
+      rules: [
+        `For an approved perspective keep its JSON under ${limits.approved_review_chars || 600} characters.`,
+        'Only critical and major issues trigger revision. Minor issues are recorded without a rewrite.',
+        'If revision is required, preserve the draft, create a targeted next version, and rerun only the failed perspective.',
+        'Allow at most one full rewrite. Copy the approved draft to 03-lecture/final.md.'
+      ]
+    },
+    {
+      id: '04-assessment',
+      role: 'Assessment Author with Self-check',
+      outputs: ['04-assessment/draft.json', '04-assessment/exercises.md', '04-assessment/answers.md'],
+      inputs: ['01-brief/lesson-brief-final.json', '03-lecture/final.md'],
+      task: 'Create the assessment and verify learning-outcome coverage in the same pass.',
+      rules: [
+        `Default to at most ${limits.assessment_default_items || 9} items; exceed this only when the brief explicitly requires more.`,
+        'Include answers, explanations, observable criteria, and an LO coverage map.',
+        'Do not create a separate semantic reviewer task when deterministic schema and coverage checks pass.'
+      ]
+    }
+  ];
+
+  if (requiresProjectStage(ctx.passport)) {
+    stages.push({
+      id: '05-project-artifacts',
+      role: 'Project Artifact Author with Self-check',
+      outputs: ['05-project/project-change.json', '05-project/proposed/', '05-project/approved/'],
+      inputs: ['00-input/project-state.yaml', '00-input/topic-passport.json', '01-brief/lesson-brief-final.json', '03-lecture/final.md'],
+      task: 'Create only the project artifacts explicitly required by the Topic Passport and self-check them once.',
+      rules: [
+        'Do not create an additional lesson-only artifact when the assessment already contains the project exercise.',
+        'Do not mutate canonical project files; write proposed and approved run artifacts only.',
+        'Only critical or major issues justify one targeted revision.'
+      ]
+    });
   }
-];
+
+  stages.push({
+    id: '06-tracker-updater',
+    role: 'Course Tracker Updater',
+    outputs: ['99-package/tracker-update-report.md'],
+    inputs: ['99-package/lesson-manifest.json', '99-package/payload-metrics.json'],
+    task: 'After local finalization, update the Google Sheets tracker from the manifest.',
+    rules: ['Read no lecture drafts, reviews, source pack, or project state unless the manifest reports an unresolved inconsistency.']
+  });
+  return stages;
+}
 
 export function buildCodexTaskPackets(ctx) {
   const courseTracker = normalizeCourseTracker(ctx.courseTracker);
+  const stages = buildStages(ctx);
   const manifest = {
     mode: 'codex-app',
     externalApiRequired: false,
@@ -121,13 +140,20 @@ export function buildCodexTaskPackets(ctx) {
     workflowVersion: ctx.run.workflowVersion,
     createdAt: ctx.createdAt,
     courseTracker,
-    taskCount: STAGES.length,
+    optimization: {
+      mode: ctx.optimization?.mode || 'lean',
+      projectStageRequired: requiresProjectStage(ctx.passport),
+      expectedProjectArtifacts: expectedProjectArtifacts(ctx.passport),
+      rerunFailedChecksOnly: ctx.optimization?.rerun_failed_checks_only !== false
+    },
+    taskCount: stages.length,
     dispatch: 'codex-tasks/00-dispatch.md',
-    tasks: STAGES.map(stage => ({
+    tasks: stages.map(stage => ({
       id: stage.id,
       role: stage.role,
       taskFile: `codex-tasks/${stage.id}.md`,
-      expectedOutput: stage.outputPath
+      expectedOutputs: stage.outputs,
+      inputFiles: stage.inputs
     }))
   };
 
@@ -136,7 +162,7 @@ export function buildCodexTaskPackets(ctx) {
       file: '00-dispatch.md',
       content: dispatchMarkdown(ctx, manifest)
     },
-    ...STAGES.map(stage => ({
+    ...stages.map(stage => ({
       file: `${stage.id}.md`,
       content: stageMarkdown(stage, ctx, courseTracker)
     }))
@@ -156,11 +182,12 @@ function dispatchMarkdown(ctx, manifest) {
     '',
     '## How to use',
     '',
-    '1. Start with `01-methodologist.md` and write each expected artifact into the path named in the task packet.',
-    '2. Keep every review independent: reviewers must inspect the artifact, not rewrite it silently.',
-    '3. If a reviewer rejects an artifact, write a revision request beside the draft and create the next draft version.',
-    '4. When all artifacts are approved, run the local validator/package step before marking the lesson complete.',
-    '5. Finish with `10-tracker-updater.md`: update the Google Sheets tracker row for this Topic ID, or add the row if it is missing.',
+    '1. Execute only the task packets listed below, in order. Do not recreate omitted legacy stages.',
+    '2. Read only each packet’s declared inputs. Pass artifacts by file path rather than copying their full text between agents.',
+    '3. Run deterministic format/schema checks before semantic review. Only critical and major issues trigger a revision.',
+    '4. Rerun only the failed review perspective and allow at most one full rewrite per artifact.',
+    `5. After authoring, run \`node scripts/publisher.mjs /finalize-codex-run ${ctx.run.runId}\`.`,
+    '6. Finish with the tracker packet, using the generated manifest and payload metrics.',
     '',
     '## Course Tracker',
     '',
@@ -172,7 +199,7 @@ function dispatchMarkdown(ctx, manifest) {
     '',
     '## Task Map',
     '',
-    ...manifest.tasks.map(task => `- ${task.id} | ${task.role} | ${task.taskFile} -> ${task.expectedOutput}`),
+    ...manifest.tasks.map(task => `- ${task.id} | ${task.role} | ${task.taskFile} -> ${task.expectedOutputs.join(', ')}`),
     '',
     '## Current Open Gaps',
     '',
@@ -182,22 +209,7 @@ function dispatchMarkdown(ctx, manifest) {
 }
 
 function stageMarkdown(stage, ctx, courseTracker) {
-  const sourceLines = ctx.sources.length
-    ? ctx.sources.map(source => `- ${source.id}: ${source.title} [${source.availability}]`)
-    : ['- no sources resolved'];
-  const projectArtifacts = ctx.passport.project?.artifacts || ctx.passport.projectUsage?.artifactsToUpdate || [];
-  const artifactLines = projectArtifacts.length ? projectArtifacts.map(item => `- ${item}`) : ['- inspect lesson brief/project state'];
-  const writerEditorialLines = stage.id === '04-writer'
-    ? [
-        `- The first line of the lecture is mandatory and must be exactly: \`# Лекция ${ctx.topic.course_order}. ${ctx.topic.title}\`. Do not replace it with an editorial or marketing-style title.`,
-        '- Write a coherent lecture, not a README or slide outline: paragraphs and one continuing scenario are the default.',
-        '- Use bullets only for independent items, compact checklists, or the final recap; never replace explanation with a table or list.',
-        '- When a technical abstraction is difficult, use a relevant analogy if it helps; state where that analogy stops being accurate.',
-        '- Start from a familiar situation and explain the purpose before introducing the term.'
-      ]
-    : [];
-
-  const trackerLines = stage.id === '10-tracker-updater'
+  const trackerLines = stage.id === '06-tracker-updater'
     ? [
         '',
         '## Google Sheets Tracker Update',
@@ -215,55 +227,36 @@ function stageMarkdown(stage, ctx, courseTracker) {
         '- Write `99-package/tracker-update-report.md` with the spreadsheet URL, row number, changed columns, and any unresolved issue.',
         ''
       ]
-    : [
-        '',
-        '## Course Tracker Note',
-        '',
-        `- The final tracker owner is \`10-tracker-updater.md\`, which updates ${courseTracker.spreadsheetUrl}.`,
-        '- If this stage creates or changes artifacts, leave enough evidence in its expected output for the tracker updater to update columns D/E accurately.',
-        ''
-      ];
+    : [];
 
   return [
     `# ${stage.role}: ${ctx.topic.id}`,
     '',
     `Task: ${stage.task}`,
-    `Expected output: \`${stage.outputPath}\``,
+    'Expected outputs:',
+    ...stage.outputs.map(output => `- \`${output}\``),
     '',
     '## Hard Constraints',
     '',
-    '- Work inside this run directory only.',
+    '- Write only inside this run directory.',
     '- Preserve Russian language for learner-facing course content.',
     '- Use the Compliance project case as the through-line for examples and exercises.',
     '- Do not skip missing prerequisites or source gaps; record them explicitly.',
-    '- Produce complete artifacts, not notes about what should be produced later.',
-    ...writerEditorialLines,
+    '- Do not load `docs/course-publisher-spec-v0.3.md` unless a declared input cannot resolve a required field.',
     '',
     '## Topic Context',
     '',
     `- Module: ${ctx.module.id} - ${ctx.module.title}`,
     `- Section: ${ctx.section.id} - ${ctx.section.title}`,
     `- Topic: ${ctx.topic.course_order}. ${ctx.topic.title} (${ctx.topic.id})`,
-    `- Topic Passport: ${ctx.topic.passport}`,
-    '',
-    '## Expected Project Artifacts',
-    '',
-    ...artifactLines,
-    '',
-    '## Resolved Sources',
-    '',
-    ...sourceLines,
     '',
     '## Files To Read First',
     '',
-    '- `00-input/course-context.yaml`',
-    '- `00-input/topic-passport.json`',
-    '- `00-input/project-state.yaml`',
-    '- `00-input/source-registry-slice.json`',
+    ...stage.inputs.map(input => `- \`${input}\``),
     '',
-    '## Quality Gate',
+    '## Lean Rules',
     '',
-    'Before finishing, check that the artifact can be consumed by the next stage without hidden assumptions.',
+    ...stage.rules.map(rule => `- ${rule}`),
     ...trackerLines,
     ''
   ].join('\n');

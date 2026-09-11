@@ -17,15 +17,13 @@ const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '
 
 function fixtureRoot() {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'course-publisher-'));
-  fs.cpSync(projectRoot, tmp, {
-    recursive: true,
-    filter: src => !src.includes(`${path.sep}.git`)
-      && !src.includes(`${path.sep}node_modules`)
-      && !src.includes(`${path.sep}runs${path.sep}`)
-      && !src.includes(`${path.sep}output${path.sep}`)
-  });
-  fs.rmSync(path.join(tmp, 'runs'), { recursive: true, force: true });
-  fs.rmSync(path.join(tmp, 'output'), { recursive: true, force: true });
+  for (const entry of ['course', 'project', 'schemas']) {
+    fs.cpSync(path.join(projectRoot, entry), path.join(tmp, entry), { recursive: true });
+  }
+  fs.copyFileSync(path.join(projectRoot, 'publisher.yaml'), path.join(tmp, 'publisher.yaml'));
+  fs.mkdirSync(path.join(tmp, 'references'), { recursive: true });
+  fs.copyFileSync(path.join(projectRoot, 'references', 'source-registry.yaml'), path.join(tmp, 'references', 'source-registry.yaml'));
+  fs.rmSync(path.join(tmp, 'project', 'compliance', 'business-analysis', 'stakeholders.md'), { force: true });
   fs.mkdirSync(path.join(tmp, 'runs'), { recursive: true });
   fs.mkdirSync(path.join(tmp, 'output'), { recursive: true });
   writeData(path.join(tmp, 'course', 'gap-registry.yaml'), { gaps: [] });
@@ -119,7 +117,7 @@ test('lecture heading is enforced as the curriculum number and title', () => {
   adapter.writeLecture = ({ brief }) => `# ${brief.title}\n\nCompliance\n\n${brief.mustCover.join('\n')}`.padEnd(1200, 'x');
   const result = new Orchestrator(root, adapter).publishTopic('REQ-STAKEHOLDERS');
   assert.equal(result.status, 'NEEDS_HUMAN_REVIEW');
-  const formatReview = readData(path.join(result.runDir, '03-lecture', 'review-v3', 'format.json'));
+  const formatReview = readData(path.join(result.runDir, '03-lecture', 'review-v2', 'format.json'));
   assert.equal(formatReview.verdict, 'REJECTED');
   assert.match(formatReview.issues[0].requiredChange, /# Лекция 14\. Заинтересованные лица/);
 });
@@ -171,8 +169,8 @@ test('iteration 3 Subject Reviewer rejects a factual stakeholder error and revis
   const root = fixtureRoot();
   const result = new Orchestrator(root).publishTopic('REQ-STAKEHOLDERS', { fixture: 'subject-error' });
   assert.equal(result.status, 'COMPLETED');
-  const subjectV1 = readData(path.join(result.runDir, '03-lecture', 'review-v1', 'subject.json'));
-  const subjectV2 = readData(path.join(result.runDir, '03-lecture', 'review-v2', 'subject.json'));
+  const subjectV1 = readData(path.join(result.runDir, '03-lecture', 'review-v1', 'content.json'));
+  const subjectV2 = readData(path.join(result.runDir, '03-lecture', 'review-v2', 'content.json'));
   assert.equal(subjectV1.verdict, 'REJECTED');
   assert.ok(subjectV1.issues.some(issue => issue.category === 'factual_error'));
   assert.equal(subjectV2.verdict, 'APPROVED');
@@ -182,8 +180,8 @@ test('iteration 3 Methodology Reviewer rejects missing final learning orientatio
   const root = fixtureRoot();
   const result = new Orchestrator(root).publishTopic('REQ-STAKEHOLDERS', { fixture: 'methodology-gap' });
   assert.equal(result.status, 'COMPLETED');
-  const methodologyV1 = readData(path.join(result.runDir, '03-lecture', 'review-v1', 'methodology.json'));
-  const methodologyV2 = readData(path.join(result.runDir, '03-lecture', 'review-v2', 'methodology.json'));
+  const methodologyV1 = readData(path.join(result.runDir, '03-lecture', 'review-v1', 'learning.json'));
+  const methodologyV2 = readData(path.join(result.runDir, '03-lecture', 'review-v2', 'learning.json'));
   assert.equal(methodologyV1.verdict, 'REJECTED');
   assert.ok(methodologyV1.issues.some(issue => issue.category === 'teachability'));
   assert.equal(methodologyV2.verdict, 'APPROVED');
@@ -193,26 +191,22 @@ test('iteration 3 Editorial Reviewer rejects list-like lecture form and revision
   const root = fixtureRoot();
   const result = new Orchestrator(root).publishTopic('REQ-STAKEHOLDERS', { fixture: 'editorial-gap' });
   assert.equal(result.status, 'COMPLETED');
-  const editorialV1 = readData(path.join(result.runDir, '03-lecture', 'review-v1', 'editorial.json'));
-  const editorialV2 = readData(path.join(result.runDir, '03-lecture', 'review-v2', 'editorial.json'));
+  const editorialV1 = readData(path.join(result.runDir, '03-lecture', 'review-v1', 'learning.json'));
+  const editorialV2 = readData(path.join(result.runDir, '03-lecture', 'review-v2', 'learning.json'));
   assert.equal(editorialV1.verdict, 'REJECTED');
   assert.ok(editorialV1.issues.some(issue => issue.category === 'narrative_opening'));
   assert.equal(editorialV2.verdict, 'APPROVED');
 });
 
-test('iteration 3 lecture review panel writes independent reviewer verdicts', () => {
+test('lean lecture review writes two combined semantic verdicts', () => {
   const root = fixtureRoot();
   const result = new Orchestrator(root).publishTopic('REQ-STAKEHOLDERS');
   const reviewDir = path.join(result.runDir, '03-lecture', 'review-v1');
-  const subject = readData(path.join(reviewDir, 'subject.json'));
-  const coverage = readData(path.join(reviewDir, 'coverage.json'));
-  const methodology = readData(path.join(reviewDir, 'methodology.json'));
-  const editorial = readData(path.join(reviewDir, 'editorial.json'));
-  assert.equal(subject.reviewer, 'subject');
-  assert.equal(coverage.reviewer, 'content-critic');
-  assert.equal(methodology.reviewer, 'methodology');
-  assert.equal(editorial.reviewer, 'editorial');
-  assert.deepEqual([subject.verdict, coverage.verdict, methodology.verdict, editorial.verdict], ['APPROVED', 'APPROVED', 'APPROVED', 'APPROVED']);
+  const content = readData(path.join(reviewDir, 'content.json'));
+  const learning = readData(path.join(reviewDir, 'learning.json'));
+  assert.equal(content.reviewer, 'content');
+  assert.equal(learning.reviewer, 'learning');
+  assert.deepEqual([content.verdict, learning.verdict], ['APPROVED', 'APPROVED']);
 });
 
 test('iteration 4 Assessment Author creates LO coverage matrix and project exercise', () => {
@@ -266,7 +260,7 @@ test('iteration 6 Run metadata and checkpoints are written', () => {
   const stopped = new Orchestrator(root).publishTopic('REQ-STAKEHOLDERS', { stopAfter: 'LECTURE_APPROVED' });
   assert.equal(stopped.status, 'LECTURE_APPROVED');
   const stoppedRun = readData(path.join(stopped.runDir, 'run.json'));
-  assert.equal(stoppedRun.workflowVersion, '0.3-iteration-6');
+  assert.equal(stoppedRun.workflowVersion, '0.4-lean');
   assert.equal(stoppedRun.promptVersions.reviewPanel, 'stakeholders-iteration-3');
   const resumed = new Orchestrator(root).resume(stopped.runId);
   assert.equal(resumed.status, 'COMPLETED');
@@ -282,13 +276,13 @@ test('Codex-native prepare creates task packets without OPENAI_API_KEY', () => {
   assert.equal(manifest.mode, 'codex-app');
   assert.equal(manifest.externalApiRequired, false);
   assert.equal(manifest.topicId, 'REQ-STAKEHOLDERS');
-  assert.equal(manifest.taskCount, 10);
+  assert.equal(manifest.taskCount, 6);
   assert.equal(manifest.courseTracker.spreadsheetId, '1She4DAsy9KIQ0uXdMDbTvtDsftT3BNBiorYMScyArew');
   assert.equal(manifest.courseTracker.sheetName, 'План лекций');
   assert.ok(fs.existsSync(path.join(result.taskDir, '00-dispatch.md')));
-  assert.ok(fs.existsSync(path.join(result.taskDir, '01-methodologist.md')));
-  assert.ok(fs.existsSync(path.join(result.taskDir, '10-tracker-updater.md')));
-  assert.match(fs.readFileSync(path.join(result.taskDir, '10-tracker-updater.md'), 'utf8'), /Google Sheets Tracker Update/);
+  assert.ok(fs.existsSync(path.join(result.taskDir, '01-plan-research.md')));
+  assert.ok(fs.existsSync(path.join(result.taskDir, '06-tracker-updater.md')));
+  assert.match(fs.readFileSync(path.join(result.taskDir, '06-tracker-updater.md'), 'utf8'), /Google Sheets Tracker Update/);
   assert.ok(fs.existsSync(path.join(result.runDir, '00-input', 'topic-passport.json')));
   const progress = readData(path.join(root, 'course', 'progress.yaml'));
   assert.equal(progress.topics['REQ-STAKEHOLDERS'].status, 'in_progress');
@@ -337,4 +331,87 @@ test('OpenAI CLI preflight fails before creating a run when key is missing', () 
   assert.throws(() => runCli(['/publish-lesson', '14', '--adapter', 'openai'], root), /OPENAI_API_KEY is not set/);
   assert.deepEqual(fs.readdirSync(path.join(root, 'runs')), beforeRuns);
   if (oldKey) process.env.OPENAI_API_KEY = oldKey;
+});
+
+test('lean Codex packets skip project stage when Topic Passport has no expected artifacts', () => {
+  const root = fixtureRoot();
+  const result = new Orchestrator(root).prepareCodexRun('DB-STRUCTURE');
+  assert.equal(result.status, 'CODEX_TASKS_READY');
+  const manifest = readData(path.join(result.taskDir, 'codex-manifest.json'));
+  assert.equal(manifest.taskCount, 5);
+  assert.equal(manifest.optimization.projectStageRequired, false);
+  assert.equal(manifest.tasks.some(task => task.id === '05-project-artifacts'), false);
+  const tracker = manifest.tasks.find(task => task.id === '06-tracker-updater');
+  assert.deepEqual(tracker.inputFiles, ['99-package/lesson-manifest.json', '99-package/payload-metrics.json']);
+});
+
+test('blocking primary source policy stops Codex generation during preflight', () => {
+  const root = fixtureRoot();
+  const registryPath = path.join(root, 'references', 'source-registry.yaml');
+  const registry = readData(registryPath);
+  registry.sources.find(source => source.id === 'SRC-POSTGRESQL-ARCHITECTURE').availability = 'missing';
+  writeData(registryPath, registry);
+  const result = new Orchestrator(root).prepareCodexRun('DB-STRUCTURE');
+  assert.equal(result.status, 'NEEDS_HUMAN_REVIEW');
+  assert.match(result.error, /BLOCKING_SOURCE_GAP/);
+  assert.equal(fs.existsSync(path.join(result.runDir, 'codex-tasks', 'codex-manifest.json')), false);
+});
+
+test('deterministic format preflight prevents semantic review of a broken draft', () => {
+  const root = fixtureRoot();
+  const adapter = new FakeAgentAdapter();
+  const originalWrite = adapter.writeLecture.bind(adapter);
+  let contentCalls = 0;
+  let learningCalls = 0;
+  adapter.writeLecture = args => {
+    const lecture = originalWrite(args);
+    return args.revision === 1 ? `${lecture}\n[internal](../02-research/source-pack.md)\n` : lecture;
+  };
+  const originalContent = adapter.contentReview.bind(adapter);
+  const originalLearning = adapter.learningReview.bind(adapter);
+  adapter.contentReview = args => { contentCalls += 1; return originalContent(args); };
+  adapter.learningReview = args => { learningCalls += 1; return originalLearning(args); };
+  const result = new Orchestrator(root, adapter).publishTopic('REQ-STAKEHOLDERS');
+  assert.equal(result.status, 'COMPLETED');
+  assert.equal(contentCalls, 1);
+  assert.equal(learningCalls, 1);
+  const formatV1 = readData(path.join(result.runDir, '03-lecture', 'review-v1', 'format.json'));
+  assert.ok(formatV1.issues.some(issue => issue.category === 'package_link_integrity'));
+});
+
+test('headless run writes payload metrics for every model-facing stage', () => {
+  const root = fixtureRoot();
+  const result = new Orchestrator(root).publishTopic('REQ-STAKEHOLDERS');
+  const metrics = readData(path.join(result.runDir, '99-package', 'payload-metrics.json'));
+  assert.ok(metrics.stageCount >= 7);
+  assert.ok(metrics.payloadInputChars > 0);
+  assert.ok(metrics.payloadOutputChars > 0);
+  assert.equal(metrics.exactUsageAvailable, false);
+});
+
+test('Codex finalizer validates and packages a lean run without an LLM packaging stage', () => {
+  const root = fixtureRoot();
+  const orchestrator = new Orchestrator(root);
+  const prepared = orchestrator.prepareCodexRun('DB-STRUCTURE');
+  const { module, section, topic } = resolveTopic(loadCurriculum(root), 'DB-STRUCTURE');
+  const passport = readData(path.join(prepared.runDir, '00-input', 'topic-passport.json'));
+  const sources = readData(path.join(prepared.runDir, '00-input', 'source-registry-slice.json'));
+  const adapter = new FakeAgentAdapter();
+  const brief = adapter.designLesson({ topic, module, section, passport });
+  const sourcePack = adapter.research({ sources });
+  const lecture = adapter.writeLecture({ brief, topic });
+  const assessment = adapter.createAssessment({ brief });
+  writeData(path.join(prepared.runDir, '01-brief', 'lesson-brief-final.json'), brief);
+  fs.writeFileSync(path.join(prepared.runDir, '02-research', 'source-pack.md'), sourcePack);
+  fs.writeFileSync(path.join(prepared.runDir, '03-lecture', 'final.md'), lecture);
+  writeData(path.join(prepared.runDir, '03-lecture', 'review-v1', 'content.json'), adapter.contentReview({ brief, lecture }));
+  writeData(path.join(prepared.runDir, '03-lecture', 'review-v1', 'learning.json'), adapter.learningReview({ brief, lecture }));
+  writeData(path.join(prepared.runDir, '04-assessment', 'draft.json'), assessment);
+  fs.writeFileSync(path.join(prepared.runDir, '04-assessment', 'exercises.md'), orchestrator.assessmentMarkdown(assessment, false));
+  fs.writeFileSync(path.join(prepared.runDir, '04-assessment', 'answers.md'), orchestrator.assessmentMarkdown(assessment, true));
+  const finalized = orchestrator.finalizeCodexRun(prepared.runId);
+  assert.equal(finalized.status, 'COMPLETED');
+  assert.ok(fs.existsSync(path.join(finalized.output, 'lesson-manifest.json')));
+  const metrics = readData(path.join(prepared.runDir, '99-package', 'payload-metrics.json'));
+  assert.ok(metrics.plannedCodexInputChars > 0);
 });

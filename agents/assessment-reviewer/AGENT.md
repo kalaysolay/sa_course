@@ -1,3 +1,3 @@
 # Agent: assessment-reviewer
 
-Structured Course Publisher v0.3 role. Output contracts are defined in docs/course-publisher-spec-v0.3.md.
+Legacy role. In lean mode assessment schema and LO coverage are checked deterministically; use this role only for a failed validation diagnosis.

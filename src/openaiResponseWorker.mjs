@@ -48,7 +48,7 @@ async function main() {
   }
   const text = extractOutputText(payload);
   if (!text) throw new Error('OpenAI response did not contain output text.');
-  process.stdout.write(JSON.stringify({ text, responseId: payload.id || null }, null, 2));
+  process.stdout.write(JSON.stringify({ text, responseId: payload.id || null, usage: payload.usage || null }, null, 2));
 }
 
 function extractOutputText(payload) {

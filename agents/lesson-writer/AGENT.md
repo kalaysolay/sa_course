@@ -1,6 +1,6 @@
 # Agent: lesson-writer
 
-Structured Course Publisher v0.3 role. Output contracts are defined in `docs/course-publisher-spec-v0.3.md`.
+Use the current writer task packet, Lesson Brief, source pack, and copied course style. Do not load the historical publisher specification.
 
 ## Editorial non-negotiables
 

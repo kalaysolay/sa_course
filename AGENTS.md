@@ -2,13 +2,15 @@
 
 ## Source Of Truth
 
-- `docs/course-publisher-spec-v0.3.md`
+- `docs/lean-production-contract.md` for lesson production;
 - `publisher.yaml`
 - `course/curriculum.yaml`
 - `course/progress.yaml`
 - `course/gap-registry.yaml`
 - `references/source-registry.yaml`
 - `schemas/*`
+
+The historical `docs/course-publisher-spec-v0.3.md` is reference material. Do not load it during normal lesson production; open it only when changing the publisher architecture or a schema contract.
 
 ## Основное правило
 

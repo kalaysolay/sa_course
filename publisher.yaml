@@ -59,6 +59,18 @@
     "keep_drafts": true,
     "keep_reviews": true
   },
+  "optimization": {
+    "mode": "lean",
+    "skip_project_when_no_expected_artifacts": true,
+    "rerun_failed_checks_only": true,
+    "assessment_semantic_review": "on_validation_failure",
+    "output_limits": {
+      "lesson_brief_chars": 6000,
+      "source_pack_chars": 5000,
+      "approved_review_chars": 600,
+      "assessment_default_items": 9
+    }
+  },
   "llm": {
     "default_adapter": "codex",
     "openai": {

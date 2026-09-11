@@ -12,20 +12,22 @@ node scripts\publisher.mjs /publish-lesson 1 --adapter codex
 
 The command creates a run with status CODEX_TASKS_READY and writes input context plus role packets under runs/<runId>/codex-tasks/.
 
-## Role order
+## Lean role order
 
-1. Methodologist -> 01-brief/lesson-brief-v1.json
-2. Content Critic -> 01-brief/scope-review-v1.json
-3. Researcher -> 02-research/source-pack.md
-4. Lecture Writer -> 03-lecture/draft-v1.md
-5. Review Panel -> 03-lecture/review-v1/*.json
-6. Assessment Author -> 04-assessment/draft-v1.json
-7. Assessment Reviewer -> 04-assessment/review-v1.json
-8. Project Artifact Author -> 05-project/proposed/
-9. Project Artifact Reviewer -> 05-project/reviews/project-v1.json
-10. Course Tracker Updater -> 99-package/tracker-update-report.md
+1. Planner + Researcher -> compact brief and source claim map.
+2. Lecture Writer -> one complete lecture draft.
+3. Lean Review -> two verdicts from one read: content/coverage and learning/editorial.
+4. Assessment Author -> assessment plus LO coverage self-check.
+5. Project Artifact Author -> only when Topic Passport declares expected artifacts.
+6. Course Tracker Updater -> reads the finalized manifest and payload metrics only.
 
-Rejected artifacts produce a revision request and next draft version. Approved artifacts move forward to package validation.
+Run deterministic finalization before the tracker task:
+
+```powershell
+node scripts\publisher.mjs /finalize-codex-run <runId>
+```
+
+Format, relative-link, schema, and assessment-coverage checks run locally. Only critical and major issues trigger revision. Rerun only the failed perspective, and allow at most one full rewrite in lean mode.
 
 ## Course tracker
 

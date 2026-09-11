@@ -55,4 +55,12 @@ node scripts\publisher.mjs /publish-lesson 1 --adapter codex
 
 The generated run stops at `CODEX_TASKS_READY`; role packets live in `runs/<runId>/codex-tasks/`. See `docs/codex-native-workflow.md`.
 
+After the authoring packets are complete, validate and assemble the package locally:
+
+```powershell
+node scripts\publisher.mjs /finalize-codex-run <runId>
+```
+
+Lean mode uses 5 task packets for lessons without project artifacts and 6 when the Topic Passport requires one. Token/payload metrics are written to `99-package/payload-metrics.json`.
+
 The OpenAI API adapter is optional only, for future headless automation when an external API key is explicitly desired.

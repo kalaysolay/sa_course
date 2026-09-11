@@ -12,6 +12,7 @@ export class OpenAIAdapter extends FakeAgentAdapter {
     this.reasoningEffort = options.reasoningEffort || process.env.OPENAI_REASONING_EFFORT || 'medium';
     this.temperature = options.temperature ?? (process.env.OPENAI_TEMPERATURE ? Number(process.env.OPENAI_TEMPERATURE) : 0.3);
     this.useFallbackOnError = Boolean(options.useFallbackOnError);
+    this.usageEvents = [];
   }
 
   requireKey() {
@@ -40,7 +41,12 @@ export class OpenAIAdapter extends FakeAgentAdapter {
       throw new Error(`OpenAI adapter failed for ${role}: ${detail}`);
     }
     const result = JSON.parse(child.stdout);
+    this.usageEvents.push({ role, model: this.model, responseId: result.responseId, usage: result.usage });
     return result.text;
+  }
+
+  drainUsage() {
+    return this.usageEvents.splice(0);
   }
 
   callJson(args) {
@@ -79,13 +85,13 @@ export class OpenAIAdapter extends FakeAgentAdapter {
     }), () => super.scopeReview({ brief, passport, fixture }));
   }
 
-  writeLecture({ brief, revision = 1, fixture }) {
+  writeLecture({ brief, revision = 1, fixture, previousLecture = '', requestedChanges = null }) {
     if (fixture) return super.writeLecture({ brief, revision, fixture });
     return this.safe('lesson-writer', () => this.call({
       role: 'lesson-writer',
       textFormat: 'text',
       system: writerSystem(),
-      user: JSON.stringify({ brief, revision }, null, 2)
+      user: JSON.stringify({ brief, revision, previousLecture: previousLecture || undefined, requestedChanges: requestedChanges || undefined }, null, 2)
     }), () => super.writeLecture({ brief, revision, fixture }));
   }
 
@@ -119,6 +125,22 @@ export class OpenAIAdapter extends FakeAgentAdapter {
       system: reviewerSystem('editorial'),
       user: JSON.stringify({ brief, lecture }, null, 2)
     }), () => super.editorialReview({ brief, lecture }));
+  }
+
+  contentReview({ brief, lecture }) {
+    return this.safe('content-reviewer', () => this.callJson({
+      role: 'content-reviewer',
+      system: combinedReviewerSystem('content'),
+      user: JSON.stringify({ brief, lecture }, null, 2)
+    }), () => super.contentReview({ brief, lecture }));
+  }
+
+  learningReview({ brief, lecture }) {
+    return this.safe('learning-reviewer', () => this.callJson({
+      role: 'learning-reviewer',
+      system: combinedReviewerSystem('learning'),
+      user: JSON.stringify({ brief, lecture }, null, 2)
+    }), () => super.learningReview({ brief, lecture }));
   }
 
   createAssessment({ brief, revision = 1, fixture }) {
@@ -178,7 +200,7 @@ function scopeCriticSystem() {
 }
 
 function writerSystem() {
-  return 'You are Lesson Writer. Write a full Russian lecture in Markdown for beginners. It must read like a human lecture for self-study and video recording, not a README or slide outline. Build a coherent narrative: begin with a familiar situation or learner question, explain why the topic matters, then introduce terminology and use a continuous Compliance example. Use paragraphs as the default; bullets are only for genuinely independent items, short checklists, or a compact recap. Do not replace explanation with tables or lists. When a technical abstraction is difficult, use a relevant analogy if it improves understanding, and immediately state where that analogy stops being accurate. Cover all mustCover items substantively, include Compliance project examples, explain tables narratively, and respect doNotCover.';
+  return 'You are Lesson Writer. Return only the complete Russian Markdown lecture. Follow the brief. Use a coherent beginner-friendly narrative and the Compliance example. On revision, preserve the previous lecture and apply only requestedChanges; do not expand unaffected sections.';
 }
 
 function reviewerSystem(kind) {
@@ -193,6 +215,13 @@ function reviewerSystem(kind) {
 
 function coverageCriticSystem() {
   return `${jsonContract()} You are Content Critic in COVERAGE_REVIEW mode. Check that the lecture substantively covers every mustCover item and every learning outcome. Reject if anything mandatory is only mentioned superficially or missing.`;
+}
+
+function combinedReviewerSystem(kind) {
+  const focus = kind === 'content'
+    ? 'technical correctness, dangerous simplifications, mustCover coverage, and learning outcome coverage'
+    : 'teachability, practice alignment, readability, narrative flow, and beginner-friendly decoding';
+  return `${jsonContract('For APPROVED output keep summary under 240 characters and omit positiveNotes.')} You are the ${kind} reviewer. Read the lecture once and focus on ${focus}. Reject only critical or major issues. Return issues, not a rewrite.`;
 }
 
 function assessmentAuthorSystem() {

@@ -41,6 +41,7 @@ export function runCli(argv, root = process.cwd()) {
   if (command === '/list-gaps' || /gap/i.test(input) || /дыры/i.test(input)) return orchestrator.courseStatus().gaps;
   if (command === '/prepare-codex-next') return orchestrator.prepareCodexNext(options);
   if (command === '/prepare-codex-topic' || command === '/prepare-codex-lesson') return orchestrator.prepareCodexRun(positional[0], options);
+  if (command === '/finalize-codex-run') return orchestrator.finalizeCodexRun(positional[0]);
   if (command === '/publish-next' || command === '/continue-course' || /продолжай курс/i.test(input) || /следующ/i.test(input)) return codexMode ? orchestrator.prepareCodexNext(options) : orchestrator.publishNext(options);
   if (command === '/publish-topic') return codexMode ? orchestrator.prepareCodexRun(positional[0], options) : orchestrator.publishTopic(positional[0], options);
   if (command === '/publish-lesson') return codexMode ? orchestrator.prepareCodexRun(positional[0], options) : orchestrator.publishTopic(positional[0], options);
