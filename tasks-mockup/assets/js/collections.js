@@ -135,6 +135,7 @@
   document.addEventListener('DOMContentLoaded', () => {
     AppUI.mountHeader('collections');
     AppUI.mountFooter();
-    render();
+    // Первый рендер ждёт Api: если рядом поднят backend, подборки приедут из Postgres.
+    (window.Api ? window.Api.ready : Promise.resolve()).then(render);
   });
 })();

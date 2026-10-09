@@ -1,1 +1,37 @@
-// Модуль catalog: задачи, подборки, справочники (наполнение — Фаза 1).
+// Модуль catalog: задачи, подборки, справочники (read API Фазы 1).
+// Тонкие контроллеры поверх репозиториев; сервисный слой появится
+// с бизнес-логикой в Фазе 2 — плодить его ради проксирования не стали.
+dependencies {
+    implementation project(':shared:persistence')
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+sourceSets {
+    integrationTest {
+        java.srcDir 'src/integrationTest/java'
+        resources.srcDir 'src/integrationTest/resources'
+        compileClasspath += sourceSets.main.output + sourceSets.test.output
+        runtimeClasspath += sourceSets.main.output + sourceSets.test.output
+    }
+}
+
+configurations {
+    integrationTestImplementation.extendsFrom testImplementation
+    integrationTestRuntimeOnly.extendsFrom testRuntimeOnly
+}
+
+dependencies {
+    integrationTestImplementation 'org.testcontainers:testcontainers:1.20.4'
+    integrationTestImplementation 'org.testcontainers:junit-jupiter:1.20.4'
+    integrationTestImplementation 'org.testcontainers:postgresql:1.20.4'
+}
+
+tasks.register('integrationTest', Test) {
+    description = 'Интеграционные тесты (нужен Docker; гоняются в CI).'
+    group = 'verification'
+    testClassesDirs = sourceSets.integrationTest.output.classesDirs
+    classpath = sourceSets.integrationTest.runtimeClasspath
+}

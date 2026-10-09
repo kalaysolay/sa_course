@@ -6,8 +6,17 @@ services:
     build: ../backend
     ports:
       - "8080:8080"
+    env_file:
+      - .env
     environment:
       - SPRING_PROFILES_ACTIVE=prod
+      # Имя хоста БД внутри compose-сети — postgres (не localhost).
+      - APP_DB_URL=jdbc:postgresql://postgres:5432/analystgym
+      - APP_DB_USER=${POSTGRES_USER}
+      - APP_DB_PASSWORD=${POSTGRES_PASSWORD}
+      - APP_JWT_SECRET=${APP_JWT_SECRET}
+      # За Caddy с https куки обязаны быть Secure, иначе браузер их не отдаст.
+      - APP_COOKIES_SECURE=true
     depends_on:
       postgres:
         condition: service_healthy

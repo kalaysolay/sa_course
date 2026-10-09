@@ -5,6 +5,37 @@ server:
 # стартовало и без подстановки из Gradle (локальный запуск из IDE).
 app:
   version: 0.1.0-dev
+  jwt:
+    # Прод-секрет — только из env (минимум 32 символа). Дефолт — для локалки.
+    secret: ${APP_JWT_SECRET:dev-secret-change-me-in-prod-00000000}
+    access-ttl-seconds: 900
+    refresh-ttl-seconds: 2592000
+  cookies:
+    # В проде за https — true (см. deploy/.env.example). Локально по http — false.
+    secure: ${APP_COOKIES_SECURE:false}
+
+spring:
+  datasource:
+    url: ${APP_DB_URL:jdbc:postgresql://localhost:5432/analystgym}
+    username: ${APP_DB_USER:analystgym}
+    password: ${APP_DB_PASSWORD:analystgym}
+    hikari:
+      # VPS маленький (4 GB): пул держим скромным, иначе съест память про запас.
+      maximum-pool-size: 10
+      minimum-idle: 2
+  jpa:
+    hibernate:
+      # Схемой владеет Flyway; Hibernate только сверяет маппинг с таблицами.
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        default_schema: public
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    # Валидация строгая: расхождение миграции с применённой — падать сразу, а не ехать.
+    validate-on-migrate: true
 
 management:
   endpoints:

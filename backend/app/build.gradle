@@ -7,11 +7,17 @@ plugins {
 
 dependencies {
     implementation project(':shared:kernel')
+    implementation project(':shared:persistence')
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.flywaydb:flyway-core'
+    runtimeOnly 'org.postgresql:postgresql'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
     testImplementation 'com.tngtech.archunit:archunit:1.4.0'
     // Classpath для ArchUnit-теста границ модулей (см. ModuleBoundariesTest):
     testImplementation project(':shared:persistence')

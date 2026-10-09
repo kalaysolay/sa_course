@@ -29,8 +29,8 @@ docker compose -f ../deploy/docker-compose.yml up --build
 ## Структура
 
 - `settings.gradle` — список модулей; `build.gradle` — общие настройки
-  (Java 21 toolchain, UTF-8, JUnit5) и версии библиотек литералами
-  (Spring Boot `3.4.1`, ArchUnit `1.4.0`).
+  (Java 21 toolchain, UTF-8, JUnit5) и центральный BOM Spring Boot
+  (версии библиотек только там, в модулях версий нет).
 - `app/` — точка входа, `HostProductFilter`, `/api/health`, syncMockup.
 - `modules/*` — 11 продуктовых модулей (пока каркасы, наполнение — Фазы 1–5).
 - `shared/kernel` — общие примитивы (`Result`); `shared/persistence` —

@@ -1,2 +1,7 @@
-// Общая персистентность: Flyway-миграции и базовые репозитории (с Фазы 1).
-// В Фазе 0 пусто: база поднимается в compose, но приложение её не трогает.
+// Общие JPA/Flyway-зависимости для модулей с базой (версии — из корневого BOM).
+// api-конфигурация: модули получают их транзитивно.
+dependencies {
+    api 'org.springframework.boot:spring-boot-starter-data-jpa'
+    api 'org.flywaydb:flyway-core'
+    api 'org.postgresql:postgresql'
+}

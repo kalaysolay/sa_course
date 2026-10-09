@@ -403,6 +403,7 @@
       update();
     });
 
-    update();
+    // Первый рендер ждёт Api: если рядом поднят backend, каталог приедет из Postgres.
+    (window.Api ? window.Api.ready : Promise.resolve()).then(update);
   });
 })();

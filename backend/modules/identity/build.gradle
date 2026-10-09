@@ -1,1 +1,43 @@
-// Модуль identity: пользователи, роли, JWT (наполнение — Фаза 1).
+// Модуль identity: пользователи, сессии, сброс пароля.
+// Отдельный integrationTest-сорссет: тесты с реальной Postgres в Docker
+// (Testcontainers) — запускаются только в CI (./gradlew integrationTest),
+// в обычный ./gradlew build не входят (иначе упадут без Docker).
+dependencies {
+    implementation project(':shared:persistence')
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+}
+
+sourceSets {
+    integrationTest {
+        java.srcDir 'src/integrationTest/java'
+        resources.srcDir 'src/integrationTest/resources'
+        compileClasspath += sourceSets.main.output + sourceSets.test.output
+        runtimeClasspath += sourceSets.main.output + sourceSets.test.output
+    }
+}
+
+configurations {
+    integrationTestImplementation.extendsFrom testImplementation
+    integrationTestRuntimeOnly.extendsFrom testRuntimeOnly
+}
+
+dependencies {
+    integrationTestImplementation 'org.testcontainers:testcontainers:1.20.4'
+    integrationTestImplementation 'org.testcontainers:junit-jupiter:1.20.4'
+    integrationTestImplementation 'org.testcontainers:postgresql:1.20.4'
+}
+
+tasks.register('integrationTest', Test) {
+    description = 'Интеграционные тесты (нужен Docker; гоняются в CI).'
+    group = 'verification'
+    testClassesDirs = sourceSets.integrationTest.output.classesDirs
+    classpath = sourceSets.integrationTest.runtimeClasspath
+}
