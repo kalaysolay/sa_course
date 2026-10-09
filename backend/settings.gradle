@@ -1,0 +1,17 @@
+// Корень сборки AnalystGym. Подпроекты — в каталогах app/, modules/*, shared/*.
+rootProject.name = 'analystgym'
+
+include 'app'
+include 'shared:kernel'
+include 'shared:persistence'
+include 'modules:identity'
+include 'modules:catalog'
+include 'modules:practice'
+include 'modules:review'
+include 'modules:assessment'
+include 'modules:courses'
+include 'modules:content'
+include 'modules:billing'
+include 'modules:quality'
+include 'modules:notify'
+include 'modules:admin'

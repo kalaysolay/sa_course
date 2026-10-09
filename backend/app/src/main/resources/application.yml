@@ -1,0 +1,16 @@
+server:
+  port: 8080
+
+# Версия сборки для /api/health. Значение по умолчанию — чтобы приложение
+# стартовало и без подстановки из Gradle (локальный запуск из IDE).
+app:
+  version: 0.1.0-dev
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never

@@ -1,0 +1,29 @@
+// Общие настройки всех подпроектов. Версии библиотек — литералами здесь
+// (версий мало; когда станет тесно — переедем на version catalog).
+// Java 21 через toolchain: Gradle сам скачает JDK при необходимости.
+allprojects {
+    group = 'ru.analystgym'
+    version = '0.1.0'
+}
+
+subprojects {
+    apply plugin: 'java-library'
+
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(21)
+        }
+    }
+
+    repositories {
+        mavenCentral()
+    }
+
+    tasks.withType(JavaCompile).configureEach {
+        options.encoding = 'UTF-8'
+    }
+
+    tasks.withType(Test).configureEach {
+        useJUnitPlatform()
+    }
+}

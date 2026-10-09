@@ -1,0 +1,7 @@
+# Caddy: все поддомены на один app (продукт различаем по Host, см. HostProductFilter).
+# Локально: этот файл не нужен — открывайте http://localhost:8080 напрямую.
+# Для локальных поддоменов добавьте в hosts: 127.0.0.1 practice.local course.local
+# и замените домены ниже на practice.local / course.local.
+analystgym.ru, practice.analystgym.ru, course.analystgym.ru {
+	reverse_proxy app:8080
+}

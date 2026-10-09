@@ -1,0 +1,24 @@
+#!/bin/sh
+#
+# Gradle startup script (сгенерировано под Gradle 8.10.2).
+# Запуск: ./gradlew build  (из каталога backend/)
+#
+APP_NAME="Gradle"
+APP_BASE_NAME=`basename "$0"`
+
+# Находим java: сначала JAVA_HOME, иначе java из PATH.
+if [ -n "$JAVA_HOME" ] ; then
+    JAVACMD="$JAVA_HOME/bin/java"
+else
+    JAVACMD="java"
+fi
+
+if [ ! -x "$JAVACMD" ] ; then
+    echo "ОШИБКА: java не найден. Установите JDK 21 или задайте JAVA_HOME." >&2
+    exit 1
+fi
+
+APP_HOME=`cd "${APP_HOME:-./}" && pwd -P` || exit
+CLASSPATH=$APP_HOME/gradle/wrapper/gradle-wrapper.jar
+
+exec "$JAVACMD" -classpath "$CLASSPATH" org.gradle.wrapper.GradleWrapperMain "$@"

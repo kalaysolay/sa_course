@@ -1,0 +1,42 @@
+// Точка входа приложения: Spring Boot + HTTP API + раздача статики.
+// Версии Spring Boot фиксируем литералами здесь (их всего две).
+plugins {
+    id 'org.springframework.boot' version '3.4.1'
+    id 'io.spring.dependency-management' version '1.1.6'
+}
+
+dependencies {
+    implementation project(':shared:kernel')
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'com.tngtech.archunit:archunit:1.4.0'
+    // Classpath для ArchUnit-теста границ модулей (см. ModuleBoundariesTest):
+    testImplementation project(':shared:persistence')
+    testImplementation project(':modules:identity')
+    testImplementation project(':modules:catalog')
+    testImplementation project(':modules:practice')
+    testImplementation project(':modules:review')
+    testImplementation project(':modules:assessment')
+    testImplementation project(':modules:courses')
+    testImplementation project(':modules:content')
+    testImplementation project(':modules:billing')
+    testImplementation project(':modules:quality')
+    testImplementation project(':modules:notify')
+    testImplementation project(':modules:admin')
+}
+
+// Копирует макет в статику приложения (tasks-mockup -> resources/static).
+// Исключаем около-сборочный мусор; docs/ оставляем (на них ссылается админка).
+tasks.register('syncMockup', Copy) {
+    description = 'Копирует tasks-mockup в статику приложения.'
+    from("${rootDir}/../tasks-mockup") {
+        exclude 'server.py', 'check-mockup.py', 'scripts/**'
+    }
+    into 'src/main/resources/static'
+}
+
+// Статика всегда свежая: сначала синхронизация, потом упаковка ресурсов.
+processResources.dependsOn syncMockup

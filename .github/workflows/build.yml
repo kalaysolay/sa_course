@@ -1,0 +1,32 @@
+# Сборка бэкенда: компиляция + тесты + ArchUnit. Деплоя здесь нет (Фаза 4).
+# Срабатывает только на изменениях в backend/ — макет и издательство CI не трогают.
+name: backend-build
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/build.yml'
+  pull_request:
+    paths:
+      - 'backend/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+
+      - name: Build
+        run: ./gradlew build --no-daemon
