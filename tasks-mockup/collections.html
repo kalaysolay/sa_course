@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Подборки задач по доменам — AnalystGym</title>
+  <meta name="description" content="Подборки задач для аналитиков: интеграции, системный дизайн, базы данных и SQL, требования и коммуникации, финтех, разминка перед собеседованием.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script>try{var __t=localStorage.getItem('sa-trainer:theme');if(__t==='light'||__t==='gray')document.documentElement.setAttribute('data-theme',__t)}catch(e){}</script>
+  <link rel="icon" type="image/png" href="./assets/logo.png">
+  <link rel="stylesheet" href="./assets/styles.css">
+</head>
+<body>
+  <header id="siteHeader"></header>
+
+  <div class="wrap wrap-wide">
+    <div class="page-head">
+      <p class="eyebrow">Подборки</p>
+      <h1>Группы задач по доменам</h1>
+      <p class="lead">
+        Готовьтесь целыми блоками: подборка — это набор задач одной предметной области,
+        которые на собеседовании обычно идут подряд. Прогресс по подборке сохраняется.
+      </p>
+      <div class="row mt-16" style="gap:8px;flex-wrap:wrap" id="collectionStats"></div>
+    </div>
+
+    <div id="collectionsHost"></div>
+  </div>
+
+  <footer id="siteFooter"></footer>
+
+  <script src="./assets/js/data-core.js" defer></script>
+  <script src="./assets/js/data-tasks-1.js" defer></script>
+  <script src="./assets/js/data-tasks-2.js" defer></script>
+  <script src="./assets/js/store.js" defer></script>
+  <script src="./assets/js/ui.js" defer></script>
+  <script src="./assets/js/collections.js" defer></script>
+</body>
+</html>

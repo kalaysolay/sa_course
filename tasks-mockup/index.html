@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AnalystGym — куда пойдёшь?</title>
+  <meta name="description" content="AnalystGym: тренажёр собеседований с ревью ИИ-агентов и курсы для аналитиков. Выбери свой путь — или сначала узнай уровень за 20 минут.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script>try{var __t=localStorage.getItem('sa-trainer:theme');if(__t==='light'||__t==='gray')document.documentElement.setAttribute('data-theme',__t)}catch(e){}</script>
+  <link rel="icon" type="image/png" href="./assets/logo.png">
+  <link rel="stylesheet" href="./assets/styles.css">
+</head>
+<body class="hub">
+  <div class="hub-blob b1" aria-hidden="true"></div>
+  <div class="hub-blob b2" aria-hidden="true"></div>
+
+  <div class="hub-top">
+    <span class="hub-logo">
+      <img src="./assets/logo.png" width="76" height="76" alt="Логотип AnalystGym" id="hubLogoImg">
+      <span class="hub-logo-text">
+        <span class="hub-logo-title">Analyst<span style="color:var(--accent)">Gym</span></span>
+        <span class="hub-logo-sub">платформа подготовки аналитиков</span>
+      </span>
+    </span>
+    <button class="btn btn-ghost btn-sm hub-theme-btn" type="button" id="hubThemeBtn" title="Сменить оформление">
+      <span aria-hidden="true">◐</span>&nbsp;<span data-theme-label>Тёмная</span>
+    </button>
+  </div>
+
+  <main class="hub-split">
+    <a class="hub-half hub-practice" href="practice.html">
+      <div class="hub-kicker"><span class="chip chip-accent">practice.analystgym.ru</span></div>
+      <h1 class="hub-title">Тренируйся<span class="accent">.</span></h1>
+      <p class="hub-desc">Задачи с реальных проектов. Пишешь решение — два ИИ-агента разбирают, что учтено, а что развалится на собесе.</p>
+      <div class="hub-stats">
+        <div><span class="num">16</span><span class="lbl">задач с ревью</span></div>
+        <div><span class="num">3</span><span class="lbl">уровня сложности</span></div>
+        <div><span class="num">2</span><span class="lbl">агента-ревьюера</span></div>
+      </div>
+      <span class="hub-go">Войти в тренажёр <span class="arrow">→</span></span>
+    </a>
+
+    <a class="hub-half hub-courses" href="courses.html">
+      <div class="hub-kicker"><span class="chip chip-violet">course.analystgym.ru</span></div>
+      <h1 class="hub-title">Учись<span class="accent">.</span></h1>
+      <p class="hub-desc">Короткие уроки без воды: от бесплатного «Требования без воды» до «Системного аналитика до мидла».</p>
+      <div class="hub-stats">
+        <div><span class="num">3</span><span class="lbl">курса</span></div>
+        <div><span class="num">15</span><span class="lbl">уроков</span></div>
+        <div><span class="num">0 ₽</span><span class="lbl">первый курс</span></div>
+      </div>
+      <span class="hub-go">Смотреть курсы <span class="arrow">→</span></span>
+    </a>
+  </main>
+
+  <div class="hub-strip">
+    <div class="wrap wrap-wide hub-strip-in">
+      <div>
+        <div class="hub-strip-title">С чего начать?</div>
+        <p>Пройди диагностику — узнаешь свой уровень и что качать. Бесплатно, 20 минут, без регистрации.</p>
+      </div>
+      <a class="btn btn-primary" href="assessment.html">Пройти диагностику →</a>
+    </div>
+  </div>
+
+  <div class="hub-foot">
+    <span>analystgym.ru · два продукта · один аккаунт · © 2026</span>
+  </div>
+
+  <script src="./assets/js/ui.js" defer></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      AppUI.initTheme();
+      const btn = document.getElementById('hubThemeBtn');
+      if (btn) {
+        btn.addEventListener('click', (event) => {
+          event.stopPropagation();
+          AppUI.themeMenu(btn);
+        });
+      }
+      /* Если файл логотипа ещё не положили в assets — показываем текстовую заглушку */
+      const logoImg = document.getElementById('hubLogoImg');
+      if (logoImg) {
+        const fallback = () => {
+          const stub = document.createElement('span');
+          stub.className = 'brand-mark hub-logo-fallback';
+          stub.textContent = 'AG';
+          logoImg.replaceWith(stub);
+        };
+        if (logoImg.complete && logoImg.naturalWidth === 0) fallback();
+        else logoImg.addEventListener('error', fallback);
+      }
+      AppUI.initTheme();
+    });
+  </script>
+</body>
+</html>

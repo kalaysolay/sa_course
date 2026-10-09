@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Задача — AnalystGym</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script>try{var __t=localStorage.getItem('sa-trainer:theme');if(__t==='light'||__t==='gray')document.documentElement.setAttribute('data-theme',__t)}catch(e){}</script>
+  <link rel="icon" type="image/png" href="./assets/logo.png">
+  <link rel="stylesheet" href="./assets/styles.css">
+</head>
+<body>
+  <header id="siteHeader"></header>
+
+  <div class="wrap wrap-wide task-page">
+    <nav class="task-crumb" id="crumbs" aria-label="Хлебные крошки"></nav>
+
+    <div id="taskHost"></div>
+
+    <!-- ============ процесс ревью ============ -->
+    <section class="review-section hidden" id="reviewProgressSection" aria-live="polite">
+      <div class="panel review-progress">
+        <div class="row-between" style="align-items:flex-start;gap:16px">
+          <div>
+            <p class="eyebrow" style="margin-bottom:8px">Идёт ревью решения</p>
+            <h3 style="font-size:17px;margin-bottom:6px">Два агента разбирают ваш ответ</h3>
+            <p class="muted" style="font-size:13.5px;margin:0">Обычно занимает 30–60 секунд. Можно остаться на странице или вернуться позже — результат сохранится.</p>
+          </div>
+          <button class="btn btn-ghost btn-sm" type="button" id="speedUpBtn" title="Для демо: пропустить анимацию">Ускорить (демо)</button>
+        </div>
+
+        <div class="progress-bar mt-16"><i id="reviewProgressBar"></i></div>
+        <div class="mono mt-8" style="font-size:11.5px;color:var(--dim)" id="reviewProgressLabel">подготовка…</div>
+
+        <div class="rp-agents" id="rpAgents"></div>
+      </div>
+    </section>
+
+    <!-- ============ ответ ревью ============ -->
+    <section class="review-section hidden" id="reviewResultSection"></section>
+
+    <!-- ============ история попыток ============ -->
+    <section class="review-section hidden" id="attemptsSection"></section>
+
+    <!-- ============ соседние задачи ============ -->
+    <section class="review-section" id="relatedSection"></section>
+  </div>
+
+  <footer id="siteFooter"></footer>
+
+  <script src="./assets/vendor/viz-global.js" defer></script>
+  <script src="./assets/vendor/mermaid.min.js" defer></script>
+  <script src="./assets/vendor/plantuml.js" defer></script>
+  <script src="./assets/js/data-core.js" defer></script>
+  <script src="./assets/js/data-tasks-1.js" defer></script>
+  <script src="./assets/js/data-tasks-2.js" defer></script>
+  <script src="./assets/js/store.js" defer></script>
+  <script src="./assets/js/review-engine.js" defer></script>
+  <script src="./assets/js/ui.js" defer></script>
+  <script src="./assets/js/task.js" defer></script>
+</body>
+</html>

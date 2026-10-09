@@ -1,0 +1,529 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AnalystGym — тренажёр собеседований для системных и бизнес-аналитиков</title>
+  <meta name="description" content="Задачи с реальных проектов, ревью двумя ИИ-агентами (системный аналитик и архитектор) и диагностика уровня. Готовьтесь к собеседованию на практике, а не по конспектам.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script>try{var __t=localStorage.getItem('sa-trainer:theme');if(__t==='light'||__t==='gray')document.documentElement.setAttribute('data-theme',__t)}catch(e){}</script>
+  <link rel="icon" type="image/png" href="./assets/logo.png">
+  <link rel="stylesheet" href="./assets/styles.css">
+</head>
+<body>
+  <header id="siteHeader"></header>
+
+  <!-- ================= HERO ================= -->
+  <section class="hero">
+    <div class="wrap wrap-wide">
+      <div class="hero-grid">
+        <div>
+          <p class="eyebrow">Тренажёр для SA / BA · практика вместо конспектов</p>
+          <h1>Собеседование<br>проходят <span class="strike">по теории</span><br><span class="accent">на практике</span></h1>
+          <p class="hero-lead">
+            16 задач с реальных проектов — интеграции, системный дизайн, базы данных, требования.
+            Вы пишете решение как на работе: документ, PlantUML, Mermaid.
+            Два ИИ-агента разбирают его и говорят, что учтено, что упущено и почему решение
+            <em>не вытянет</em> технический экран.
+          </p>
+          <div class="hero-cta">
+            <a class="btn btn-primary btn-lg" href="assessment.html">Определить свой уровень →</a>
+            <a class="btn btn-outline btn-lg" href="catalog.html">Открыть каталог задач</a>
+          </div>
+          <div class="hero-stats">
+            <div class="hero-stat"><span class="num" id="statTasks">16</span><span class="lbl">задач трёх уровней</span></div>
+            <div class="hero-stat"><span class="num">2</span><span class="lbl">ИИ-ревьюера с ролями</span></div>
+            <div class="hero-stat"><span class="num" id="statQuestions">40</span><span class="lbl">вопросов диагностики</span></div>
+            <div class="hero-stat"><span class="num">7</span><span class="lbl">компетенций в профиле</span></div>
+          </div>
+        </div>
+
+        <div class="hero-visual">
+          <div class="float-card fc-1">+ ревью архитектора</div>
+          <div class="float-card fc-2">PlantUML · Mermaid рендерятся</div>
+          <div class="mock-window">
+            <div class="mock-titlebar">
+              <span class="mock-dots"><i></i><i></i><i></i></span>
+              <span class="path">task / int-idempotency · решение отправлено</span>
+            </div>
+            <div class="mock-body">
+              <div class="row-between" style="margin-bottom:14px">
+                <div>
+                  <div class="mono" style="font-size:10.5px;letter-spacing:.1em;color:var(--dim)">ВЕРДИКТ РЕВЬЮ</div>
+                  <div style="font-size:16px;font-weight:650;margin-top:2px">Хорошее решение</div>
+                </div>
+                <div style="text-align:right">
+                  <div class="mono" style="font-size:28px;font-weight:600;color:var(--accent)">72</div>
+                  <div class="mono" style="font-size:10px;color:var(--dim)">качество</div>
+                </div>
+              </div>
+              <div class="grade-meter" style="margin-bottom:16px">
+                <i class="on-1"></i><i class="on-2"></i><i class="on-3"></i><i class="on-4"></i><i></i>
+              </div>
+              <div class="agent-line">
+                <span class="agent-avatar sa">СА</span>
+                <div>
+                  <div class="who">Анна Ковалёва · системный аналитик</div>
+                  <div class="what">Учтено: ключ идемпотентности, модель состояний. <span style="color:var(--warn)">Не учтено:</span> поведение при зависшем эквайеринге.</div>
+                </div>
+              </div>
+              <div class="agent-line">
+                <span class="agent-avatar arch">АР</span>
+                <div>
+                  <div class="who">Дмитрий Лазарев · архитектор</div>
+                  <div class="what">Схема рабочая. Гонку двух одинаковых запросов unique-индекс не закрывает — это стоит описать явно.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="wrap wrap-wide">
+    <div class="proof-strip">
+      <span>Домены задач: <b>финтех</b> · <b>e-commerce</b> · <b>доставка</b> · <b>ритейл</b> · <b>B2B SaaS</b></span>
+      <span>Нотации: <b>UML</b> · <b>BPMN</b> · <b>ER</b> · <b>Sequence</b></span>
+      <span>Рендер диаграмм: <b>PlantUML</b> · <b>Mermaid</b> — локально, без интернета</span>
+    </div>
+  </div>
+
+  <!-- ================= БОЛЬ ================= -->
+  <section class="section">
+    <div class="wrap">
+      <p class="eyebrow">Знакомо?</p>
+      <h2 class="section-title">Три причины, по которым сильные аналитики проваливают собесы</h2>
+      <p class="section-lead mb-32">Дело почти никогда не в знаниях. Дело в том, что знания не тренировали в формате, который требует интервью.</p>
+      <div class="grid-3">
+        <div class="card feature-card">
+          <span class="feature-num">01 / УСТНО ≠ ПИСЬМЕННО</span>
+          <h3>«Расскажите, как спроектируете интеграцию»</h3>
+          <p>В голове ответ есть, а вслух получается каша: нет структуры, нет цифр, нет альтернативных сценариев. Интервьюер слышит неуверенность. Письменная практика с разбором лечит именно это.</p>
+        </div>
+        <div class="card feature-card">
+          <span class="feature-num">02 / ПРОБЕЛЫ НЕВИДИМЫ</span>
+          <h3>Вы не знаете, чего не знаете</h3>
+          <p>Идемпотентность вспомнили, а про DLQ, сверку и откат — нет. Без внешнего взгляда пробелы не обнаружить: на работе их прикрывает команда, на собеседовании — некому.</p>
+        </div>
+        <div class="card feature-card">
+          <span class="feature-num">03 / НЕТ ОРИЕНТИРА</span>
+          <h3>«Я middle или уже senior?»</h3>
+          <p>Без калибровки сложно выбирать вакансии и говорить о деньгах. Диагностика по 7 компетенциям показывает фактический профиль, а не самооценку.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= КАК ЭТО РАБОТАЕТ ================= -->
+  <section class="section section-bordered" id="how">
+    <div class="wrap">
+      <div class="row-between mb-32" style="align-items:flex-end">
+        <div>
+          <p class="eyebrow">Процесс</p>
+          <h2 class="section-title">Четыре шага до оффера</h2>
+          <p class="section-lead">Цикл одной задачи — от 20 до 90 минут. Как настоящий рабочий артефакт, только с мгновенным разбором.</p>
+        </div>
+        <a class="btn btn-ghost" href="catalog.html">Попробовать на задаче →</a>
+      </div>
+
+      <div class="grid-2" style="gap:32px;align-items:start">
+        <div class="steps">
+          <div class="step">
+            <span class="step-num">01</span>
+            <div>
+              <h3>Выбираете задачу</h3>
+              <p>Каталог с фильтрами по уровню и меткам (SQL, REST API, SOAP, архитектура, требования…) или готовые подборки по доменам: интеграции, системный дизайн, базы данных.</p>
+            </div>
+          </div>
+          <div class="step">
+            <span class="step-num">02</span>
+            <div>
+              <h3>Пишете решение во вкладках</h3>
+              <p>Слева — условие, справа — рабочее место. Типы вкладок: <strong>документ</strong> с WYSIWYG-редактором, <strong>PlantUML</strong> и <strong>Mermaid</strong> с живым превью. Всё автосохраняется в браузере.</p>
+            </div>
+          </div>
+          <div class="step">
+            <span class="step-num">03</span>
+            <div>
+              <h3>Отправляете на ревью</h3>
+              <p>Кнопка «Отправить решение» → подтверждение → агенты разбирают ваш текст по рубрике задачи. Вы видите процесс: кто что читает и проверяет.</p>
+            </div>
+          </div>
+          <div class="step">
+            <span class="step-num">04</span>
+            <div>
+              <h3>Получаете два разбора</h3>
+              <p>Системный аналитик — про полноту, сценарии и измеримость. Архитектор — про реализуемость, данные и надёжность. Плюс вердикт «хорошее / не хорошее решение» и что усилить.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="stack" style="gap:18px">
+          <div class="panel">
+            <div class="panel-head">
+              <p class="panel-title">Рабочее место · вкладки решения</p>
+              <span class="badge badge-accent">макет</span>
+            </div>
+            <div class="panel-body">
+              <div class="row" style="gap:6px;margin-bottom:14px;flex-wrap:wrap">
+                <span class="chip chip-accent">Документ</span>
+                <span class="chip">PlantUML</span>
+                <span class="chip">Mermaid</span>
+                <span class="chip" style="border-style:dashed">+ добавить</span>
+              </div>
+              <div class="wysiwyg" style="min-height:auto;padding:14px;background:var(--bg-soft);border:1px solid var(--line);border-radius:10px;font-size:13px">
+                <h3 style="font-size:14px;margin-top:0">Идемпотентность списания</h3>
+                <p style="margin-bottom:8px">Ключ генерирует клиент в момент формирования намерения. Сервер хранит ключ + снимок ответа…</p>
+                <ul style="margin:0;padding-left:18px">
+                  <li>повтор по ключу → 200 и сохранённый ответ</li>
+                  <li>ключ в работе → 409 + retryAfter</li>
+                </ul>
+              </div>
+              <div class="row" style="margin-top:14px;gap:8px">
+                <span class="badge"><span class="save-dot"></span> сохранено</span>
+                <span class="badge badge-info">1 документ · 2 схемы</span>
+                <button class="btn btn-primary btn-sm" style="margin-left:auto" type="button" onclick="location.href='task.html?id=int-idempotency'">Отправить решение</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head">
+              <p class="panel-title">Что вы получаете в ответе</p>
+              <span class="badge">не «верно/неверно»</span>
+            </div>
+            <div class="panel-body">
+              <ul class="rubric-list">
+                <li><span class="w">+</span><span><strong>Что учтено</strong> — с цитатами из вашего текста, чтобы было видно, что именно зачли.</span></li>
+                <li><span class="w mid">−</span><span><strong>Что не учтено</strong> — и почему без этого решение не работает в проде.</span></li>
+                <li><span class="w high">!</span><span><strong>Вердикт</strong> — хорошее решение / с пробелами / не решает задачу, с расшифровкой.</span></li>
+                <li><span class="w">?</span><span><strong>Вопросы интервьюера</strong> — что бы вас спросили по каждому пробелу.</span></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= РЕВЬЮ ================= -->
+  <section class="section section-bordered">
+    <div class="wrap">
+      <p class="eyebrow">Ревью двумя агентами</p>
+      <h2 class="section-title">Оценка качества, а не «правильно / неправильно»</h2>
+      <p class="section-lead mb-32">
+        В анализе редко бывает один верный ответ. Поэтому мы оцениваем, насколько решение хорошее: что вы учли,
+        что упустили, выдержит ли оно прод и уточняющие вопросы интервьюера.
+      </p>
+
+      <div class="grid-2" style="gap:18px;align-items:stretch">
+        <div class="panel review-agent sa" style="border-radius:14px">
+          <div class="ra-head">
+            <span class="ra-avatar sa">СА</span>
+            <div>
+              <div class="ra-name">Анна Ковалёва</div>
+              <div class="ra-role">Агент · системный аналитик · 11 лет в финтехе</div>
+            </div>
+            <div class="ra-score"><div class="num">7.4</div><div class="lbl">оценка</div></div>
+          </div>
+          <div class="ra-cols">
+            <div class="ra-block good">
+              <h5><span class="dot"></span>Что учтено</h5>
+              <ul class="ra-list">
+                <li><span class="ico">✓</span><span>Ключ идемпотентности генерирует клиент — повторная отправка не создаёт второй платёж.</span></li>
+                <li><span class="ico">✓</span><span>Модель состояний включает UNKNOWN: вы не потеряли «зависший» эквайринг.</span></li>
+              </ul>
+            </div>
+            <div class="ra-block miss">
+              <h5><span class="dot"></span>Что не учтено</h5>
+              <ul class="ra-list">
+                <li><span class="ico crit">!</span><span>Нет сверки с эквайером: кто и как узнаёт истину, если ответа нет сутки.</span></li>
+                <li><span class="ico">−</span><span>Не описано, что видит пользователь в состоянии PENDING.</span></li>
+              </ul>
+            </div>
+          </div>
+          <div class="ra-narrative">
+            <span class="lbl">Почему решение решает задачу — но не до конца</span>
+            Основной сценарий закрыт: двойного списания не будет. Но задача про деньги не заканчивается на «ключе»:
+            без процедуры сверки расхождение между нашим статусом и деньгами клиента останется неразобранным,
+            и его будет закрывать поддержка вручную. Это ровно то место, где на собеседовании задают следующий вопрос.
+          </div>
+        </div>
+
+        <div class="panel review-agent" style="border-radius:14px">
+          <div class="ra-head">
+            <span class="ra-avatar arch">АР</span>
+            <div>
+              <div class="ra-name">Дмитрий Лазарев</div>
+              <div class="ra-role">Агент · архитектор интеграций · 14 лет</div>
+            </div>
+            <div class="ra-score"><div class="num">6.8</div><div class="lbl">оценка</div></div>
+          </div>
+          <div class="ra-cols">
+            <div class="ra-block good">
+              <h5><span class="dot"></span>Что учтено</h5>
+              <ul class="ra-list">
+                <li><span class="ico">✓</span><span>Хранение ключа со снимком ответа и TTL 24 часа.</span></li>
+                <li><span class="ico">✓</span><span>Есть sequence-диаграмма — поток читается без догадок.</span></li>
+              </ul>
+            </div>
+            <div class="ra-block miss">
+              <h5><span class="dot"></span>Что не учтено</h5>
+              <ul class="ra-list">
+                <li><span class="ico crit">!</span><span>Гонка двух одновременных запросов: проверка «ключа нет» в коде не спасает, нужен unique-индекс.</span></li>
+                <li><span class="ico">−</span><span>Не заданы таймауты и политика ретраев к эквайеру.</span></li>
+              </ul>
+            </div>
+          </div>
+          <div class="ra-narrative">
+            <span class="lbl">Реализуемость</span>
+            Решение можно отдать в разработку, но реализация разойдётся с ожиданием в одном месте: параллельные дубли.
+            Добавьте ограничение на уровне БД и обработку 409 — и схема становится устойчивой.
+            Из приятного: вы не стали изобретать exactly-once там, где достаточно идемпотентного потребителя.
+          </div>
+        </div>
+      </div>
+
+      <div class="info-box mt-24" style="max-width:none">
+        <div class="ib-title">Как это устроено под капотом</div>
+        <p style="margin:0;color:var(--text-2);font-size:13.5px">
+          Каждый агент — отдельная роль со своим промптом, своим фокусом проверки и своей рубрикой.
+          Рубрика задачи состоит из критериев с весами: агент ищет в вашем тексте подтверждения, цитирует их
+          и объясняет, почему непокрытый критерий ломает решение. В этом макете разбор собирается локально
+          (детерминированный движок), в продукте на том же контракте работает LLM — поэтому структура ответа
+          и UX остаются теми же.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ПОДБОРКИ ================= -->
+  <section class="section section-bordered">
+    <div class="wrap">
+      <div class="row-between mb-32" style="align-items:flex-end">
+        <div>
+          <p class="eyebrow">Подборки</p>
+          <h2 class="section-title">Готовьтесь доменами, а не вразнобой</h2>
+          <p class="section-lead">Собес в банк — берите интеграции и финтех. В продуктовую команду — системный дизайн и требования.</p>
+        </div>
+        <a class="btn btn-ghost" href="collections.html">Все подборки →</a>
+      </div>
+      <div class="grid-3" id="landingCollections"></div>
+    </div>
+  </section>
+
+  <!-- ================= ДИАГНОСТИКА ================= -->
+  <section class="section section-bordered" id="assessment">
+    <div class="wrap">
+      <div class="grid-2" style="gap:40px;align-items:center">
+        <div>
+          <p class="eyebrow">Диагностика уровня</p>
+          <h2 class="section-title">40 вопросов — и вы знаете, где провалы</h2>
+          <p class="section-lead mb-24">
+            Большой тест по реальным рабочим ситуациям: не «что такое REST», а «что вы сделаете, если
+            эквайеринг не ответил, а пользователь ждёт». По итогам — профиль по 7 компетенциям,
+            ваш грейд и персональный план из задач тренажёра.
+          </p>
+          <ul class="price-features mb-24">
+            <li>Общий уровень: от «Старт» до «Lead»</li>
+            <li>Профиль по компетенциям: требования, интеграции, данные, архитектура, нотации, процессы, качество</li>
+            <li>Разбор каждого ответа с объяснением</li>
+            <li>План прокачки: конкретные задачи под ваши пробелы</li>
+          </ul>
+          <div class="row" style="gap:12px;flex-wrap:wrap">
+            <a class="btn btn-primary btn-lg" href="assessment.html">Пройти диагностику · 20 минут</a>
+            <span class="mono dim" style="font-size:12px">бесплатно, без регистрации</span>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <p class="panel-title">Пример результата</p>
+            <span class="badge badge-accent">Middle · 68/100</span>
+          </div>
+          <div class="panel-body">
+            <div class="competency-bars">
+              <div class="cbar" data-tier="strong">
+                <div class="top"><span class="name">Требования и формализация</span><span class="pct">86%</span></div>
+                <div class="track"><i style="width:86%"></i></div>
+                <div class="verdict">Сильная зона: можно брать задачи уровня senior</div>
+              </div>
+              <div class="cbar" data-tier="ok">
+                <div class="top"><span class="name">Моделирование и нотации</span><span class="pct">71%</span></div>
+                <div class="track"><i style="width:71%"></i></div>
+                <div class="verdict">Уверенно, но BPMN стоит повторить</div>
+              </div>
+              <div class="cbar" data-tier="weak">
+                <div class="top"><span class="name">Интеграции и API</span><span class="pct">54%</span></div>
+                <div class="track"><i style="width:54%"></i></div>
+                <div class="verdict">Пробел: идемпотентность и гарантии доставки</div>
+              </div>
+              <div class="cbar" data-tier="bad">
+                <div class="top"><span class="name">Архитектура и системный дизайн</span><span class="pct">38%</span></div>
+                <div class="track"><i style="width:38%"></i></div>
+                <div class="verdict">Зона роста: саги, outbox, партиционирование</div>
+              </div>
+            </div>
+            <div class="divider" style="margin:20px 0"></div>
+            <div class="mono" style="font-size:11px;color:var(--dim);margin-bottom:10px">ПЛАН ПРОКАЧКИ</div>
+            <div class="plan-item"><span class="n">01</span><div><div class="t">Событийная интеграция заказа</div><div class="s">Архитектура · Kafka · сага</div></div><span class="level level-hard">Сложный</span></div>
+            <div class="plan-item"><span class="n">02</span><div><div class="t">Идемпотентное списание</div><div class="s">REST API · идемпотентность</div></div><span class="level level-medium">Средний</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ТАРИФЫ ================= -->
+  <section class="section section-bordered" id="pricing">
+    <div class="wrap">
+      <p class="eyebrow">Тарифы</p>
+      <h2 class="section-title">Один собес окупает год подписки</h2>
+      <p class="section-lead mb-32">Начните бесплатно: диагностика уровня и две задачи с ревью доступны без оплаты.</p>
+
+      <div class="pricing-grid">
+        <div class="card price-card">
+          <div class="price-name">Free</div>
+          <div class="price-value">0 ₽</div>
+          <p class="muted" style="font-size:13.5px;margin:0">Понять, подходит ли формат</p>
+          <ul class="price-features">
+            <li>Диагностика уровня (40 вопросов)</li>
+            <li>2 задачи на выбор с полным ревью</li>
+            <li>Доступ к каталогу и подборкам</li>
+            <li class="off">История попыток и динамика</li>
+            <li class="off">Эталонные решения</li>
+          </ul>
+          <a class="btn btn-outline btn-block" href="assessment.html">Начать бесплатно</a>
+        </div>
+
+        <div class="card price-card popular">
+          <span class="price-flag">Выбирают чаще всего</span>
+          <div class="price-name">Pro</div>
+          <div class="price-value">990 ₽ <small>/ мес</small></div>
+          <p class="muted" style="font-size:13.5px;margin:0">Активная подготовка к собесам</p>
+          <ul class="price-features">
+            <li>Все задачи и все подборки</li>
+            <li>Неограниченные отправки на ревью</li>
+            <li>Эталонные решения автора с диаграммами</li>
+            <li>История попыток и прогресс по компетенциям</li>
+            <li>Повторная диагностика раз в месяц</li>
+            <li>Персональный план прокачки</li>
+          </ul>
+          <a class="btn btn-primary btn-block" href="#" data-demo-plan="pro">Оформить Pro</a>
+          <span class="mono dim center" style="font-size:11px">790 ₽/мес при оплате за год · отмена в любой момент</span>
+        </div>
+
+        <div class="card price-card">
+          <div class="price-name">Team</div>
+          <div class="price-value">по запросу</div>
+          <p class="muted" style="font-size:13.5px;margin:0">Обучение и оценка команды аналитиков</p>
+          <ul class="price-features">
+            <li>Всё из Pro на каждого участника</li>
+            <li>Отчёт по команде: грейды и пробелы</li>
+            <li>Задачи под ваш домен и стек</li>
+            <li>Ревью вашим лидом поверх агентского</li>
+            <li>SSO и выгрузка результатов в HR-систему</li>
+          </ul>
+          <a class="btn btn-outline btn-block" href="#" data-demo-plan="team">Обсудить Team</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ОТЗЫВЫ ================= -->
+  <section class="section section-bordered">
+    <div class="wrap">
+      <p class="eyebrow">Отзывы</p>
+      <h2 class="section-title mb-32">Что говорят те, кто уже прошёл через собесы</h2>
+      <div class="grid-3">
+        <div class="card quote">
+          <p>«Провалила два собеса подряд и не понимала почему. Здесь на третьей задаче архитектор написал: „нет поведения при отказе“ — и я увидела, что отвечаю только про счастливый путь. Через месяц получила оффер.»</p>
+          <div class="quote-who">
+            <span class="avatar">МК</span>
+            <div><div class="name">Мария К.</div><div class="role">системный аналитик → fintech, Middle+</div></div>
+          </div>
+        </div>
+        <div class="card quote">
+          <p>«Диагностика показала 38% по архитектуре при 86% по требованиям. Я был уверен, что у меня ровно наоборот. План прокачки закрыл пробел за три недели — на собесе вопрос про сагу уже не выбил из колеи.»</p>
+          <div class="quote-who">
+            <span class="avatar">АП</span>
+            <div><div class="name">Артём П.</div><div class="role">бизнес-аналитик → e-commerce, Senior</div></div>
+          </div>
+        </div>
+        <div class="card quote">
+          <p>«Беру задачи из подборки „Разминка перед собеседованием“ за два дня до интервью. Формат „напиши как на работе, получи разбор“ работает лучше любых курсов: на выходе у меня готовые артефакты для портфолио.»</p>
+          <div class="quote-who">
+            <span class="avatar">ЕС</span>
+            <div><div class="name">Елена С.</div><div class="role">аналитик интеграций → логистика</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= FAQ ================= -->
+  <section class="section section-bordered" id="faq">
+    <div class="wrap" style="max-width:900px">
+      <p class="eyebrow">Вопросы</p>
+      <h2 class="section-title mb-24">Коротко о главном</h2>
+
+      <details class="faq-item">
+        <summary>Это подходит бизнес-аналитикам или только системным?</summary>
+        <div class="faq-body">Обоим. Задачи помечены метками: «требования», «стейкхолдеры», «user story» — это чистая BA-зона; «архитектура», «Kafka», «SQL» — SA. В современных вакансиях границы размыты, поэтому профиль компетенций строится по семи осям, и вы сами видите, где вы BA, а где SA.</div>
+      </details>
+      <details class="faq-item">
+        <summary>Почему ревью делают ИИ-агенты, а не люди?</summary>
+        <div class="faq-body">Люди не дадут вам разбор в 23:00 за 30 секунд и не сделают это 20 раз подряд по одной задаче. Агенты работают по явной рубрике: критерии с весами, подтверждения в вашем тексте, объяснение последствий. В тарифе Team разбор агента дополнительно комментирует ваш лид — получается и скорость, и человеческий контекст.</div>
+      </details>
+      <details class="faq-item">
+        <summary>Оценка «хорошее / не хорошее» — это не слишком субъективно?</summary>
+        <div class="faq-body">Оценка складывается из покрытия рубрики задачи: сколько критериев закрыто, какие именно, есть ли числа, схема, альтернативные сценарии. Каждый пункт виден в разборе — вы можете возразить по конкретному критерию, а не по «ощущению». При этом мы честно не делим решения на «верные» и «неверные»: в анализе так не бывает.</div>
+      </details>
+      <details class="faq-item">
+        <summary>Нужно ли уметь рисовать в PlantUML и Mermaid?</summary>
+        <div class="faq-body">Желательно, но мы даём сниппеты прямо в редакторе: sequence, activity, ER, state — в один клик. Диаграмма в решении сильно повышает оценку: интервьюер видит поток, а не догадывается о нём.</div>
+      </details>
+      <details class="faq-item">
+        <summary>Задачи взяты из реальных проектов?</summary>
+        <div class="faq-body">Да, все условия — переработанные боевые кейсы: платёжная идемпотентность, миграция с SOAP, система лояльности с офлайн-кассами, отчёт, который собирается 40 минут, конфликт продаж и рисков. Данные компаний обезличены, цифры приближены к реальным.</div>
+      </details>
+      <details class="faq-item">
+        <summary>Что с моими данными в этом макете?</summary>
+        <div class="faq-body">Это кликабельный прототип: решения, ревью и результаты диагностики хранятся в localStorage вашего браузера и никуда не отправляются. Кнопка «Сбросить демо-данные» в подвале очищает всё.</div>
+      </details>
+    </div>
+  </section>
+
+  <!-- ================= CTA ================= -->
+  <section class="section-tight">
+    <div class="wrap">
+      <div class="cta-band">
+        <div>
+          <h2>Узнайте свой уровень за 20 минут</h2>
+          <p>40 вопросов по семи компетенциям, профиль с сильными зонами и пробелами, план прокачки из задач тренажёра. Бесплатно и без регистрации — результат сохранится в браузере.</p>
+        </div>
+        <div class="stack" style="gap:10px">
+          <a class="btn btn-primary btn-lg" href="assessment.html">Пройти диагностику</a>
+          <a class="btn btn-ghost" href="catalog.html">Сначала посмотреть задачи</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer id="siteFooter"></footer>
+
+  <script src="./assets/vendor/viz-global.js" defer></script>
+  <script src="./assets/vendor/mermaid.min.js" defer></script>
+  <script src="./assets/vendor/plantuml.js" defer></script>
+  <script src="./assets/js/data-core.js" defer></script>
+  <script src="./assets/js/data-tasks-1.js" defer></script>
+  <script src="./assets/js/data-tasks-2.js" defer></script>
+  <script src="./assets/js/questions.js" defer></script>
+  <script src="./assets/js/store.js" defer></script>
+  <script src="./assets/js/ui.js" defer></script>
+  <script src="./assets/js/landing.js" defer></script>
+</body>
+</html>

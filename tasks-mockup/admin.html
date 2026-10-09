@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Справочники и админка — AnalystGym</title>
+  <meta name="description" content="Админка тренажёра: справочник меток задач, уровни сложности, подборки по доменам и данные макета.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script>try{var __t=localStorage.getItem('sa-trainer:theme');if(__t==='light'||__t==='gray')document.documentElement.setAttribute('data-theme',__t)}catch(e){}</script>
+  <link rel="icon" type="image/png" href="./assets/logo.png">
+  <link rel="stylesheet" href="./assets/styles.css">
+</head>
+<body>
+  <header id="siteHeader"></header>
+
+  <div class="wrap wrap-wide">
+    <div class="page-head">
+      <p class="eyebrow">Админка</p>
+      <h1>Справочники платформы</h1>
+      <p class="lead">
+        Метки задач, уровни сложности и подборки — это данные, а не код. Здесь они редактируются,
+        а каталог и подборки подхватывают изменения сразу. В продукте на этом месте будут таблицы
+        в БД и права доступа по ролям.
+      </p>
+    </div>
+
+    <div class="admin-layout">
+      <nav class="admin-nav" id="adminNav" aria-label="Разделы админки"></nav>
+      <main id="adminMain"></main>
+    </div>
+  </div>
+
+  <footer id="siteFooter"></footer>
+
+  <script src="./assets/js/data-core.js" defer></script>
+  <script src="./assets/js/data-tasks-1.js" defer></script>
+  <script src="./assets/js/data-tasks-2.js" defer></script>
+  <script src="./assets/js/questions.js" defer></script>
+  <script src="./assets/js/store.js" defer></script>
+  <script src="./assets/js/review-engine.js" defer></script>
+  <script src="./assets/js/ui.js" defer></script>
+  <script src="./assets/js/admin-tasks.js" defer></script>
+  <script src="./assets/js/admin-ops.js" defer></script>
+  <script src="./assets/js/admin.js" defer></script>
+</body>
+</html>
