@@ -14,15 +14,20 @@ import os
 import re
 import sys
 
-ROOT = r"D:\Projects\sa_course\tasks-mockup"
+ROOT = os.path.dirname(os.path.abspath(__file__))
 JS = os.path.join(ROOT, "assets", "js")
 HTML_FILES = [
+    "index.html",
     "practice.html",
     "catalog.html",
     "collections.html",
     "task.html",
     "assessment.html",
     "results.html",
+    "courses.html",
+    "course.html",
+    "login.html",
+    "account.html",
     "admin.html",
 ]
 

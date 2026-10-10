@@ -177,7 +177,8 @@
     { href: 'courses.html', label: 'Курсы', id: 'courses' }
   ];
 
-  /* Вход/кабинет в шапке: гостю — Войти + Регистрация, своему — имя и выход.
+  /* Вход/кабинет в шапке: гостю — текстовые ссылки (кнопка здесь одна —
+     «К задачам», иначе два одинаковых primary рядом), своему — имя и выход.
      Api подтягивается асинхронно (ready), поэтому рисуем дважды: сразу
      гостевой вариант и повторно после ready (без сервера останется гость). */
   function paintAuthSlot(mount) {
@@ -189,14 +190,14 @@
       const user = window.Api ? Api.user : null;
       if (!user) {
         target.innerHTML = `
-          <a class="btn btn-ghost btn-sm" href="login.html">Войти</a>
-          <a class="btn btn-primary btn-sm" href="login.html?mode=register">Регистрация</a>`;
+          <a class="link-btn" href="login.html">Войти</a>
+          <a class="link-btn" href="login.html?mode=register">Регистрация</a>`;
         return;
       }
       const short = String(user.name || user.email || 'Кабинет').split(' ')[0];
       target.innerHTML = `
-        <a class="btn btn-ghost btn-sm" href="account.html" title="${UI.esc(user.email || '')}">${UI.esc(short)}</a>
-        <button class="btn btn-ghost btn-sm" type="button" data-logout>Выйти</button>`;
+        <a class="link-btn" href="account.html" title="${UI.esc(user.email || '')}">${UI.esc(short)}</a>
+        <button class="link-btn" type="button" data-logout>Выйти</button>`;
       const out = target.querySelector('[data-logout]');
       if (out) out.addEventListener('click', async () => {
         try { await Api.logout(); } catch (error) { /* сессия и так мёртвая */ }
@@ -244,7 +245,7 @@
             </div>` : ''}
           ${isCourse
             ? '<a class="btn btn-primary btn-sm" href="practice.html">Онлайн-тренажёр</a>'
-            : '<a class="btn btn-primary btn-sm" href="catalog.html">К задачам</a>'}
+            : ''}
         </div>
       </div>`;
     const toggle = mount.querySelector('[data-theme-toggle]');
