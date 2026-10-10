@@ -271,8 +271,7 @@
       }
     },
 
-    /* ---------- биллинг (Фаза 4): тарифы, заказы, Pro-статус ---------- */
-    async plans() {
+    /* ---------- биллинг (Фаза 4): тарифы, заказы, Pro-статус ---------- */    async plans() {
       return getJson('/api/billing/plans');
     },
 
@@ -290,6 +289,44 @@
 
     async redeemPromo(code) {
       return postJson('/api/billing/promocodes/redeem', { code });
+    },
+
+    async myOrders() {
+      try {
+        return await getJson('/api/billing/orders');
+      } catch (error) {
+        return null;
+      }
+    },
+
+    async cancelSubscription(id) {
+      return postJson('/api/billing/subscriptions/' + encodeURIComponent(id) + '/cancel', {});
+    },
+
+    /* ---------- кабинет (макет): серверные доработки после утверждения ---------- */
+    async updateProfile(name) {
+      return putJson('/api/auth/profile', { name });
+    },
+
+    async changePassword(currentPassword, newPassword) {
+      return postJson('/api/auth/password/change', { currentPassword, newPassword });
+    },
+
+    async myAttempts(limit) {
+      try {
+        const query = limit ? '?limit=' + encodeURIComponent(limit) : '';
+        return await getJson('/api/attempts/mine' + query);
+      } catch (error) {
+        return null;
+      }
+    },
+
+    async oauthStatus() {
+      try {
+        return await getJson('/api/auth/oauth2/status');
+      } catch (error) {
+        return { googleEnabled: false };
+      }
     }
   };
 

@@ -28,7 +28,8 @@ public final class BillingDto {
             String createdAt) {
     }
 
-    public record StatusView(boolean pro, String plan, String endsAt, String provider) {
+    public record StatusView(boolean pro, String plan, String endsAt, String provider,
+                               UUID subscriptionId) {
     }
 
     public record WebhookRequest(String providerPaymentId, String status) {

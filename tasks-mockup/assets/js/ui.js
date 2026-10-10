@@ -169,12 +169,45 @@
     { href: 'collections.html', label: 'Подборки', id: 'collections' },
     { href: 'courses.html', label: 'Курсы', id: 'courses' },
     { href: 'practice.html#how', label: 'Как это работает', id: 'how' },
-    { href: 'practice.html#pricing', label: 'Тарифы', id: 'pricing' }
+    { href: 'practice.html#pricing', label: 'Тарифы', id: 'pricing' },
+    { href: 'account.html', label: 'Кабинет', id: 'account' }
   ];
 
   const NAV_COURSE = [
     { href: 'courses.html', label: 'Курсы', id: 'courses' }
   ];
+
+  /* Вход/кабинет в шапке: гостю — Войти + Регистрация, своему — имя и выход.
+     Api подтягивается асинхронно (ready), поэтому рисуем дважды: сразу
+     гостевой вариант и повторно после ready (без сервера останется гость). */
+  function paintAuthSlot(mount) {
+    const slot = mount.querySelector('[data-auth-slot]');
+    if (!slot) return;
+    const paint = () => {
+      const target = mount.querySelector('[data-auth-slot]');
+      if (!target) return;
+      const user = window.Api ? Api.user : null;
+      if (!user) {
+        target.innerHTML = `
+          <a class="btn btn-ghost btn-sm" href="login.html">Войти</a>
+          <a class="btn btn-primary btn-sm" href="login.html?mode=register">Регистрация</a>`;
+        return;
+      }
+      const short = String(user.name || user.email || 'Кабинет').split(' ')[0];
+      target.innerHTML = `
+        <a class="btn btn-ghost btn-sm" href="account.html" title="${UI.esc(user.email || '')}">${UI.esc(short)}</a>
+        <button class="btn btn-ghost btn-sm" type="button" data-logout>Выйти</button>`;
+      const out = target.querySelector('[data-logout]');
+      if (out) out.addEventListener('click', async () => {
+        try { await Api.logout(); } catch (error) { /* сессия и так мёртвая */ }
+        window.location.reload();
+      });
+    };
+    paint();
+    if (window.Api && Api.ready && typeof Api.ready.then === 'function') {
+      Api.ready.then(paint).catch(paint);
+    }
+  }
 
   UI.mountHeader = function (active, product) {
     const mount = document.getElementById('siteHeader');
@@ -201,6 +234,7 @@
           <button class="btn btn-ghost btn-sm" type="button" data-theme-toggle title="Сменить оформление">
             <span aria-hidden="true">◐</span>&nbsp;<span data-theme-label>Тёмная</span>
           </button>
+          <span data-auth-slot style="display:contents"></span>
           ${!isCourse && (stats.reviewed || stats.assessment) ? `
             <div class="progress-chip" title="Ваш прогресс в макете">
               <span class="avatar">Я</span>
@@ -218,6 +252,7 @@
       event.stopPropagation();
       UI.themeMenu(toggle);
     });
+    paintAuthSlot(mount);
     const burger = mount.querySelector('#burgerBtn');
     const navEl = mount.querySelector('.main-nav');
     if (burger && navEl) {

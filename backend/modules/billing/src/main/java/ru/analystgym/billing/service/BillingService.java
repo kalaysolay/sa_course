@@ -97,7 +97,8 @@ public class BillingService {
     @Transactional(readOnly = true)
     public StatusView statusOf(UUID userId) {
         ProState pro = proState(userId);
-        return new StatusView(pro.pro(), pro.plan(), pro.endsAt(), provider.name());
+        return new StatusView(pro.pro(), pro.plan(), pro.endsAt(), provider.name(),
+                pro.subscriptionId());
     }
 
     /** Заказ + платёж у провайдера (ключ идемпотентности — orderId). */

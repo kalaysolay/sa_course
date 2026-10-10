@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Вход — AnalystGym</title>
+  <meta name="description" content="Вход и регистрация в AnalystGym: тренажёр собеседований и курсы для аналитиков.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script>try{var __t=localStorage.getItem('sa-trainer:theme');if(__t==='light'||__t==='gray')document.documentElement.setAttribute('data-theme',__t)}catch(e){}</script>
+  <link rel="icon" type="image/png" href="./assets/logo.png">
+  <link rel="stylesheet" href="./assets/styles.css">
+</head>
+<body>
+  <header id="siteHeader"></header>
+
+  <div class="wrap" style="max-width:520px">
+    <div class="page-head">
+      <p class="eyebrow">Аккаунт</p>
+      <h1 id="authTitle">Вход</h1>
+    </div>
+
+    <div class="panel">
+      <div class="panel-body">
+        <div class="row mb-16" style="gap:8px" role="tablist">
+          <button class="btn btn-ghost btn-sm" type="button" id="tabLogin" role="tab">Вход</button>
+          <button class="btn btn-ghost btn-sm" type="button" id="tabRegister" role="tab">Регистрация</button>
+        </div>
+
+        <div id="authError" class="info-box hidden" style="border-color:rgba(255,107,107,.4)"></div>
+
+        <form id="loginForm" novalidate>
+          <div class="field"><label for="loginEmail">Email</label>
+            <input id="loginEmail" type="email" autocomplete="email" placeholder="you@example.com">
+          </div>
+          <div class="field"><label for="loginPassword">Пароль</label>
+            <input id="loginPassword" type="password" autocomplete="current-password">
+          </div>
+          <button class="btn btn-primary mt-16" type="submit" id="loginBtn" style="width:100%">Войти</button>
+        </form>
+
+        <form id="registerForm" class="hidden" novalidate>
+          <div class="field"><label for="regName">Имя</label>
+            <input id="regName" type="text" autocomplete="name" placeholder="Как к вам обращаться">
+          </div>
+          <div class="field"><label for="regEmail">Email</label>
+            <input id="regEmail" type="email" autocomplete="email" placeholder="you@example.com">
+          </div>
+          <div class="field"><label for="regPassword">Пароль (минимум 8 символов)</label>
+            <input id="regPassword" type="password" autocomplete="new-password">
+          </div>
+          <button class="btn btn-primary mt-16" type="submit" id="regBtn" style="width:100%">Зарегистрироваться</button>
+          <p class="muted mt-16" style="font-size:12px">Регистрируясь, вы соглашаетесь на обработку данных для работы сервиса: имя и email, ничего лишнего.</p>
+        </form>
+
+        <div class="mt-16" id="googleBox"></div>
+      </div>
+    </div>
+  </div>
+
+  <footer id="siteFooter"></footer>
+
+  <script src="./assets/js/data-core.js" defer></script>
+  <script src="./assets/js/store.js" defer></script>
+  <script src="./assets/js/api.js" defer></script>
+  <script src="./assets/js/ui.js" defer></script>
+  <script src="./assets/js/login.js" defer></script>
+</body>
+</html>

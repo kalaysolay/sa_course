@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Личный кабинет — AnalystGym</title>
+  <meta name="description" content="Личный кабинет AnalystGym: профиль, подписка Pro, мои попытки, диагностика, жалобы и безопасность.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script>try{var __t=localStorage.getItem('sa-trainer:theme');if(__t==='light'||__t==='gray')document.documentElement.setAttribute('data-theme',__t)}catch(e){}</script>
+  <link rel="icon" type="image/png" href="./assets/logo.png">
+  <link rel="stylesheet" href="./assets/styles.css">
+</head>
+<body>
+  <header id="siteHeader"></header>
+
+  <div class="wrap wrap-wide">
+    <div class="page-head">
+      <p class="eyebrow">Кабинет</p>
+      <h1>Личный кабинет</h1>
+      <p class="lead">
+        Профиль, подписка Pro, ваши попытки и замеры — всё в одном месте.
+        Данные подтягиваются с сервера, когда вы вошли.
+      </p>
+    </div>
+
+    <div id="guestBox"></div>
+
+    <div id="accountBox" class="hidden">
+      <div class="catalog-layout">
+        <!-- ============ ПРОФИЛЬ И ПОДПИСКА ============ -->
+        <aside class="filters">
+          <div class="panel filter-group" id="profilePanel">
+            <h4>Профиль</h4>
+            <div id="profileBody"><p class="muted">Загрузка…</p></div>
+          </div>
+
+          <div class="panel filter-group" id="proPanel">
+            <h4>Подписка</h4>
+            <div id="proBody"><p class="muted">Загрузка…</p></div>
+          </div>
+
+          <div class="panel filter-group" id="securityPanel">
+            <h4>Безопасность</h4>
+            <div id="securityBody"></div>
+          </div>
+        </aside>
+
+        <!-- ============ ИСТОРИЯ ============ -->
+        <div>
+          <div class="panel mb-16" id="attemptsPanel">
+            <div class="panel-head">
+              <p class="panel-title">Мои попытки</p>
+              <span class="badge" id="attemptsCount"></span>
+            </div>
+            <div class="panel-body" id="attemptsBody"><p class="muted">Загрузка…</p></div>
+          </div>
+
+          <div class="panel mb-16" id="assessmentPanel">
+            <div class="panel-head">
+              <p class="panel-title">Диагностика</p>
+              <a class="btn btn-ghost btn-sm" href="assessment.html">Пройти заново</a>
+            </div>
+            <div class="panel-body" id="assessmentBody"><p class="muted">Загрузка…</p></div>
+          </div>
+
+          <div class="panel mb-16" id="complaintsPanel">
+            <div class="panel-head">
+              <p class="panel-title">Мои жалобы</p>
+            </div>
+            <div class="panel-body" id="complaintsBody"><p class="muted">Загрузка…</p></div>
+          </div>
+
+          <div class="panel mb-16" id="ordersPanel">
+            <div class="panel-head">
+              <p class="panel-title">Заказы</p>
+            </div>
+            <div class="panel-body" id="ordersBody"><p class="muted">Загрузка…</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer id="siteFooter"></footer>
+
+  <script src="./assets/js/data-core.js" defer></script>
+  <script src="./assets/js/data-tasks-1.js" defer></script>
+  <script src="./assets/js/data-tasks-2.js" defer></script>
+  <script src="./assets/js/questions.js" defer></script>
+  <script src="./assets/js/store.js" defer></script>
+  <script src="./assets/js/api.js" defer></script>
+  <script src="./assets/js/ui.js" defer></script>
+  <script src="./assets/js/account.js" defer></script>
+</body>
+</html>
