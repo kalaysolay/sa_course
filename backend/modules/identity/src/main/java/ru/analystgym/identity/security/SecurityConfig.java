@@ -42,10 +42,25 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf
                         // CsrfTokenRequestAttributeHandler здесь дефолтный:
                         // кладёт токен в атрибут запроса, фронт читает куку XSRF-TOKEN.
-                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
+                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                        // Stateless-JWT: дефолтная CsrfAuthenticationStrategy при КАЖДОМ запросе
+                        // с валидным JWT чистит куку XSRF-TOKEN (saveToken(null) + ремаскировка),
+                        // ломая следующий POST фронта, — проверено живьём вплоть до байткода.
+                        // «События логина» в stateless-мире нет, ротировать некому — гасим.
+                        .sessionAuthenticationStrategy((authentication, request, response) -> {
+                        }))
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        // /me — только своим: иначе аноним падает в NPE вместо 401.
+                        .requestMatchers("/api/auth/me").authenticated()
                         .requestMatchers("/api/auth/**").permitAll()
+                        // Health обязан быть публичным: его дёргают Caddy, compose-healthcheck
+                        // и CI-smoke без кук (контракт Фазы 0).
+                        .requestMatchers("/api/health").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/tasks/**", "/api/collections/**", "/api/dictionaries/**").permitAll()
+                        // /error обязан быть публичным: иначе контейнерный error-dispatch
+                        // на 404 контроллера пере-проверяется цепочкой и маскарадит 404 в 401.
+                        .requestMatchers("/error").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/tasks/**", "/api/collections/**", "/api/dictionaries/**").permitAll()
                         .requestMatchers("/", "/*.html", "/assets/**", "/docs/**", "/actuator/health", "/favicon.ico").permitAll()
                         .anyRequest().authenticated())

@@ -32,6 +32,10 @@ subprojects {
 
     tasks.withType(JavaCompile).configureEach {
         options.encoding = 'UTF-8'
+        // Spring MVC/Security читают имена параметров (@RequestParam String level)
+        // из байткода: без -parameters такие эндпоинты падают в 500/401
+        // (проверено живьём на GET /api/tasks).
+        options.compilerArgs += '-parameters'
     }
 
     tasks.withType(Test).configureEach {

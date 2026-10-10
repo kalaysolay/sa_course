@@ -8,6 +8,11 @@ plugins {
 dependencies {
     implementation project(':shared:kernel')
     implementation project(':shared:persistence')
+    // Рантайм-модули Фазы 1: без них в app нет ни контроллеров, ни SecurityConfig
+    // (симптом: дефолтная Basic-авторизация вместо нашей — WWW-Authenticate: Basic).
+    // Новые модули следующих фаз добавляем сюда же строкой.
+    implementation project(':modules:identity')
+    implementation project(':modules:catalog')
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'

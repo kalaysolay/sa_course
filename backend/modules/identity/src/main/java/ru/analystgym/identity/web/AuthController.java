@@ -23,6 +23,7 @@ import ru.analystgym.identity.repo.UserRepository;
 import ru.analystgym.identity.security.JwtAuthFilter;
 import ru.analystgym.identity.security.JwtService;
 import ru.analystgym.identity.service.AuthService;
+import org.springframework.security.web.csrf.CsrfToken;
 
 /**
  * Auth API: регистрация, вход, ротация сессии, выход, профиль, сброс пароля.
@@ -96,12 +97,27 @@ public class AuthController {
                 .body(Map.of("status", "ok"));
     }
 
-    /** Профиль для шапки фронта. Без куки — 401 от Security (сюда не дойдём). */
+    /** Профиль для шапки фронта. Без куки сюда не пускает цепочка (401 раньше метода). */
     @GetMapping("/me")
     public MeResponse me(Authentication authentication) {
-        UUID userId = (UUID) authentication.getPrincipal();
+        // Страховка от NPE: если матчинг в SecurityConfig однажды разъедется,
+        // аноним получит понятный 401, а не 500 (проверено живьём).
+        if (authentication == null || !(authentication.getPrincipal() instanceof UUID userId)) {
+            throw new AuthService.InvalidSessionException();
+        }
         User user = users.findById(userId).orElseThrow(AuthService.InvalidSessionException::new);
         return toMe(user);
+    }
+
+    /**
+     * Маячок CSRF для фронта: само обращение к токену заставляет
+     * CookieCsrfTokenRepository записать readable-куку XSRF-TOKEN
+     * (на обычных GET токен ленивый и кука не пишется — проверено живьём).
+     * api.js дёргает его при старте перед первым POST.
+     */
+    @GetMapping("/csrf")
+    public Map<String, String> csrf(CsrfToken token) {
+        return Map.of("token", token.getToken());
     }
 
     /** Заглушка Фазы 1: всегда 202, существует ли email — не раскрываем. */

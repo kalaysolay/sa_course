@@ -26,10 +26,14 @@
   }
 
   async function postJson(path, body) {
-    // CSRF: Spring кладёт readable-куку XSRF-TOKEN на GET; каждый POST
-    // обязан вернуть её значение заголовком X-XSRF-TOKEN (см. SecurityConfig).
+    // CSRF: сервер пишет readable-куку XSRF-TOKEN только когда токен материализован
+    // (GET /api/auth/csrf ниже), на обычных GET куки нет — токен ленивый.
+    // Каждый POST обязан вернуть значение куки заголовком X-XSRF-TOKEN.
+    await ensureCsrf();
     const headers = Object.assign({}, JSON_HEADERS);
-    const token = cookie('XSRF-TOKEN');
+    // Заголовок — маскированный токен из тела /api/auth/csrf (см. ensureCsrf),
+    // запасной вариант — сырая кука (с XOR-хендлером не сработает, но и не навредит).
+    const token = csrfToken || cookie('XSRF-TOKEN');
     if (token) headers['X-XSRF-TOKEN'] = token;
     const response = await fetch(path, {
       method: 'POST',
@@ -48,6 +52,26 @@
       return text ? JSON.parse(text) : {};
     } catch (e) {
       return {};
+    }
+  }
+
+  /* Прайминг CSRF перед КАЖДЫМ POST: сервер при некоторых условиях чистит куку
+     XSRF-TOKEN на промежутке между запросами (session-стратегия + stateless-JWT),
+     поэтому вчерашний токен может протухнуть — свежий прайм дешёвый и лечит всё.
+     Сервер отдаёт маскированный токен телом /api/auth/csrf (кука XSRF-TOKEN — сырая,
+     в заголовок идёт значение из тела: Boot по умолчанию включает
+     XorCsrfTokenRequestAttributeHandler, и сырая кука в заголовке даёт 403).
+     Ошибки глотаем: на file:// сервера нет, а POST там всё равно некуда слать. */
+  let csrfToken = null;
+  async function ensureCsrf() {
+    try {
+      const response = await fetch('/api/auth/csrf', { credentials: 'same-origin' });
+      if (response.ok) {
+        const data = await response.json();
+        if (data && data.token) csrfToken = data.token;
+      }
+    } catch (error) {
+      // Сервера рядом нет — следующий POST всё равно упадёт в fetch, это штатно для макета.
     }
   }
 

@@ -3,5 +3,8 @@
 dependencies {
     api 'org.springframework.boot:spring-boot-starter-data-jpa'
     api 'org.flywaydb:flyway-core'
+    // Flyway 10+ держит поддержку СУБД в отдельных артефактах: без этого
+    // плагина старт падает с Unsupported Database (проверено на PG 16).
+    api 'org.flywaydb:flyway-database-postgresql'
     api 'org.postgresql:postgresql'
 }
