@@ -20,7 +20,7 @@
       host.innerHTML = `
         <div class="empty-state mt-48">
           <h3>Результата пока нет</h3>
-          <p class="muted" style="margin-bottom:16px">Пройдите диагностику — 40 вопросов, 20–25 минут. Результат сохранится в этом браузере.</p>
+          <p class="muted" style="margin-bottom:16px">Пройдите диагностику — 55 вопросов, 20–25 минут. Результат сохранится в этом браузере.</p>
           <div class="row" style="gap:10px;justify-content:center">
             <a class="btn btn-primary" href="assessment.html">Начать диагностику</a>
             <a class="btn btn-ghost" href="catalog.html">Сначала посмотреть задачи</a>

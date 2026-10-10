@@ -1,16 +1,18 @@
-# Сборка бэкенда: компиляция + тесты + ArchUnit. Деплоя здесь нет (Фаза 4).
-# Срабатывает только на изменениях в backend/ — макет и издательство CI не трогают.
+# Сборка бэкенда: компиляция + тесты + ArchUnit.
+# Триггеры отключены (спам из почты): запуск только вручную из Actions.
+# Вернуть автозапуск — раскомментировать push/pull_request ниже.
 name: backend-build
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'backend/**'
-      - '.github/workflows/build.yml'
-  pull_request:
-    paths:
-      - 'backend/**'
+  workflow_dispatch:
+  # push:
+  #   branches: [main]
+  #   paths:
+  #     - 'backend/**'
+  #     - '.github/workflows/build.yml'
+  # pull_request:
+  #   paths:
+  #     - 'backend/**'
 
 jobs:
   build:

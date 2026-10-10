@@ -1,4 +1,4 @@
-# AnalystGym backend (Фаза 0)
+# AnalystGym backend (Фазы 0–4, MVP)
 
 ## Быстрый старт
 
@@ -9,8 +9,12 @@ docker compose -f ../deploy/docker-compose.yml up --build
 # 3. Открыть: http://localhost:8080 (хаб), /api/health (JSON).
 ```
 
+Первый вход команды: задать `APP_ADMIN_EMAILS` в `deploy/.env`
+(или env при `bootRun`) и зарегистрироваться — станете SUPERADMIN,
+дальше роли раздаются через `PUT /api/admin/users/{id}/role`.
+
 Локальная разработка без Docker: `./gradlew bootRun` (нужны JDK 21
-и запущенные postgres/redis, если ваш код их уже требует; в Фазе 0 не требует).
+и запущенный postgres; redis коду не нужен — лимиты в памяти).
 
 ## Порты и переменные
 

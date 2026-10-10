@@ -10,9 +10,7 @@ DATE="$(date +%F)"
 mkdir -p "$BACKUP_DIR"
 FILE="$BACKUP_DIR/analystgym-$DATE.dump"
 # Пароль берём из .env рядом (в репо его нет, см. .env.example).
-set -a
-. ./../deploy/.env 2>/dev/null || . ./.env
-set +a
+. ./.env
 docker compose -f docker-compose.yml exec -T postgres \
   pg_dump -U "$POSTGRES_USER" -d analystgym -Fc > "$FILE"
 find "$BACKUP_DIR" -name 'analystgym-*.dump' -mtime +"$KEEP" -delete
