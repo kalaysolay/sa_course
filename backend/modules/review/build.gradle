@@ -1,8 +1,14 @@
-// Модуль review: пайплайн ревью, агенты, промпты (Фаза 2 — только mock).
-// Чистая библиотека без Spring и JPA: рубрику передаёт вызывающий модуль
-// (practice), прямых зависимостей на catalog здесь нет и быть не должно
-// (см. ModuleBoundariesTest.reviewDoesNotDependOnCatalog).
+// Модуль review: пайплайн ревью, агенты, промпты, версии, A/B (Фаза 2+4).
+// Скоринг (веса/грейды) — чистая математика без Spring; доступ к промптам
+// и провайдерам — через репозитории. Рубрику по-прежнему передаёт вызывающий
+// practice, прямых зависимостей на catalog нет (см. ModuleBoundariesTest).
 dependencies {
+    implementation project(':shared:persistence')
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testImplementation 'org.assertj:assertj-core'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }

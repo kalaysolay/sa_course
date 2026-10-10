@@ -18,6 +18,8 @@ dependencies {
     implementation project(':modules:assessment')
     implementation project(':modules:quality')
     implementation project(':modules:admin')
+    implementation project(':modules:notify')
+    implementation project(':modules:billing')
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'

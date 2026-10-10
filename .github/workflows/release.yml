@@ -1,0 +1,48 @@
+# Релиз: образ приложения в GHCR по тегу v* (деплой вариант A).
+# Прод на VPS только pull+up, сборка Gradle на проде не живёт.
+# Тесты гоняются дважды: сначала здесь (быстрый отказ), потом внутри
+# docker build (образ без зелёного build не соберётся).
+name: backend-release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+
+      - name: Build (tests + ArchUnit)
+        run: ./gradlew build --no-daemon
+        working-directory: backend
+
+      - name: Login GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: backend/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}-app:${{ github.ref_name }}
+            ghcr.io/${{ github.repository }}-app:latest

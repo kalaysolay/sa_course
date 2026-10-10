@@ -4,9 +4,11 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import ru.analystgym.catalog.domain.Task;
 import ru.analystgym.catalog.repo.LevelRepository;
 import ru.analystgym.catalog.repo.TaskRepository;
@@ -19,6 +21,7 @@ import ru.analystgym.practice.repo.ReviewRepository;
 import ru.analystgym.review.MockReviewProvider;
 import ru.analystgym.review.RecCandidate;
 import ru.analystgym.review.ReviewInput;
+import ru.analystgym.review.ReviewPipeline;
 import ru.analystgym.review.ReviewResult;
 import ru.analystgym.review.SolutionTab;
 
@@ -36,6 +39,9 @@ public class ReviewProcessor {
     private final TaskRepository tasks;
     private final LevelRepository levels;
     private final ObjectMapper mapper;
+    /** Движок ревью: mock (детерминированный) или llm (модели). */
+    private final ReviewPipeline pipeline;
+    private final String engine;
 
     public ReviewProcessor(
             ReviewJobRepository jobs,
@@ -43,13 +49,17 @@ public class ReviewProcessor {
             ReviewRepository reviews,
             TaskRepository tasks,
             LevelRepository levels,
-            ObjectMapper mapper) {
+            ObjectMapper mapper,
+            ReviewPipeline pipeline,
+            @Value("${review.engine:mock}") String engine) {
         this.jobs = jobs;
         this.attempts = attempts;
         this.reviews = reviews;
         this.tasks = tasks;
         this.levels = levels;
         this.mapper = mapper;
+        this.pipeline = pipeline;
+        this.engine = engine;
     }
 
     /** Захват oldest-queued (SKIP LOCKED) + пометка «забрали в работу». */
@@ -104,14 +114,32 @@ public class ReviewProcessor {
                 task.getTags() == null ? List.of() : List.of(task.getTags()),
                 ReviewMapper.expectsDiagram(task.getStarterTabs()),
                 attempt.getRubricSnapshot(), task.getInterviewQuestions());
-        ReviewResult result = MockReviewProvider.buildReview(input, tabs, candidates);
-
         Review review = new Review();
         review.setAttemptId(attempt.getId());
-        review.setEngine(result.engine());
-        review.setGradeCode(result.grade().code());
-        review.setScore(result.grade().score());
-        review.setResult(mapper.valueToTree(result));
+        if ("llm".equalsIgnoreCase(engine)) {
+            ReviewPipeline.LlmOutcome outcome = pipeline.review(input, tabs, candidates);
+            ReviewResult result = outcome.result();
+            review.setEngine(result.engine());
+            review.setGradeCode(result.grade().code());
+            review.setScore(result.grade().score());
+            review.setResult(mapper.valueToTree(result));
+            review.setProvider(outcome.provider());
+            review.setModel(outcome.model());
+            review.setPromptVersions(mapper.valueToTree(outcome.promptVersions()));
+            review.setInputTokens(outcome.inputTokens());
+            review.setOutputTokens(outcome.outputTokens());
+        } else {
+            ReviewResult result = MockReviewProvider.buildReview(input, tabs, candidates);
+            review.setEngine(result.engine());
+            review.setGradeCode(result.grade().code());
+            review.setScore(result.grade().score());
+            review.setResult(mapper.valueToTree(result));
+            review.setProvider("");
+            review.setModel("");
+            review.setPromptVersions(JsonNodeFactory.instance.objectNode());
+            review.setInputTokens(0);
+            review.setOutputTokens(0);
+        }
         reviews.save(review);
 
         attempt.setStatus("reviewed");
@@ -124,8 +152,21 @@ public class ReviewProcessor {
         jobs.save(job);
     }
 
-    /** Падение: попытка и задача помечаются, причина видна в polling. */
-    @Transactional
+    /** Падение: попытка и задача помечаются, причина видна в polling.
+     * Данные готового ревью для письма (читаем после коммита finish). */
+    @Transactional(readOnly = true)
+    public Optional<DoneInfo> doneInfo(UUID jobId) {
+        return jobs.findById(jobId)
+                .flatMap(job -> attempts.findById(job.getAttemptId()))
+                .flatMap(attempt -> reviews.findById(attempt.getId())
+                        .map(review -> new DoneInfo(attempt.getUserId(),
+                                tasks.findById(attempt.getTaskId())
+                                        .map(Task::getTitle).orElse(attempt.getTaskId()),
+                                review.getScore())));
+    }
+
+    public record DoneInfo(UUID userId, String taskTitle, int score) {
+    }    @Transactional
     public void fail(UUID jobId, String error) {
         ReviewJob job = jobs.findById(jobId).orElse(null);
         if (job == null) {

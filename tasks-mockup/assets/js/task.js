@@ -780,6 +780,11 @@
         submitLocalFallback(tabs);
         return;
       }
+      // Квота Free исчерпана — честно говорим про Pro, а не «ошибка».
+      if (error && error.status === 402) {
+        AppUI.toast('Бесплатный лимит ревью исчерпан — оформите Pro, чтобы продолжить', 'warn');
+        return;
+      }
       AppUI.toast('Не удалось отправить решение: ' + (error && error.message ? error.message : error), 'bad');
       return;
     }

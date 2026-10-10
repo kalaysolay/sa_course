@@ -41,6 +41,9 @@ public class SecurityConfig {
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf
+                        // Вебхуки провайдера идут без кук и CSRF-токена:
+                        // там своя проверка подписи (см. BillingService).
+                        .ignoringRequestMatchers("/api/billing/webhooks/**")
                         // CsrfTokenRequestAttributeHandler здесь дефолтный:
                         // кладёт токен в атрибут запроса, фронт читает куку XSRF-TOKEN.
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
@@ -61,10 +64,14 @@ public class SecurityConfig {
                         // Контур практики: черновики/попытки/эталон — только своим.
                         // Стоит раньше публичного GET /api/tasks/**: первое совпадение
                         // побеждает, иначе гейт эталона был бы открыт гостям.
+                        // Тарифы публичны (лендинг), вебхук — без сессии (там подпись).
+                        // Стоят раньше общего authenticated: первое совпадение побеждает.
+                        .requestMatchers(HttpMethod.GET, "/api/billing/plans").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/billing/webhooks/**").permitAll()
                         .requestMatchers("/api/tasks/*/draft", "/api/tasks/*/attempts",
                                 "/api/tasks/*/reference", "/api/attempts/**",
                                 "/api/assessment/**", "/api/complaints/**",
-                                "/api/admin/**").authenticated()
+                                "/api/admin/**", "/api/billing/**").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/tasks/**", "/api/collections/**", "/api/dictionaries/**").permitAll()
                         // /error обязан быть публичным: иначе контейнерный error-dispatch
                         // на 404 контроллера пере-проверяется цепочкой и маскарадит 404 в 401.

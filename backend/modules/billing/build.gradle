@@ -1,1 +1,11 @@
-// Модуль billing: заказы, подписки, владения, адаптер провайдера (Фаза 4).
+// Модуль billing: заказы, Pro-подписки, промокоды, адаптер провайдера (Фаза 4).
+// practice зависит от billing (квота бесплатных ревью), обратно — нет.
+dependencies {
+    implementation project(':shared:persistence')
+    implementation project(':modules:identity')
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}

@@ -17,6 +17,7 @@ import ru.analystgym.catalog.domain.Task;
 import ru.analystgym.catalog.repo.TaskRepository;
 import ru.analystgym.identity.domain.User;
 import ru.analystgym.identity.repo.UserRepository;
+import ru.analystgym.notify.service.NotificationService;
 import ru.analystgym.practice.domain.Attempt;
 import ru.analystgym.practice.domain.Review;
 import ru.analystgym.practice.repo.AttemptRepository;
@@ -51,18 +52,21 @@ public class QualityService {
     private final ReviewRepository reviews;
     private final TaskRepository tasks;
     private final UserRepository users;
+    private final NotificationService notify;
 
     public QualityService(
             ComplaintRepository complaints,
             AttemptRepository attempts,
             ReviewRepository reviews,
             TaskRepository tasks,
-            UserRepository users) {
+            UserRepository users,
+            NotificationService notify) {
         this.complaints = complaints;
         this.attempts = attempts;
         this.reviews = reviews;
         this.tasks = tasks;
         this.users = users;
+        this.notify = notify;
     }
 
     /** Подача жалобы: только своя reviewed-попытка, причина 10–2000 символов. */
@@ -130,7 +134,9 @@ public class QualityService {
         }
         complaint.setStatus(status);
         complaint.setResolution(resolution == null || resolution.isBlank() ? null : resolution.trim());
-        return complaints.save(complaint);
+        complaints.save(complaint);
+        notify.complaintResolved(complaint.getUserId(), complaint.getId(), status);
+        return complaint;
     }
 
     /** Дашборд: KPI + требующие внимания + MISS-топ + свежие жалобы. */

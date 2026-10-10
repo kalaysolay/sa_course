@@ -3,6 +3,7 @@ package ru.analystgym.identity.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -44,11 +45,13 @@ class AuthServiceTest {
     JwtService jwt = new JwtService("test-secret-0123456789abcdef-test", 900, 2592000);
 
     AuthService auth() {
-        return new AuthService(users, sessions, resets, passwords, jwt, 2592000, "");
+        return new AuthService(users, sessions, resets, passwords, jwt, 2592000, "",
+                mock(ru.analystgym.notify.service.NotificationService.class));
     }
 
     AuthService authWithAdmins(String csv) {
-        return new AuthService(users, sessions, resets, passwords, jwt, 2592000, csv);
+        return new AuthService(users, sessions, resets, passwords, jwt, 2592000, csv,
+                mock(ru.analystgym.notify.service.NotificationService.class));
     }
 
     @Test

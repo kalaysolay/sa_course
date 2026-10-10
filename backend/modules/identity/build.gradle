@@ -4,6 +4,7 @@
 // в обычный ./gradlew build не входят (иначе упадут без Docker).
 dependencies {
     implementation project(':shared:persistence')
+    implementation project(':modules:notify')
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-validation'

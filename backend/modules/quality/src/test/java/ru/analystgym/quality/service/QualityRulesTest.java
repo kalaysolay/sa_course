@@ -29,7 +29,8 @@ class QualityRulesTest {
                 mock(ru.analystgym.practice.repo.AttemptRepository.class),
                 mock(ru.analystgym.practice.repo.ReviewRepository.class),
                 mock(ru.analystgym.catalog.repo.TaskRepository.class),
-                mock(ru.analystgym.identity.repo.UserRepository.class));
+                mock(ru.analystgym.identity.repo.UserRepository.class),
+                mock(ru.analystgym.notify.service.NotificationService.class));
     }
 
     private static Complaint complaintOf(String status) {

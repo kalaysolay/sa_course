@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import ru.analystgym.notify.service.NotificationService;
 
 /**
  * Воркер очереди ревью: раз в 500 мс забирает одну queued-задачу и ведёт
@@ -19,9 +20,11 @@ public class ReviewWorker {
     private static final Logger log = LoggerFactory.getLogger(ReviewWorker.class);
 
     private final ReviewProcessor processor;
+    private final NotificationService notify;
 
-    public ReviewWorker(ReviewProcessor processor) {
+    public ReviewWorker(ReviewProcessor processor, NotificationService notify) {
         this.processor = processor;
+        this.notify = notify;
     }
 
     @Scheduled(fixedDelay = 500)
@@ -44,6 +47,9 @@ public class ReviewWorker {
             processor.markStage(jobId, "arch_running", "arch", 65);
             processor.markStage(jobId, "grading", "grading", 80);
             processor.finish(jobId);
+            // Письмо «ревью готово» — после коммита, вне транзакции.
+            processor.doneInfo(jobId).ifPresent(done ->
+                    notify.reviewReady(done.userId(), done.taskTitle(), done.score()));
         } catch (InterruptedException interrupted) {
             Thread.currentThread().interrupt();
             processor.fail(jobId, "worker interrupted");

@@ -43,7 +43,11 @@ public final class PracticeDto {
             GradeView grade,
             /** Полный ReviewResult — только когда reviewed. */
             JsonNode review,
-            String error) {
+            String error,
+            /** Учёт LLM: токены и версии промптов (у mock нули). */
+            Integer inputTokens,
+            Integer outputTokens,
+            JsonNode promptVersions) {
     }
 
     public record GradeView(int code, String label, String headline, String tone, int score) {

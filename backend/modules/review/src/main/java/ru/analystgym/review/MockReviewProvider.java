@@ -684,6 +684,100 @@ public final class MockReviewProvider {
 
     /* ---------- итоговая оценка ---------- */
 
+    /** Разбивка рубрики по состояниям + ключевые пробелы (общая для mock и LLM). */
+    record Split(
+            List<ReviewResult.CriterionReview> hits,
+            List<ReviewResult.CriterionReview> partials,
+            List<ReviewResult.CriterionReview> misses,
+            List<ReviewResult.CriterionReview> criticalMisses) {
+    }
+
+    static Split splitByState(List<ReviewResult.CriterionReview> rubric) {
+        List<ReviewResult.CriterionReview> hits = new ArrayList<>();
+        List<ReviewResult.CriterionReview> partials = new ArrayList<>();
+        List<ReviewResult.CriterionReview> misses = new ArrayList<>();
+        for (ReviewResult.CriterionReview criterion : rubric) {
+            switch (criterion.state()) {
+                case "hit" -> hits.add(criterion);
+                case "miss" -> misses.add(criterion);
+                default -> partials.add(criterion);
+            }
+        }
+        List<ReviewResult.CriterionReview> criticalMisses = new ArrayList<>();
+        for (ReviewResult.CriterionReview miss : misses) {
+            if ("high".equals(miss.weight())) {
+                criticalMisses.add(miss);
+            }
+        }
+        return new Split(
+                List.copyOf(hits), List.copyOf(partials),
+                List.copyOf(misses), List.copyOf(criticalMisses));
+    }
+
+    /** Формула итога с колпаками: score = round(100*(0.82*coverage+0.18*structure)). */
+    static int scoreOf(double coverage, double structure, boolean empty) {
+        int score = (int) Math.round(100 * (0.82 * coverage + 0.18 * structure));
+        if (coverage < 0.12) {
+            score = Math.min(score, 22);
+        }
+        if (empty) {
+            score = Math.min(score, 6);
+        }
+        return Math.max(0, Math.min(100, score));
+    }
+
+    /** Оценка агента 0–10 из покрытия своей зоны и структуры. */
+    static int agentScoreOf(double ownCoverage, double structure) {
+        return (int) Math.round(10 * (0.85 * ownCoverage + 0.15 * structure));
+    }
+
+    /** Блок «почему такая оценка» — одинаковый для mock и LLM. */
+    static List<String> buildWhy(ReviewInput task, Solution solution,
+                                 ReviewResult.Signals signals,
+                                 List<ReviewResult.CriterionReview> rubric, Split split) {
+        List<String> why = new ArrayList<>();
+        if (signals.empty()) {
+            why.add("Решение пустое или содержит несколько слов — оценивать нечего, поэтому оценка минимальная.");
+            return List.copyOf(why);
+        }
+        StringBuilder first = new StringBuilder("Покрыто " + split.hits().size() + " из " + rubric.size()
+                + " критериев рубрики");
+        if (!split.partials().isEmpty()) {
+            first.append(", ещё ").append(split.partials().size()).append(" затронуты частично");
+        }
+        if (!split.criticalMisses().isEmpty()) {
+            first.append(", из них ").append(split.criticalMisses().size()).append(" ключевых не раскрыто");
+        }
+        first.append(".");
+        why.add(first.toString());
+        if (!split.criticalMisses().isEmpty()) {
+            List<String> titles = new ArrayList<>();
+            for (ReviewResult.CriterionReview miss
+                    : split.criticalMisses().subList(0, Math.min(3, split.criticalMisses().size()))) {
+                titles.add("«" + shortTitle(miss.title(), 55) + "»");
+            }
+            why.add("Критичные пробелы: " + String.join(", ", titles)
+                    + ". Пока они не закрыты, решение не выдержит реального собеседования.");
+        }
+        if (!split.hits().isEmpty()) {
+            List<String> titles = new ArrayList<>();
+            for (ReviewResult.CriterionReview hit
+                    : split.hits().subList(0, Math.min(3, split.hits().size()))) {
+                titles.add("«" + shortTitle(hit.title(), 55) + "»");
+            }
+            why.add("Учтено: " + String.join(", ", titles) + ".");
+        }
+        why.add(signals.diagram()
+                ? "Есть визуализация — поток читается, а не угадывается."
+                : "Схемы нет: текст приходится достраивать в голове, на собеседовании за это снижают оценку.");
+        String levelName = task.levelName() != null && !task.levelName().isEmpty()
+                ? task.levelName() : task.level();
+        String volumeWord = solution.words >= 250 ? "достаточно" : solution.words >= 120 ? "впритык" : "мало";
+        why.add("Объём документа — около " + solution.words + " слов; для уровня «" + levelName
+                + "» этого " + volumeWord + ".");
+        return List.copyOf(why);
+    }
+
     /**
      * Строит ревью 1-в-1 с JS buildReview: score = round(100 * (0.82*coverage +
      * 0.18*structure)), колпаки при coverage&lt;0.12 и пустом решении.
@@ -700,32 +794,10 @@ public final class MockReviewProvider {
         }
         double coverage = coverageOf(rubric);
         double structure = structureScore(solution, task.expectsDiagram(), signals);
-        int score = (int) Math.round(100 * (0.82 * coverage + 0.18 * structure));
-        if (coverage < 0.12) {
-            score = Math.min(score, 22);
-        }
-        if (signals.empty()) {
-            score = Math.min(score, 6);
-        }
-        score = Math.max(0, Math.min(100, score));
+        int score = scoreOf(coverage, structure, signals.empty());
 
         ReviewResult.Grade grade = gradeFor(score);
-        List<ReviewResult.CriterionReview> hits = new ArrayList<>();
-        List<ReviewResult.CriterionReview> partials = new ArrayList<>();
-        List<ReviewResult.CriterionReview> misses = new ArrayList<>();
-        for (ReviewResult.CriterionReview criterion : rubric) {
-            switch (criterion.state()) {
-                case "hit" -> hits.add(criterion);
-                case "partial" -> partials.add(criterion);
-                default -> misses.add(criterion);
-            }
-        }
-        List<ReviewResult.CriterionReview> criticalMisses = new ArrayList<>();
-        for (ReviewResult.CriterionReview miss : misses) {
-            if ("high".equals(miss.weight())) {
-                criticalMisses.add(miss);
-            }
-        }
+        Split split = splitByState(rubric);
 
         List<ReviewResult.AgentReview> agents = new ArrayList<>();
         for (String agentId : List.of("sa", "arch")) {
@@ -735,7 +807,7 @@ public final class MockReviewProvider {
             agents.add(new ReviewResult.AgentReview(
                     agentId, persona.name(), persona.role(), persona.initials(),
                     List.copyOf(persona.checks()),
-                    (int) Math.round(10 * (0.85 * ownCoverage + 0.15 * structure)),
+                    agentScoreOf(ownCoverage, structure),
                     (int) Math.round(ownCoverage * 100),
                     buildCovered(own, solution, signals, agentId),
                     buildMissed(own, signals, agentId, solution),
@@ -744,54 +816,18 @@ public final class MockReviewProvider {
                     buildQuestions(own, task, agentId)));
         }
 
-        List<String> why = new ArrayList<>();
-        if (signals.empty()) {
-            why.add("Решение пустое или содержит несколько слов — оценивать нечего, поэтому оценка минимальная.");
-        } else {
-            StringBuilder first = new StringBuilder("Покрыто " + hits.size() + " из " + rubric.size()
-                    + " критериев рубрики");
-            if (!partials.isEmpty()) {
-                first.append(", ещё ").append(partials.size()).append(" затронуты частично");
-            }
-            if (!criticalMisses.isEmpty()) {
-                first.append(", из них ").append(criticalMisses.size()).append(" ключевых не раскрыто");
-            }
-            first.append(".");
-            why.add(first.toString());
-            if (!criticalMisses.isEmpty()) {
-                List<String> titles = new ArrayList<>();
-                for (ReviewResult.CriterionReview miss : criticalMisses.subList(0, Math.min(3, criticalMisses.size()))) {
-                    titles.add("«" + shortTitle(miss.title(), 55) + "»");
-                }
-                why.add("Критичные пробелы: " + String.join(", ", titles)
-                        + ". Пока они не закрыты, решение не выдержит реального собеседования.");
-            }
-            if (!hits.isEmpty()) {
-                List<String> titles = new ArrayList<>();
-                for (ReviewResult.CriterionReview hit : hits.subList(0, Math.min(3, hits.size()))) {
-                    titles.add("«" + shortTitle(hit.title(), 55) + "»");
-                }
-                why.add("Учтено: " + String.join(", ", titles) + ".");
-            }
-            why.add(signals.diagram()
-                    ? "Есть визуализация — поток читается, а не угадывается."
-                    : "Схемы нет: текст приходится достраивать в голове, на собеседовании за это снижают оценку.");
-            String levelName = task.levelName() != null && !task.levelName().isEmpty()
-                    ? task.levelName() : task.level();
-            String volumeWord = solution.words >= 250 ? "достаточно" : solution.words >= 120 ? "впритык" : "мало";
-            why.add("Объём документа — около " + solution.words + " слов; для уровня «" + levelName
-                    + "» этого " + volumeWord + ".");
-        }
-
         List<ReviewResult.CriterionReview> criteria = List.copyOf(rubric);
         return new ReviewResult(
                 "rev_" + Long.toString(System.currentTimeMillis(), 36) + randomSuffix(),
                 task.id(), Instant.now().toString(), ENGINE,
                 grade,
-                buildSummary(grade, coverage, hits, misses, criticalMisses, rubric.size()),
-                List.copyOf(why), criteria, List.copyOf(agents), signals,
+                buildSummary(grade, coverage, split.hits(), split.misses(),
+                        split.criticalMisses(), rubric.size()),
+                buildWhy(task, solution, signals, rubric, split),
+                criteria, List.copyOf(agents), signals,
                 new ReviewResult.Stats(solution.words, solution.tabs.size(), solution.diagramTabs,
-                        rubric.size(), hits.size(), partials.size(), misses.size()),
+                        rubric.size(), split.hits().size(), split.partials().size(),
+                        split.misses().size()),
                 buildRecommendations(task, candidates));
     }
 

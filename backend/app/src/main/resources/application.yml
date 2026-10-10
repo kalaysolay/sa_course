@@ -8,6 +8,25 @@ app:
   # Bootstrap суперадминов (UC-A01): email через запятую; совпавший при
   # регистрации сразу получает SUPERADMIN. Прод — только через env.
   admin-emails: ${APP_ADMIN_EMAILS:}
+  # Тарифы тренажёра (те же числа, что на лендинге): Free — N задач с ревью.
+  billing:
+    free-review-tasks: 2
+    pro-monthly-price: 990
+    pro-yearly-price: 9480
+    # Провайдер выбирается автоматически: ЮKassa при заданных ключах, иначе fake.
+    fake-enabled: ${BILLING_FAKE_ENABLED:true}
+    webhook-secret: ${BILLING_WEBHOOK_SECRET:}
+  # Ключи ЮKassa — только из env, в БД и логах их нет.
+  yookassa:
+    shop-id: ${YOOKASSA_SHOP_ID:}
+    secret-key: ${YOOKASSA_SECRET_KEY:}
+  # Движок ревью: mock (детерминированный) или llm (модели + фолбэк).
+  review:
+    engine: ${REVIEW_ENGINE:mock}
+    llm:
+      primary: ${REVIEW_LLM_PRIMARY:deepseek}
+      fallback: ${REVIEW_LLM_FALLBACK:glm}
+      max-tokens: 8000
   jwt:
     # Прод-секрет — только из env (минимум 32 символа). Дефолт — для локалки.
     secret: ${APP_JWT_SECRET:dev-secret-change-me-in-prod-00000000}

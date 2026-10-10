@@ -3,7 +3,12 @@
 # Переменные — только через .env (рядом лежит .env.example, секретов в репо нет).
 services:
   app:
-    build: ../backend
+    # Вариант A: образ собирает CI и пушит в GHCR, прод только pull+up.
+    # Локально: тот же compose с build (контекст — корень репо, см. Dockerfile).
+    image: ghcr.io/kalaysolay/sa_course-app:latest
+    build:
+      context: ..
+      dockerfile: backend/Dockerfile
     ports:
       - "8080:8080"
     env_file:

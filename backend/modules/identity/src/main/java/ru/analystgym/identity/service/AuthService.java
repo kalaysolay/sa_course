@@ -19,6 +19,7 @@ import ru.analystgym.identity.repo.RefreshTokenRepository;
 import ru.analystgym.identity.repo.UserRepository;
 import ru.analystgym.identity.security.JwtService;
 import ru.analystgym.identity.security.Roles;
+import ru.analystgym.notify.service.NotificationService;
 
 /**
  * Сценарии входа: регистрация, логин, ротация refresh, выход, сброс пароля.
@@ -36,6 +37,7 @@ public class AuthService {
     private final PasswordEncoder passwords;
     private final JwtService jwt;
     private final long refreshTtlSeconds;
+    private final NotificationService notify;
     /** Bootstrap суперадминов: email из app.admin-emails (нижний регистр). */
     private final java.util.Set<String> adminEmails;
     private final SecureRandom random = new SecureRandom();
@@ -47,13 +49,15 @@ public class AuthService {
             PasswordEncoder passwords,
             JwtService jwt,
             @Value("${app.jwt.refresh-ttl-seconds:2592000}") long refreshTtlSeconds,
-            @Value("${app.admin-emails:}") String adminEmailsCsv) {
+            @Value("${app.admin-emails:}") String adminEmailsCsv,
+            NotificationService notify) {
         this.users = users;
         this.sessions = sessions;
         this.resets = resets;
         this.passwords = passwords;
         this.jwt = jwt;
         this.refreshTtlSeconds = refreshTtlSeconds;
+        this.notify = notify;
         java.util.Set<String> admins = new java.util.HashSet<>();
         for (String raw : adminEmailsCsv.split(",")) {
             String email = raw.trim().toLowerCase(java.util.Locale.ROOT);
@@ -119,10 +123,9 @@ public class AuthService {
     }
 
     /**
-     * Заглушка сброса: писем в Фазе 1 нет — сырой токен пишем в лог
-     * (контракт roadmap: «письмо в лог»), оттуда его забирают тесты и админка.
-     * Фронт заберёт ссылку по почте в Фазе 3. В продегромкость лога с токенами
-     * убрать вместе с появлением почты (иначе токены осядут в лог-агрегаторе).
+     * Сброс через notify-канал: в dev письмо уходит в лог (там же токен
+     * для тестов), в проде — тем же вызовом через SMTP-провайдера.
+     * В ответах API токена нет и не будет.
      */
     @Transactional
     public String requestReset(String email) {
@@ -130,7 +133,7 @@ public class AuthService {
         String raw = randomToken();
         Instant expires = Instant.now().plusSeconds(3600);
         resets.save(new PasswordResetToken(TokenHash.sha256(raw), user, expires));
-        log.info("Password reset for {}: dev-token={} (valid 1h, single-use)", user.getEmail(), raw);
+        notify.passwordReset(user.getId(), user.getEmail(), raw);
         return raw;
     }
 

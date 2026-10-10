@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,7 @@ import ru.analystgym.practice.web.PracticeDto.AttemptView;
 import ru.analystgym.practice.web.PracticeDto.GradeView;
 import ru.analystgym.practice.web.PracticeDto.TabDto;
 import ru.analystgym.practice.web.PracticeDto.TaskDetail;
+import ru.analystgym.practice.web.QuotaExceededException;
 import ru.analystgym.practice.web.ReferenceLockedException;
 
 /**
@@ -50,6 +52,9 @@ public class PracticeService {
     private final ReviewRepository reviews;
     private final ReviewJobRepository jobs;
     private final ObjectMapper mapper;
+    /** Квота Free и Pro-статус — из биллинга (тарифы practice.html). */
+    private final ru.analystgym.billing.service.BillingService billing;
+    private final int freeReviewTasks;
 
     public PracticeService(
             TaskRepository tasks,
@@ -58,7 +63,9 @@ public class PracticeService {
             AttemptRepository attempts,
             ReviewRepository reviews,
             ReviewJobRepository jobs,
-            ObjectMapper mapper) {
+            ObjectMapper mapper,
+            ru.analystgym.billing.service.BillingService billing,
+            @Value("${billing.free-review-tasks:2}") int freeReviewTasks) {
         this.tasks = tasks;
         this.levels = levels;
         this.drafts = drafts;
@@ -66,6 +73,8 @@ public class PracticeService {
         this.reviews = reviews;
         this.jobs = jobs;
         this.mapper = mapper;
+        this.billing = billing;
+        this.freeReviewTasks = freeReviewTasks;
     }
 
     /** Опубликованная задача или 404 (черновики витрине не видны). */
@@ -114,6 +123,14 @@ public class PracticeService {
         }
         Task task = publishedOrThrow(taskId);
         validateTabs(tabs);
+        // Тариф Free: полное ревью не более чем по N задачам; повторная
+        // отправка по уже разобранной задаче квоту не ест (доработка).
+        if (!billing.proState(userId).pro()) {
+            java.util.Set<String> reviewed = attempts.reviewedTaskIds(userId);
+            if (!reviewed.contains(taskId) && reviewed.size() >= freeReviewTasks) {
+                throw new QuotaExceededException();
+            }
+        }
         Attempt attempt = new Attempt();
         attempt.setId(UUID.randomUUID());
         attempt.setUserId(userId);
@@ -174,7 +191,10 @@ public class PracticeService {
                 job == null ? null : job.getStage(),
                 attempt.getCreatedAt() == null ? null : attempt.getCreatedAt().toString(),
                 grade, result,
-                job == null ? null : job.getError());
+                job == null ? null : job.getError(),
+                review == null ? null : review.getInputTokens(),
+                review == null ? null : review.getOutputTokens(),
+                review == null ? null : review.getPromptVersions());
     }
 
     /** История попыток пользователя по задаче (новые первые). */

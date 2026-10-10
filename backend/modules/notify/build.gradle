@@ -1,1 +1,7 @@
-// Модуль notify: письма и уведомления (интерфейс сейчас, провайдер — Фаза 4).
+// Модуль notify: письма и уведомления (Фаза 4 — интерфейс + лог-провайдер).
+// Ни от кого не зависит: адреса передают вызывающие (циклов нет).
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}

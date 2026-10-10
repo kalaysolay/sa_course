@@ -7,6 +7,7 @@ dependencies {
     implementation project(':modules:catalog')
     implementation project(':modules:practice')
     implementation project(':modules:identity')
+    implementation project(':modules:notify')
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-security'

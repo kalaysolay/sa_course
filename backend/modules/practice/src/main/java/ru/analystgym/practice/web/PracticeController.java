@@ -110,6 +110,13 @@ public class PracticeController {
                 .body(Map.of("error", "reference_locked"));
     }
 
+    /** Квота Free исчерпана — 402: это предложение оформить Pro, а не запрет. */
+    @ExceptionHandler(QuotaExceededException.class)
+    public ResponseEntity<Map<String, String>> quotaExceeded(QuotaExceededException error) {
+        return ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED)
+                .body(Map.of("error", "quota_exhausted"));
+    }
+
     private static UUID currentUser(Authentication authentication) {
         if (authentication == null || !(authentication.getPrincipal() instanceof UUID userId)) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);

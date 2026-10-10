@@ -16,13 +16,17 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import com.fasterxml.jackson.databind.JsonNode;
+import ru.analystgym.admin.service.LlmAdminService;
 import ru.analystgym.admin.service.QuestionAdminService;
 import ru.analystgym.admin.service.ReferenceAdminService;
 import ru.analystgym.admin.service.TaskAdminService;
 import ru.analystgym.admin.service.UserAdminService;
 import ru.analystgym.admin.web.AdminDto.AuditRow;
+import ru.analystgym.admin.web.AdminDto.AgentDto;
 import ru.analystgym.admin.web.AdminDto.CollectionDto;
 import ru.analystgym.admin.web.AdminDto.LevelDto;
+import ru.analystgym.admin.web.AdminDto.PromptVersionDto;
+import ru.analystgym.admin.web.AdminDto.ProviderDto;
 import ru.analystgym.admin.web.AdminDto.QuestionDto;
 import ru.analystgym.admin.web.AdminDto.RevisionView;
 import ru.analystgym.admin.web.AdminDto.RoleRequest;
@@ -33,7 +37,9 @@ import ru.analystgym.admin.web.AdminDto.TaskFull;
 import ru.analystgym.admin.web.AdminDto.TaskImportRequest;
 import ru.analystgym.admin.web.AdminDto.TaskRow;
 import ru.analystgym.admin.web.AdminDto.TaskUpdateRequest;
+import ru.analystgym.admin.web.AdminDto.TrafficRequest;
 import ru.analystgym.admin.web.AdminDto.UserRow;
+import ru.analystgym.admin.web.AdminDto.VersionCreateRequest;
 import ru.analystgym.identity.domain.User;
 import ru.analystgym.identity.repo.UserRepository;
 import ru.analystgym.identity.security.Roles;
@@ -51,6 +57,7 @@ public class AdminController {
     private final ReferenceAdminService refs;
     private final UserAdminService usersAdmin;
     private final QuestionAdminService questionBank;
+    private final LlmAdminService llm;
     private final UserRepository users;
 
     public AdminController(
@@ -58,11 +65,13 @@ public class AdminController {
             ReferenceAdminService refs,
             UserAdminService usersAdmin,
             QuestionAdminService questionBank,
+            LlmAdminService llm,
             UserRepository users) {
         this.tasks = tasks;
         this.refs = refs;
         this.usersAdmin = usersAdmin;
         this.questionBank = questionBank;
+        this.llm = llm;
         this.users = users;
     }
 
@@ -222,7 +231,6 @@ public class AdminController {
     }
 
     /* ---------- пользователи и журнал ---------- */
-
     @GetMapping("/users")
     public List<UserRow> listUsers(Authentication authentication) {
         superadmin(authentication);
@@ -247,6 +255,80 @@ public class AdminController {
         return usersAdmin.audit(limit);
     }
 
+    /* ---------- LLM-инфраструктура (UC-L01–L06) ---------- */
+
+    @GetMapping("/llm/providers")
+    public List<ProviderDto> providers(Authentication authentication) {
+        llmAdmin(authentication);
+        return llm.listProviders();
+    }
+
+    @PostMapping("/llm/providers")
+    public ResponseEntity<ProviderDto> saveProvider(
+            @RequestBody ProviderDto body, Authentication authentication) {
+        User user = llmAdmin(authentication);
+        var saved = llm.saveProvider(user.getId(), body);
+        return ResponseEntity.status(saved.created() ? HttpStatus.CREATED : HttpStatus.OK)
+                .body(saved.provider());
+    }
+
+    @PostMapping("/llm/providers/{id}/check")
+    public ProviderDto checkProvider(@PathVariable String id, Authentication authentication) {
+        llmAdmin(authentication);
+        return llm.healthCheck(id);
+    }
+
+    @GetMapping("/llm/agents")
+    public List<AgentDto> agents(Authentication authentication) {
+        llmAdmin(authentication);
+        return llm.listAgents();
+    }
+
+    @PutMapping("/llm/agents/{id}")
+    public AgentDto saveAgent(
+            @PathVariable String id, @RequestBody AgentDto body, Authentication authentication) {
+        User user = llmAdmin(authentication);
+        return llm.saveAgent(user.getId(), id, body);
+    }
+
+    @GetMapping("/llm/prompts/{key}/versions")
+    public List<PromptVersionDto> versions(
+            @PathVariable String key, Authentication authentication) {
+        llmAdmin(authentication);
+        return llm.listVersions(key);
+    }
+
+    @PostMapping("/llm/prompts/{key}/versions")
+    public ResponseEntity<PromptVersionDto> createVersion(
+            @PathVariable String key, @RequestBody VersionCreateRequest body,
+            Authentication authentication) {
+        User user = llmAdmin(authentication);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(llm.createVersion(user.getId(), key, body));
+    }
+
+    @PutMapping("/llm/versions/{id}")
+    public PromptVersionDto updateVersion(
+            @PathVariable UUID id, @RequestBody VersionCreateRequest body,
+            Authentication authentication) {
+        User user = llmAdmin(authentication);
+        return llm.updateVersion(user.getId(), id, body);
+    }
+
+    @PostMapping("/llm/versions/{id}/traffic")
+    public PromptVersionDto setTraffic(
+            @PathVariable UUID id, @RequestBody TrafficRequest body,
+            Authentication authentication) {
+        User user = llmAdmin(authentication);
+        return llm.setTraffic(user.getId(), id, body);
+    }
+
+    @PostMapping("/llm/versions/{id}/promote")
+    public PromptVersionDto promote(@PathVariable UUID id, Authentication authentication) {
+        User user = llmAdmin(authentication);
+        return llm.promote(user.getId(), id);
+    }
+
     /* ---------- доступ ---------- */
 
     private static UUID currentUser(Authentication authentication) {
@@ -267,6 +349,14 @@ public class AdminController {
         User user = users.findById(currentUser(authentication))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
         Roles.require(user, Roles.SUPERADMIN);
+        return user;
+    }
+
+    /** Персонал LLM-контура: админ инфраструктуры или суперадмин. */
+    private User llmAdmin(Authentication authentication) {
+        User user = users.findById(currentUser(authentication))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+        Roles.require(user, Roles.LLM_ADMIN, Roles.SUPERADMIN);
         return user;
     }
 }

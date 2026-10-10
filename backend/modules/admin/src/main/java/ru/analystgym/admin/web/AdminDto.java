@@ -116,6 +116,50 @@ public final class AdminDto {
     public record RoleRequest(String role) {
     }
 
+    public record ProviderDto(
+            String id,
+            String name,
+            String baseUrl,
+            String model,
+            String keyEnv,
+            Boolean keyPresent,
+            Integer timeoutSec,
+            Boolean enabled) {
+    }
+
+    public record AgentDto(
+            String id,
+            String name,
+            String role,
+            String initials,
+            List<String> checks,
+            String model,
+            Boolean enabled,
+            String promptKey) {
+    }
+
+    public record PromptVersionDto(
+            UUID id,
+            String promptKey,
+            int v,
+            String status,
+            int traffic,
+            String model,
+            String changelog,
+            String text,
+            String updatedAt) {
+    }
+
+    public record TrafficRequest(Integer traffic) {
+    }
+
+    public record VersionCreateRequest(
+            String text,
+            String changelog,
+            String model,
+            Integer traffic) {
+    }
+
     public record UserRow(UUID id, String name, String email, String role, String createdAt) {
     }
 

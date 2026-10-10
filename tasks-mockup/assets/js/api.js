@@ -53,6 +53,13 @@
     if (!response.ok) {
       const error = new Error(method + ' ' + path + ' -> ' + response.status);
       error.status = response.status;
+      // Тело ошибки (код вида quota_exhausted) — для точных тостов.
+      try {
+        const errText = await response.text();
+        error.body = errText ? JSON.parse(errText) : null;
+      } catch (e) {
+        error.body = null;
+      }
       throw error;
     }
     // refresh/logout могут вернуть пустое тело — читаем как текст с запасом.
@@ -252,8 +259,7 @@
       }
     },
 
-    /* ---------- жалобы (Фаза 3, UC-S08) ---------- */
-    async fileComplaint(attemptId, reason) {
+    /* ---------- жалобы (Фаза 3, UC-S08) ---------- */    async fileComplaint(attemptId, reason) {
       return postJson('/api/complaints', { attemptId, reason });
     },
 
@@ -263,6 +269,27 @@
       } catch (error) {
         return null;
       }
+    },
+
+    /* ---------- биллинг (Фаза 4): тарифы, заказы, Pro-статус ---------- */
+    async plans() {
+      return getJson('/api/billing/plans');
+    },
+
+    async billingStatus() {
+      try {
+        return await getJson('/api/billing/status');
+      } catch (error) {
+        return null;
+      }
+    },
+
+    async createOrder(plan) {
+      return postJson('/api/billing/orders', { plan });
+    },
+
+    async redeemPromo(code) {
+      return postJson('/api/billing/promocodes/redeem', { code });
     }
   };
 
