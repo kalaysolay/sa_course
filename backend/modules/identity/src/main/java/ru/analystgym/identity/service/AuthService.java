@@ -95,6 +95,30 @@ public class AuthService {
         return issuePair(user);
     }
 
+    /**
+     * Вход через внешнего провайдера (Google): аккаунт находится по email
+     * или создаётся; парольный вход такому аккаунту недоступен — вместо
+     * хэша лежит случайный мусор (подобрать нельзя, проверить нельзя).
+     * Доверяем только подтверждённой почте (проверяет вызывающий).
+     */
+    @Transactional
+    public OAuthLogin oauthLogin(String email, String name) {
+        String norm = normalize(email);
+        User user = users.findByEmail(norm).orElse(null);
+        if (user == null) {
+            user = User.of(norm, passwords.encode("oauth-" + UUID.randomUUID()), name.trim());
+            if (adminEmails.contains(norm)) {
+                user.setRole(Roles.SUPERADMIN);
+            }
+            users.save(user);
+        }
+        return new OAuthLogin(user, issuePair(user));
+    }
+
+    /** Пользователь + свежая пара токенов для установки в куки. */
+    public record OAuthLogin(User user, TokenPair pair) {
+    }
+
     /** Ротация: старый refresh отзывается, выдаётся новая пара (защита от переиспользования). */
     @Transactional
     public TokenPair refresh(String rawRefresh) {

@@ -1,13 +1,12 @@
 package ru.analystgym.identity.web;
 
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import java.time.Duration;
 import java.util.Map;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,8 +22,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import ru.analystgym.identity.domain.User;
 import ru.analystgym.identity.repo.UserRepository;
-import ru.analystgym.identity.security.JwtAuthFilter;
 import ru.analystgym.identity.security.JwtService;
+import ru.analystgym.identity.security.SessionCookies;
 import ru.analystgym.identity.service.AuthService;
 import org.springframework.security.web.csrf.CsrfToken;
 
@@ -44,9 +43,7 @@ public class AuthController {
     private final UserRepository users;
     private final JwtService jwt;
     private final PasswordEncoder passwords;
-    private final boolean cookieSecure;
-    private final long accessMaxAge;
-    private final long refreshMaxAge;
+    private final SessionCookies cookies;
     private final boolean googleEnabled;
 
     public AuthController(
@@ -54,17 +51,13 @@ public class AuthController {
             UserRepository users,
             JwtService jwt,
             PasswordEncoder passwords,
-            @Value("${app.cookies.secure:false}") boolean cookieSecure,
-            @Value("${app.jwt.access-ttl-seconds:900}") long accessMaxAge,
-            @Value("${app.jwt.refresh-ttl-seconds:2592000}") long refreshMaxAge,
+            SessionCookies cookies,
             @Value("${app.google.enabled:false}") boolean googleEnabled) {
         this.auth = auth;
         this.users = users;
         this.jwt = jwt;
         this.passwords = passwords;
-        this.cookieSecure = cookieSecure;
-        this.accessMaxAge = accessMaxAge;
-        this.refreshMaxAge = refreshMaxAge;
+        this.cookies = cookies;
         this.googleEnabled = googleEnabled;
     }
 
@@ -101,8 +94,8 @@ public class AuthController {
             @CookieValue(name = REFRESH_COOKIE, required = false) String rawRefresh) {
         auth.logout(rawRefresh);
         return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, clearCookie(JwtAuthFilter.ACCESS_COOKIE).toString())
-                .header(HttpHeaders.SET_COOKIE, clearCookie(REFRESH_COOKIE).toString())
+                .header(HttpHeaders.SET_COOKIE, cookies.clearAccess().toString())
+                .header(HttpHeaders.SET_COOKIE, cookies.clearRefresh().toString())
                 .body(Map.of("status", "ok"));
     }
 
@@ -162,6 +155,19 @@ public class AuthController {
     }
 
     /**
+     * Старт Google-флоу: при включённом OAuth2 уводим на Spring-фильтр
+     * (/oauth2/authorization/google), при выключенном — честный 409,
+     * а не молчаливый 404 (фронт показывает заглушку).
+     */
+    @GetMapping("/oauth2/google")
+    public void googleStart(HttpServletResponse response) throws java.io.IOException {
+        if (!googleEnabled) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "oauth disabled");
+        }
+        response.sendRedirect("/oauth2/authorization/google");
+    }
+
+    /**
      * Маячок CSRF для фронта: само обращение к токену заставляет
      * CookieCsrfTokenRepository записать readable-куку XSRF-TOKEN
      * (на обычных GET токен ленивый и кука не пишется — проверено живьём).
@@ -205,38 +211,9 @@ public class AuthController {
             AuthService.TokenPair pair, HttpStatus status, MeResponse body) {
         // Две куки одним ответом: Spring склеит оба Set-Cookie заголовка сам.
         return ResponseEntity.status(status)
-                .header(HttpHeaders.SET_COOKIE, accessCookie(pair.access()).toString())
-                .header(HttpHeaders.SET_COOKIE, refreshCookie(pair.refresh()).toString())
+                .header(HttpHeaders.SET_COOKIE, cookies.access(pair.access()).toString())
+                .header(HttpHeaders.SET_COOKIE, cookies.refresh(pair.refresh()).toString())
                 .body(body);
-    }
-
-    private ResponseCookie accessCookie(String value) {
-        return baseCookie(JwtAuthFilter.ACCESS_COOKIE, value, accessMaxAge).build();
-    }
-
-    private ResponseCookie refreshCookie(String value) {
-        return baseCookie(REFRESH_COOKIE, value, refreshMaxAge).build();
-    }
-
-    private ResponseCookie.ResponseCookieBuilder baseCookie(String name, String value, long maxAge) {
-        // Secure=false по умолчанию: локалка ходит по http, а Secure-куки браузер по http не отдаёт.
-        // В проде ставим APP_COOKIES_SECURE=true (см. deploy/.env.example).
-        return ResponseCookie.from(name, value)
-                .httpOnly(true)
-                .secure(cookieSecure)
-                .sameSite("Lax")
-                .path("/")
-                .maxAge(Duration.ofSeconds(maxAge));
-    }
-
-    private ResponseCookie clearCookie(String name) {
-        return ResponseCookie.from(name, "")
-                .httpOnly(true)
-                .secure(cookieSecure)
-                .sameSite("Lax")
-                .path("/")
-                .maxAge(0)
-                .build();
     }
 
     private UUID userIdOf(String accessToken) {

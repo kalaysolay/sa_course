@@ -130,6 +130,37 @@ class AuthServiceTest {
     }
 
     @Test
+    void oauthСоздаётНовогоБезПарольногоВхода() {
+        when(users.findByEmail("g@example.com")).thenReturn(Optional.empty());
+        when(users.save(any(User.class))).thenAnswer(call -> {
+            User created = call.getArgument(0);
+            giveId(created);
+            return created;
+        });
+
+        AuthService.OAuthLogin login = auth().oauthLogin("G@Example.com", "Гугл");
+
+        assertThat(login.user().getEmail()).isEqualTo("g@example.com");
+        assertThat(login.user().getRole()).isEqualTo("STUDENT");
+        assertThat(login.pair().access()).isNotBlank();
+        // Случайный мусор вместо хэша: войти паролем нельзя.
+        assertThat(passwords.matches("anything", login.user().getPasswordHash())).isFalse();
+    }
+
+    @Test
+    void oauthПривязываетсяКСуществующему() {
+        User existing = User.of("g@example.com", passwords.encode("password123"), "Старожил");
+        giveId(existing);
+        when(users.findByEmail("g@example.com")).thenReturn(Optional.of(existing));
+
+        AuthService.OAuthLogin login = auth().oauthLogin("g@example.com", "Другое имя");
+
+        assertThat(login.user().getId()).isEqualTo(existing.getId());
+        // Пароль не затираем: вход обоими способами живёт.
+        assertThat(passwords.matches("password123", login.user().getPasswordHash())).isTrue();
+    }
+
+    @Test
     void гардРолейПропускаетСвоихИРежетЧужих() {
         User methodist = User.of("m@example.com", "hash", "Метод");
         methodist.setRole("METHODIST");

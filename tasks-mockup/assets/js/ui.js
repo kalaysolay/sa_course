@@ -298,8 +298,7 @@
       { title: 'Платформа', links: [
         ['index.html', 'AnalystGym — платформа'],
         ['practice.html#pricing', 'Тарифы'],
-        ['practice.html#faq', 'Вопросы и ответы'],
-        ['admin.html', 'Справочники (админка)']
+        ['practice.html#faq', 'Вопросы и ответы']
       ]}
     ],
     course: [
@@ -312,11 +311,35 @@
         ['catalog.html', 'Каталог задач']
       ]},
       { title: 'Платформа', links: [
-        ['index.html', 'AnalystGym — платформа'],
-        ['admin.html', 'Справочники (админка)']
+        ['index.html', 'AnalystGym — платформа']
       ]}
     ]
   };
+
+  /* Ссылки для персонала (админка): по умолчанию скрыты (fail-closed),
+     показываем только METHODIST/REVIEWER/LLM_ADMIN/SUPERADMIN после ready.
+     Методист без ссылки всё равно пройдёт по прямому URL — скрытие лишь
+     от лишних глаз, доступ решает бэк (403). */
+  function paintStaffLinks(mount) {
+    const scope = mount || document;
+    const user = window.Api ? Api.user : null;
+    const staff = user && ['METHODIST', 'REVIEWER', 'LLM_ADMIN', 'SUPERADMIN'].indexOf(user.role) >= 0;
+    if (!staff) return;
+    scope.querySelectorAll('[data-staff-only]').forEach((node) => {
+      node.classList.remove('hidden');
+    });
+    const cols = scope.querySelectorAll('.footer-col');
+    if (cols.length && !scope.querySelector('[data-admin-link]')) {
+      const target = cols[cols.length - 2] || cols[cols.length - 1];
+      if (target) {
+        const link = document.createElement('a');
+        link.href = 'admin.html';
+        link.textContent = 'Админка';
+        link.setAttribute('data-admin-link', '');
+        target.appendChild(link);
+      }
+    }
+  }
 
   UI.mountFooter = function (product) {
     const mount = document.getElementById('siteFooter');
@@ -354,6 +377,10 @@
       </div>`;
 
     UI.bindLogos(mount);
+    paintStaffLinks(mount);
+    if (window.Api && Api.ready && typeof Api.ready.then === 'function') {
+      Api.ready.then(() => paintStaffLinks(mount)).catch(() => paintStaffLinks(mount));
+    }
     mount.querySelectorAll('[data-action="reset-demo"]').forEach((link) => {
       link.addEventListener('click', (event) => {
         event.preventDefault();
