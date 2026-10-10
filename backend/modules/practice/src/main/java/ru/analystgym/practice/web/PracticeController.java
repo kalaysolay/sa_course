@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -24,6 +25,7 @@ import ru.analystgym.practice.web.PracticeDto.AttemptSummary;
 import ru.analystgym.practice.web.PracticeDto.AttemptView;
 import ru.analystgym.practice.web.PracticeDto.DraftRequest;
 import ru.analystgym.practice.web.PracticeDto.DraftResponse;
+import ru.analystgym.practice.web.PracticeDto.MyAttempt;
 import ru.analystgym.practice.web.PracticeDto.SubmitRequest;
 import ru.analystgym.practice.web.PracticeDto.SubmitResponse;
 import ru.analystgym.practice.web.PracticeDto.TaskDetail;
@@ -86,6 +88,14 @@ public class PracticeController {
     @GetMapping("/attempts/{attemptId}")
     public AttemptView attempt(@PathVariable UUID attemptId, Authentication authentication) {
         return practice.attemptView(currentUser(authentication), attemptId);
+    }
+
+    /** Лента попыток для кабинета: свои, свежие первые, с названием задачи и баллом. */
+    @GetMapping("/attempts/mine")
+    public List<MyAttempt> mine(
+            @RequestParam(required = false, defaultValue = "20") int limit,
+            Authentication authentication) {
+        return practice.myAttempts(currentUser(authentication), limit);
     }
 
     @GetMapping("/tasks/{id}/attempts")

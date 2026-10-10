@@ -67,7 +67,7 @@
         await Api.login(email, password);
         window.location.href = nextUrl();
       } catch (error) {
-        showError(error && error.status === 400 ? 'Неверный email или пароль.' : 'Не удалось войти, попробуйте позже.');
+        showError(error && error.status === 401 ? 'Неверный email или пароль.' : 'Не удалось войти, попробуйте позже.');
       } finally {
         btn.disabled = false;
       }

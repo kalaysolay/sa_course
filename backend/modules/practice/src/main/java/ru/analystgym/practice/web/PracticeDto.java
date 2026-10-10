@@ -64,6 +64,17 @@ public final class PracticeDto {
             int tabsCount) {
     }
 
+    /** Строка ленты кабинета (GET /api/attempts/mine): всё для строки списка. */
+    public record MyAttempt(
+            UUID attemptId,
+            String taskId,
+            String taskTitle,
+            String status,
+            Integer score,
+            String gradeLabel,
+            String submittedAt) {
+    }
+
     /** Полное тело задачи без эталона (публично). */
     public record TaskDetail(
             String id,

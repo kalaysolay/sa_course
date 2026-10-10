@@ -2,6 +2,7 @@ package ru.analystgym.practice.service;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,6 +27,7 @@ import ru.analystgym.practice.repo.ReviewRepository;
 import ru.analystgym.practice.web.PracticeDto.AttemptSummary;
 import ru.analystgym.practice.web.PracticeDto.AttemptView;
 import ru.analystgym.practice.web.PracticeDto.GradeView;
+import ru.analystgym.practice.web.PracticeDto.MyAttempt;
 import ru.analystgym.practice.web.PracticeDto.TabDto;
 import ru.analystgym.practice.web.PracticeDto.TaskDetail;
 import ru.analystgym.practice.web.QuotaExceededException;
@@ -216,6 +218,34 @@ public class PracticeService {
                     tabsCount));
         }
         return result;
+    }
+
+    /** Лента попыток для кабинета: свои, свежие первые, лимит 1–100. */
+    @Transactional(readOnly = true)
+    public List<MyAttempt> myAttempts(UUID userId, int limit) {
+        int max = Math.max(1, Math.min(limit <= 0 ? 20 : limit, 100));
+        List<Attempt> mine = new ArrayList<>();
+        for (Attempt attempt : attempts.findAll()) {
+            if (userId.equals(attempt.getUserId())) {
+                mine.add(attempt);
+            }
+        }
+        mine.sort(Comparator.comparing(Attempt::getCreatedAt,
+                Comparator.nullsLast(Comparator.naturalOrder())).reversed());
+        List<MyAttempt> rows = new ArrayList<>();
+        for (Attempt attempt : mine.subList(0, Math.min(max, mine.size()))) {
+            var review = reviews.findById(attempt.getId()).orElse(null);
+            String title = tasks.findById(attempt.getTaskId())
+                    .map(Task::getTitle).orElse(attempt.getTaskId());
+            String gradeLabel = null;
+            if (review != null && review.getResult() != null) {
+                gradeLabel = review.getResult().path("grade").path("label").asText(null);
+            }
+            rows.add(new MyAttempt(attempt.getId(), attempt.getTaskId(), title,
+                    attempt.getStatus(), review == null ? null : review.getScore(), gradeLabel,
+                    attempt.getCreatedAt() == null ? null : attempt.getCreatedAt().toString()));
+        }
+        return rows;
     }
 
     /** Полное тело задачи без эталона (публично, как условие в task.js). */

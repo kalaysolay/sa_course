@@ -303,8 +303,7 @@
       return postJson('/api/billing/subscriptions/' + encodeURIComponent(id) + '/cancel', {});
     },
 
-    /* ---------- кабинет (макет): серверные доработки после утверждения ---------- */
-    async updateProfile(name) {
+    /* ---------- кабинет (макет): серверные доработки после утверждения ---------- */    async updateProfile(name) {
       return putJson('/api/auth/profile', { name });
     },
 

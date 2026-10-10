@@ -81,6 +81,11 @@ public class User {
         return name;
     }
 
+    /** Переименование из кабинета (валидирует вызывающий). */
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public String getRole() {
         return role;
     }

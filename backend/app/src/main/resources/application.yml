@@ -8,6 +8,11 @@ app:
   # Bootstrap суперадминов (UC-A01): email через запятую; совпавший при
   # регистрации сразу получает SUPERADMIN. Прод — только через env.
   admin-emails: ${APP_ADMIN_EMAILS:}
+  # Вход через Google (OAuth2 code flow): выключен без ключей.
+  google:
+    enabled: ${AUTH_GOOGLE_ENABLED:false}
+    client-id: ${AUTH_GOOGLE_CLIENT_ID:}
+    client-secret: ${AUTH_GOOGLE_SECRET:}
   # Тарифы тренажёра (те же числа, что на лендинге): Free — N задач с ревью.
   billing:
     free-review-tasks: 2

@@ -57,6 +57,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // /me — только своим: иначе аноним падает в NPE вместо 401.
                         .requestMatchers("/api/auth/me").authenticated()
+                        // Профиль и смена пароля — только своим (лежат под /api/auth/** ниже).
+                        .requestMatchers("/api/auth/profile", "/api/auth/password/change").authenticated()
                         .requestMatchers("/api/auth/**").permitAll()
                         // Health обязан быть публичным: его дёргают Caddy, compose-healthcheck
                         // и CI-smoke без кук (контракт Фазы 0).

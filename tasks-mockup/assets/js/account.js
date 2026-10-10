@@ -368,11 +368,9 @@
   }
 })();
 
-/* Бэк-доработки под макет (после утверждения):
-   PUT /api/auth/profile {name} → MeResponse
-   POST /api/auth/password/change {currentPassword,newPassword} → 200 (401 при чужом текущем)
-   GET /api/attempts/mine?limit= → [{attemptId,taskId,taskTitle,score,gradeLabel,status,submittedAt}]
-   GET /api/auth/oauth2/status → {googleEnabled: bool}
+/* Бэк под макет: готово — PUT /api/auth/profile, POST /api/auth/password/change,
+   GET /api/attempts/mine, GET /api/auth/oauth2/status (googleEnabled из конфига).
+   Остался сам Google-флоу (после ключей):
    GET /api/auth/oauth2/google → редирект в Google (OAuth2 code flow)
    GET /api/auth/oauth2/callback → привязка по verified email + JWT-куки
-   Конфиги: auth.google.enabled, auth.google.client-id/secret (только env). */
+   Конфиги: app.google.enabled, app.google.client-id/secret (только env). */

@@ -10,14 +10,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 import ru.analystgym.identity.domain.User;
 import ru.analystgym.identity.repo.UserRepository;
 import ru.analystgym.identity.security.JwtAuthFilter;
@@ -40,23 +43,29 @@ public class AuthController {
     private final AuthService auth;
     private final UserRepository users;
     private final JwtService jwt;
+    private final PasswordEncoder passwords;
     private final boolean cookieSecure;
     private final long accessMaxAge;
     private final long refreshMaxAge;
+    private final boolean googleEnabled;
 
     public AuthController(
             AuthService auth,
             UserRepository users,
             JwtService jwt,
+            PasswordEncoder passwords,
             @Value("${app.cookies.secure:false}") boolean cookieSecure,
             @Value("${app.jwt.access-ttl-seconds:900}") long accessMaxAge,
-            @Value("${app.jwt.refresh-ttl-seconds:2592000}") long refreshMaxAge) {
+            @Value("${app.jwt.refresh-ttl-seconds:2592000}") long refreshMaxAge,
+            @Value("${app.google.enabled:false}") boolean googleEnabled) {
         this.auth = auth;
         this.users = users;
         this.jwt = jwt;
+        this.passwords = passwords;
         this.cookieSecure = cookieSecure;
         this.accessMaxAge = accessMaxAge;
         this.refreshMaxAge = refreshMaxAge;
+        this.googleEnabled = googleEnabled;
     }
 
     @PostMapping("/register")
@@ -107,6 +116,49 @@ public class AuthController {
         }
         User user = users.findById(userId).orElseThrow(AuthService.InvalidSessionException::new);
         return toMe(user);
+    }
+
+    /** Переименование из кабинета (email и роль здесь не меняются). */
+    @PutMapping("/profile")
+    public MeResponse rename(@RequestBody Map<String, String> body, Authentication authentication) {
+        UUID userId = requireUser(authentication);
+        String name = body == null || body.get("name") == null ? "" : body.get("name").trim();
+        if (name.length() < 1 || name.length() > 100) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "bad name");
+        }
+        User user = users.findById(userId).orElseThrow(AuthService.InvalidSessionException::new);
+        user.setName(name);
+        users.save(user);
+        return toMe(user);
+    }
+
+    /**
+     * Смена пароля из кабинета: текущий проверяем (401 при чужом),
+     * остальные сессии прибиваем как при сбросе (угонщик вылетает).
+     */
+    @PostMapping("/password/change")
+    public Map<String, String> changePassword(
+            @RequestBody Map<String, String> body, Authentication authentication) {
+        UUID userId = requireUser(authentication);
+        String current = body == null ? "" : body.getOrDefault("currentPassword", "");
+        String next = body == null ? "" : body.getOrDefault("newPassword", "");
+        if (next.length() < 8 || next.length() > 100) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "bad password");
+        }
+        User user = users.findById(userId).orElseThrow(AuthService.InvalidSessionException::new);
+        if (!passwords.matches(current, user.getPasswordHash())) {
+            throw new AuthService.InvalidSessionException();
+        }
+        user.setPasswordHash(passwords.encode(next));
+        users.save(user);
+        auth.logoutAll(userId);
+        return Map.of("status", "ok");
+    }
+
+    /** Google-вход: включён ли (без ключей — false, кнопка показывает заглушку). */
+    @GetMapping("/oauth2/status")
+    public Map<String, Boolean> oauthStatus() {
+        return Map.of("googleEnabled", googleEnabled);
     }
 
     /**
@@ -192,6 +244,13 @@ public class AuthController {
         return jwt.parse(accessToken)
                 .map(c -> UUID.fromString(c.getSubject()))
                 .orElseThrow(AuthService.InvalidSessionException::new);
+    }
+
+    private static UUID requireUser(Authentication authentication) {
+        if (authentication == null || !(authentication.getPrincipal() instanceof UUID userId)) {
+            throw new AuthService.InvalidSessionException();
+        }
+        return userId;
     }
 
     private static MeResponse toMe(User user) {
