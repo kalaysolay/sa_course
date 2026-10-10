@@ -62,7 +62,9 @@ public class SecurityConfig {
                         // Стоит раньше публичного GET /api/tasks/**: первое совпадение
                         // побеждает, иначе гейт эталона был бы открыт гостям.
                         .requestMatchers("/api/tasks/*/draft", "/api/tasks/*/attempts",
-                                "/api/tasks/*/reference", "/api/attempts/**").authenticated()
+                                "/api/tasks/*/reference", "/api/attempts/**",
+                                "/api/assessment/**", "/api/complaints/**",
+                                "/api/admin/**").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/tasks/**", "/api/collections/**", "/api/dictionaries/**").permitAll()
                         // /error обязан быть публичным: иначе контейнерный error-dispatch
                         // на 404 контроллера пере-проверяется цепочкой и маскарадит 404 в 401.

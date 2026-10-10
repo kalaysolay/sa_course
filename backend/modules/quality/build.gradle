@@ -1,1 +1,15 @@
-// Модуль quality: жалобы, разборы, дашборд, студенты (Фаза 3).
+// Модуль quality: жалобы, дашборд, разбор попыток, студенты (Фаза 3).
+// Читает practice (попытки/ревью), catalog (задачи) и identity (роли).
+// Жалобы подаются сюда же (POST /api/complaints), чтобы practice не
+// зависел от quality (иначе цикл practice<->quality).
+dependencies {
+    implementation project(':shared:persistence')
+    implementation project(':modules:catalog')
+    implementation project(':modules:practice')
+    implementation project(':modules:identity')
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}

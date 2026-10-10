@@ -1,1 +1,16 @@
-// Модуль admin: ревизии контента, лог действий (тонкий слой поверх модулей).
+// Модуль admin: задачи/подборки/справочники/роли/аудит (Фаза 3).
+// Тонкий слой поверх catalog + assessment + identity + review:
+// симулятор считает тем же движком, что и студенческие ревью.
+dependencies {
+    implementation project(':shared:persistence')
+    implementation project(':modules:catalog')
+    implementation project(':modules:practice')
+    implementation project(':modules:assessment')
+    implementation project(':modules:identity')
+    implementation project(':modules:review')
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}

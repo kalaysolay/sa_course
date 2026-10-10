@@ -141,4 +141,45 @@ if ($data.full) {
   Write-Host 'No "full" in seed.json, V4 skipped (old seed without bodies).'
 }
 
+# ---------- V6: assessment questions (Phase 3; needs "questions") ----------
+if ($data.questions) {
+  $v6 = @()
+  $v6 += '-- Assessment bank: questions with weights (difficulty) and explanations.'
+  $v6 += '-- Source: tasks-mockup/assets/js/questions.js (generated, do not edit by hand).'
+  $v6 += ''
+  $v6 += 'CREATE TABLE IF NOT EXISTS questions ('
+  $v6 += '  id          TEXT PRIMARY KEY,'
+  $v6 += '  competency  TEXT NOT NULL,'
+  $v6 += '  difficulty  INTEGER NOT NULL DEFAULT 1,'
+  $v6 += '  question    TEXT NOT NULL,'
+  $v6 += '  options     JSONB NOT NULL DEFAULT ''[]'','
+  $v6 += '  answer      INTEGER NOT NULL DEFAULT 0,'
+  $v6 += '  explain     TEXT NOT NULL DEFAULT '''','
+  $v6 += '  active      BOOLEAN NOT NULL DEFAULT TRUE'
+  $v6 += ');'
+  $v6 += ''
+  $v6 += 'CREATE TABLE IF NOT EXISTS assessment_submissions ('
+  $v6 += '  id            UUID PRIMARY KEY,'
+  $v6 += '  user_id       UUID NOT NULL REFERENCES users (id) ON DELETE CASCADE,'
+  $v6 += '  answers       JSONB NOT NULL DEFAULT ''{}'','
+  $v6 += '  duration_sec  INTEGER NOT NULL DEFAULT 0,'
+  $v6 += '  score         NUMERIC NOT NULL DEFAULT 0,'
+  $v6 += '  score_rounded INTEGER NOT NULL DEFAULT 0,'
+  $v6 += '  grade_id      TEXT NOT NULL DEFAULT '''','
+  $v6 += '  result        JSONB NOT NULL DEFAULT ''{}'','
+  $v6 += '  created_at    TIMESTAMPTZ NOT NULL DEFAULT now()'
+  $v6 += ');'
+  $v6 += 'CREATE INDEX IF NOT EXISTS ix_assessment_user ON assessment_submissions (user_id, created_at DESC);'
+  $v6 += ''
+  foreach ($q in $data.questions) {
+    $opts = ($q.options | ConvertTo-Json -Depth 5 -Compress) -replace "'", "''"
+    $v6 += ('INSERT INTO questions (id, competency, difficulty, question, options, answer, explain, active) VALUES ({0}, {1}, {2}, {3}, ''{4}''::jsonb, {5}, {6}, TRUE) ON CONFLICT (id) DO UPDATE SET competency = EXCLUDED.competency, difficulty = EXCLUDED.difficulty, question = EXCLUDED.question, options = EXCLUDED.options, answer = EXCLUDED.answer, explain = EXCLUDED.explain;' `
+      -f (Q $q.id), (Q $q.competency), ([int]$q.difficulty), (Q $q.question), $opts, ([int]$q.answer), (Q $q.explain))
+  }
+  $v6 += ''
+  [IO.File]::WriteAllText((Join-Path $migDir 'V6__assessment.sql'), ($v6 -join "`n"), $utf8)
+} else {
+  Write-Host 'No "questions" in seed.json, V6 skipped.'
+}
+
 Write-Host "Migrations written."

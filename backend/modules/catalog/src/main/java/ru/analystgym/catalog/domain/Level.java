@@ -35,7 +35,8 @@ public class Level {
     @Column(nullable = false)
     private boolean active = true;
 
-    protected Level() {
+    /** Публичный для методистской админки; в проде сущность собираем сеттерами. */
+    public Level() {
     }
 
     public String getId() {

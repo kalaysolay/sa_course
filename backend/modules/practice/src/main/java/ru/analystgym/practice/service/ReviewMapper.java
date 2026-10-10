@@ -62,7 +62,8 @@ public final class ReviewMapper {
         return result;
     }
 
-    static List<ReviewInput.CriterionInput> mapRubric(JsonNode rubric) {
+    /** Рубрика JSONB → вход движка (публично для симулятора админки). */
+    public static List<ReviewInput.CriterionInput> mapRubric(JsonNode rubric) {
         List<ReviewInput.CriterionInput> result = new ArrayList<>();
         if (rubric == null || !rubric.isArray()) {
             return result;
@@ -80,7 +81,8 @@ public final class ReviewMapper {
         return result;
     }
 
-    static boolean expectsDiagram(JsonNode starterTabs) {
+    /** Есть ли в стартовых вкладках хоть одна диаграмма. */
+    public static boolean expectsDiagram(JsonNode starterTabs) {
         if (starterTabs == null || !starterTabs.isArray()) {
             return false;
         }
@@ -111,7 +113,8 @@ public final class ReviewMapper {
         return node.get(field).asInt();
     }
 
-    static List<String> strings(JsonNode node) {
+    /** Строковый массив JSONB → список (публично для планов/симулятора). */
+    public static List<String> strings(JsonNode node) {
         List<String> result = new ArrayList<>();
         if (node == null || !node.isArray()) {
             return result;

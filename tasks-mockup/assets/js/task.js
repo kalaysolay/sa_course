@@ -1091,6 +1091,7 @@
               </div>
             </div>` : '<div class="grow"></div>'}
           <span class="note">ревью ${AppUI.timeAgo(attempt.submittedAt)}</span>
+          <button class="btn btn-ghost btn-sm" type="button" id="complainBtn">Оспорить</button>
           <button class="btn btn-outline btn-sm" type="button" id="openAuthorBtn">Смотреть эталон</button>
           <button class="btn btn-primary btn-sm" type="button" id="resubmitBtn">Доработать и отправить снова</button>
         </div>
@@ -1113,6 +1114,27 @@
       fold.open = true;
       mountAuthorSolution();
       fold.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+
+    /* Оспаривание ревью (UC-S08): жалоба уходит в очередь методиста.
+       Работает только для серверных попыток — у локальных нет attemptId бэка. */
+    document.getElementById('complainBtn').addEventListener('click', async () => {
+      if (!window.Api || !Api.serverPractice() || !attempt.server) {
+        AppUI.toast('Оспорить можно серверное ревью: войдите и отправьте решение ещё раз', 'warn');
+        return;
+      }
+      const reason = window.prompt('Что не так с ревью? Напишите причину (минимум 10 символов) — методист разберёт жалобу.');
+      if (reason === null) return;
+      if (reason.trim().length < 10) {
+        AppUI.toast('Причина слишком короткая — нужно хотя бы 10 символов', 'warn');
+        return;
+      }
+      try {
+        await Api.fileComplaint(attempt.id, reason.trim());
+        AppUI.toast('Жалоба отправлена методисту', 'ok');
+      } catch (error) {
+        AppUI.toast('Не удалось отправить жалобу: ' + (error && error.message ? error.message : error), 'bad');
+      }
     });
   }
 

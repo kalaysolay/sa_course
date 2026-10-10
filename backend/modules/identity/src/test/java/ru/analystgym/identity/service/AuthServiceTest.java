@@ -20,6 +20,7 @@ import ru.analystgym.identity.repo.PasswordResetRepository;
 import ru.analystgym.identity.repo.RefreshTokenRepository;
 import ru.analystgym.identity.repo.UserRepository;
 import ru.analystgym.identity.security.JwtService;
+import ru.analystgym.identity.security.Roles;
 
 /**
  * Сценарии входа без БД: репозитории — моки, bcrypt и JWT — настоящие.
@@ -43,7 +44,11 @@ class AuthServiceTest {
     JwtService jwt = new JwtService("test-secret-0123456789abcdef-test", 900, 2592000);
 
     AuthService auth() {
-        return new AuthService(users, sessions, resets, passwords, jwt, 2592000);
+        return new AuthService(users, sessions, resets, passwords, jwt, 2592000, "");
+    }
+
+    AuthService authWithAdmins(String csv) {
+        return new AuthService(users, sessions, resets, passwords, jwt, 2592000, csv);
     }
 
     @Test
@@ -98,6 +103,40 @@ class AuthServiceTest {
         // Одинаковый ответ на обе ситуации — не раскрываем, какие email зарегистрированы.
         assertThatThrownBy(() -> auth().login("ghost@example.com", "whatever"))
                 .isInstanceOf(AuthService.InvalidCredentialsException.class);
+    }
+
+    @Test
+    void bootstrapEmailСразуСуперадмин() {
+        when(users.findByEmail("boss@example.com")).thenReturn(Optional.empty());
+        when(users.save(any(User.class))).thenAnswer(call -> call.getArgument(0));
+
+        User saved = authWithAdmins("boss@example.com, other@example.com")
+                .register("Boss@Example.com", "password123", "Босс");
+
+        assertThat(saved.getRole()).isEqualTo("SUPERADMIN");
+    }
+
+    @Test
+    void обычныйПользовательОстаётсяСтудентом() {
+        when(users.findByEmail("user@example.com")).thenReturn(Optional.empty());
+        when(users.save(any(User.class))).thenAnswer(call -> call.getArgument(0));
+
+        User saved = authWithAdmins("boss@example.com").register("user@example.com", "password123", "Тест");
+
+        assertThat(saved.getRole()).isEqualTo("STUDENT");
+    }
+
+    @Test
+    void гардРолейПропускаетСвоихИРежетЧужих() {
+        User methodist = User.of("m@example.com", "hash", "Метод");
+        methodist.setRole("METHODIST");
+
+        // Свой проходит, чужой получает 403, а не 500.
+        Roles.require(methodist, "METHODIST", "SUPERADMIN");
+        assertThatThrownBy(() -> Roles.require(methodist, "REVIEWER"))
+                .isInstanceOf(org.springframework.web.server.ResponseStatusException.class);
+        assertThatThrownBy(() -> Roles.require(null, "STUDENT"))
+                .isInstanceOf(org.springframework.web.server.ResponseStatusException.class);
     }
 
     /** ID в проде ставит БД; в тесте без неё подкладываем UUID вручную. */

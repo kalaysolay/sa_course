@@ -171,7 +171,9 @@ window.Scoring = (function () {
         score: overlap * 10 - levelDistance * 2 - (done ? 25 : 0)
       };
     }).filter((item) => item.overlap > 0)
-      .sort((a, b) => b.score - a.score);
+      // Тай-брейк по id как в рекомендациях ревью: иначе порядок при равных
+      // баллах висит на порядке строк в БД и бэк не совпадёт с макетом.
+      .sort((a, b) => (b.score - a.score) || (a.task.id < b.task.id ? -1 : (a.task.id > b.task.id ? 1 : 0)));
 
     return tasks.slice(0, max).map((item, index) => ({
       n: index + 1,

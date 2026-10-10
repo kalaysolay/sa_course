@@ -10,13 +10,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;import ru.analystgym.identity.domain.PasswordResetToken;
+import org.springframework.transaction.annotation.Transactional;
+import ru.analystgym.identity.domain.PasswordResetToken;
 import ru.analystgym.identity.domain.RefreshToken;
 import ru.analystgym.identity.domain.User;
 import ru.analystgym.identity.repo.PasswordResetRepository;
 import ru.analystgym.identity.repo.RefreshTokenRepository;
 import ru.analystgym.identity.repo.UserRepository;
 import ru.analystgym.identity.security.JwtService;
+import ru.analystgym.identity.security.Roles;
 
 /**
  * Сценарии входа: регистрация, логин, ротация refresh, выход, сброс пароля.
@@ -34,6 +36,8 @@ public class AuthService {
     private final PasswordEncoder passwords;
     private final JwtService jwt;
     private final long refreshTtlSeconds;
+    /** Bootstrap суперадминов: email из app.admin-emails (нижний регистр). */
+    private final java.util.Set<String> adminEmails;
     private final SecureRandom random = new SecureRandom();
 
     public AuthService(
@@ -42,13 +46,22 @@ public class AuthService {
             PasswordResetRepository resets,
             PasswordEncoder passwords,
             JwtService jwt,
-            @Value("${app.jwt.refresh-ttl-seconds:2592000}") long refreshTtlSeconds) {
+            @Value("${app.jwt.refresh-ttl-seconds:2592000}") long refreshTtlSeconds,
+            @Value("${app.admin-emails:}") String adminEmailsCsv) {
         this.users = users;
         this.sessions = sessions;
         this.resets = resets;
         this.passwords = passwords;
         this.jwt = jwt;
         this.refreshTtlSeconds = refreshTtlSeconds;
+        java.util.Set<String> admins = new java.util.HashSet<>();
+        for (String raw : adminEmailsCsv.split(",")) {
+            String email = raw.trim().toLowerCase(java.util.Locale.ROOT);
+            if (!email.isEmpty()) {
+                admins.add(email);
+            }
+        }
+        this.adminEmails = java.util.Set.copyOf(admins);
     }
 
     /** Пара токенов для установки в куки. Access — JWT, refresh — JWT + запись в БД. */
@@ -61,7 +74,12 @@ public class AuthService {
         users.findByEmail(norm).ifPresent(u -> {
             throw new EmailTakenException();
         });
-        return users.save(User.of(norm, passwords.encode(rawPassword), name.trim()));
+        User user = User.of(norm, passwords.encode(rawPassword), name.trim());
+        // Первый вход команды: email из bootstrap-списка сразу суперадмин.
+        if (adminEmails.contains(norm)) {
+            user.setRole(Roles.SUPERADMIN);
+        }
+        return users.save(user);
     }
 
     @Transactional

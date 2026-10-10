@@ -1,10 +1,11 @@
 /* ============================================================
-   api.js — мост фронта к backend API (Фаза 1).
+   api.js — мост фронта к backend API (Фазы 1–3).
    Пытается забрать каталог/словари с того же origin (/api/*);
    если сервера нет (file:// или макет открыт как статика) —
    молча остаётся на встроенных SA_DATA. ready всегда резолвится,
    никогда не реджектится: страница обязана отрисоваться в любом случае.
-   Решения/попытки пока живут в Store (localStorage), их очередь — Фаза 2.
+   Фазы 2–3: черновики/попытки/диагностика/жалобы идут через сервер,
+   когда он есть и пользователь вошёл; иначе task.js работает локально.
    ============================================================ */
 
 (function () {
@@ -224,6 +225,44 @@
         return null;
       }
     },
+
+    /* ---------- диагностика (Фаза 3): сервер, если есть и вошли ---------- */
+    async getQuestions() {
+      return getJson('/api/assessment/questions');
+    },
+
+    async submitAssessment(answers, durationSec) {
+      return postJson('/api/assessment/submissions', { answers: answers || {}, durationSec: durationSec || 0 });
+    },
+
+    async assessmentHistory() {
+      try {
+        return await getJson('/api/assessment/submissions');
+      } catch (error) {
+        return null;
+      }
+    },
+
+    async assessmentPlan(submissionId) {
+      try {
+        const query = submissionId ? '?submissionId=' + encodeURIComponent(submissionId) : '';
+        return await getJson('/api/assessment/plan' + query);
+      } catch (error) {
+        return null;
+      }
+    },
+
+    /* ---------- жалобы (Фаза 3, UC-S08) ---------- */
+    async fileComplaint(attemptId, reason) {
+      return postJson('/api/complaints', { attemptId, reason });
+    },
+
+    async myComplaints() {
+      try {
+        return await getJson('/api/complaints/mine');
+      } catch (error) {
+        return null;
+      }
     }
   };
 

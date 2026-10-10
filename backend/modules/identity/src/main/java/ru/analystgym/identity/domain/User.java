@@ -11,8 +11,10 @@ import java.time.Instant;
 import java.util.UUID;
 
 /**
- * Пользователь платформы. Роль — одной строкой (STUDENT по умолчанию),
- * отдельная таблица ролей появится, когда понадобятся составные права.
+ * Пользователь платформы. Роль — одной строкой (STUDENT по умолчанию;
+ * методистов/ревьюеров назначает SUPERADMIN или bootstrap-список
+ * app.admin-emails при регистрации). Составных прав нет — проверка
+ * через Roles.require (Фаза 3, UC-A01).
  * Email всегда храним в нижнем регистре (приводит сервис, UNIQUE страхует).
  */
 @Entity
@@ -81,6 +83,11 @@ public class User {
 
     public String getRole() {
         return role;
+    }
+
+    /** Назначение роли — только из админки или bootstrap (см. AuthService). */
+    public void setRole(String role) {
+        this.role = role;
     }
 
     public Instant getCreatedAt() {

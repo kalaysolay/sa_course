@@ -5,6 +5,9 @@ server:
 # стартовало и без подстановки из Gradle (локальный запуск из IDE).
 app:
   version: 0.1.0-dev
+  # Bootstrap суперадминов (UC-A01): email через запятую; совпавший при
+  # регистрации сразу получает SUPERADMIN. Прод — только через env.
+  admin-emails: ${APP_ADMIN_EMAILS:}
   jwt:
     # Прод-секрет — только из env (минимум 32 символа). Дефолт — для локалки.
     secret: ${APP_JWT_SECRET:dev-secret-change-me-in-prod-00000000}

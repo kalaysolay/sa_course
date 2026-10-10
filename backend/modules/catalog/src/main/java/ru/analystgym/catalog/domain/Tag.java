@@ -33,7 +33,8 @@ public class Tag {
     @Column(nullable = false)
     private boolean active = true;
 
-    protected Tag() {
+    /** Публичный для методистской админки; в проде сущность собираем сеттерами. */
+    public Tag() {
     }
 
     public String getId() {

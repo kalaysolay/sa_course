@@ -286,7 +286,7 @@
     const unanswered = questions.filter((q) => answers[q.id] === undefined);
     const flagged = questions.filter((q) => flags[q.id] && answers[q.id] !== undefined);
 
-    const proceed = () => {
+    const proceed = async () => {
       finished = true;
       clearInterval(timerId);
       const result = Scoring.compute(answers);
@@ -300,6 +300,16 @@
         durationSec,
         result
       });
+      // Замер на сервер — best-effort копией (история замеров, UC-D03):
+      // локальный результат первичен, редирект не ждёт дольше одного ответа.
+      try {
+        if (window.Api) {
+          await Api.ready;
+          if (Api.serverPractice()) await Api.submitAssessment(answers, durationSec);
+        }
+      } catch (error) {
+        /* без сети история останется только локальной — это штатно */
+      }
       window.location.href = 'results.html';
     };
 
