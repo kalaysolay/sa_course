@@ -110,17 +110,30 @@
       window.location.href = 'index.html';
     });
 
-    /* Переключение видов правой колонки: профиль <-> безопасность. */
-    document.getElementById('securityBtn').addEventListener('click', () => {
+    /* Переключение видов правой колонки: профиль <-> безопасность.
+       Скроллим ровно к показанному блоку, а не наверх: иначе на узком
+       экране (сайдбар сверху) панель оказывается за кадром и кажется,
+       что «колонка пропала». */
+    function showSecurity() {
       document.getElementById('mainPanels').classList.add('hidden');
-      document.getElementById('securityPanel').classList.remove('hidden');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
-    document.getElementById('backToProfileBtn').addEventListener('click', () => {
+      const panel = document.getElementById('securityPanel');
+      panel.classList.remove('hidden');
+      requestAnimationFrame(() => {
+        panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    }
+
+    function showMain() {
       document.getElementById('securityPanel').classList.add('hidden');
-      document.getElementById('mainPanels').classList.remove('hidden');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
+      const main = document.getElementById('mainPanels');
+      main.classList.remove('hidden');
+      requestAnimationFrame(() => {
+        main.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    }
+
+    document.getElementById('securityBtn').addEventListener('click', showSecurity);
+    document.getElementById('backToProfileBtn').addEventListener('click', showMain);
   }
 
   /* ==================== подписка ==================== */
