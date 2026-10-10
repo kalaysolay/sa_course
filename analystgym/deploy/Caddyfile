@@ -1,7 +1,8 @@
 # Caddy: все поддомены на один app (продукт различаем по Host, см. HostProductFilter).
+# Домены — из APP_DOMAIN (.env): смена домена без правки файла.
 # Локально: этот файл не нужен — открывайте http://localhost:8080 напрямую.
 # Для локальных поддоменов добавьте в hosts: 127.0.0.1 practice.local course.local
-# и замените домены ниже на practice.local / course.local.
-analystgym.ru, practice.analystgym.ru, course.analystgym.ru {
+# и задайте APP_DOMAIN=practice.local... нет: локально проще без Caddy вообще.
+{$APP_DOMAIN}, practice.{$APP_DOMAIN}, course.{$APP_DOMAIN} {
 	reverse_proxy app:8080
 }

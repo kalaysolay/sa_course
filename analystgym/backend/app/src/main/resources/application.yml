@@ -15,25 +15,15 @@ app:
     client-secret: ${AUTH_GOOGLE_SECRET:}
     success-url: /account.html
     failure-url: /login.html?error=oauth
-  # Тарифы тренажёра (те же числа, что на лендинге): Free — N задач с ревью.
-  billing:
-    free-review-tasks: 2
-    pro-monthly-price: 990
-    pro-yearly-price: 9480
-    # Провайдер выбирается автоматически: ЮKassa при заданных ключах, иначе fake.
-    fake-enabled: ${BILLING_FAKE_ENABLED:true}
-    webhook-secret: ${BILLING_WEBHOOK_SECRET:}
-  # Ключи ЮKassa — только из env, в БД и логах их нет.
-  yookassa:
-    shop-id: ${YOOKASSA_SHOP_ID:}
-    secret-key: ${YOOKASSA_SECRET_KEY:}
-  # Движок ревью: mock (детерминированный) или llm (модели + фолбэк).
-  review:
-    engine: ${REVIEW_ENGINE:mock}
-    llm:
-      primary: ${REVIEW_LLM_PRIMARY:deepseek}
-      fallback: ${REVIEW_LLM_FALLBACK:glm}
-      max-tokens: 8000
+  # Сайт: внешний базовый URL для ссылок в письмах (сброс пароля).
+  site:
+    base-url: ${APP_SITE_BASE_URL:http://localhost:8080}
+  # Почта: выключена по умолчанию (лог-провайдер). Включается флагом
+  # APP_MAIL_ENABLED=true + MAIL_* ниже; письма — только транзакционные.
+  mail:
+    enabled: ${APP_MAIL_ENABLED:false}
+    from: ${APP_MAIL_FROM:}
+    reset-path: /login.html?mode=reset&token=
   jwt:
     # Прод-секрет — только из env (минимум 32 символа). Дефолт — для локалки.
     secret: ${APP_JWT_SECRET:dev-secret-change-me-in-prod-00000000}
@@ -42,6 +32,35 @@ app:
   cookies:
     # В проде за https — true (см. deploy/.env.example). Локально по http — false.
     secure: ${APP_COOKIES_SECURE:false}
+
+# Тарифы тренажёра (те же числа, что на лендинге): Free — N задач с ревью.
+# Секции верхнеуровневые: код читает billing.*, yookassa.*, review.*,
+# ratelimit.* (не app.* — иначе env не биндятся, проверено чтением кода).
+billing:
+  free-review-tasks: 2
+  pro-monthly-price: 990
+  pro-yearly-price: 9480
+  # Провайдер выбирается автоматически: ЮKassa при заданных ключах, иначе fake.
+  fake-enabled: ${BILLING_FAKE_ENABLED:true}
+  webhook-secret: ${BILLING_WEBHOOK_SECRET:}
+# Ключи ЮKassa — только из env, в БД и логах их нет.
+yookassa:
+  shop-id: ${YOOKASSA_SHOP_ID:}
+  secret-key: ${YOOKASSA_SECRET_KEY:}
+# Движок ревью: mock (детерминированный) или llm (модели + фолбэк).
+# Сами ключи моделей — в env (имена — в таблице провайдеров, см. V9__llm.sql).
+review:
+  engine: ${REVIEW_ENGINE:mock}
+  llm:
+    primary: ${REVIEW_LLM_PRIMARY:deepseek}
+    fallback: ${REVIEW_LLM_FALLBACK:glm}
+    max-tokens: 8000
+# Лимиты API (прод — через env при абузе).
+ratelimit:
+  login-per-min: ${RATELIMIT_LOGIN_PER_MIN:20}
+  submit-per-min: ${RATELIMIT_SUBMIT_PER_MIN:10}
+  assessment-per-min: ${RATELIMIT_ASSESSMENT_PER_MIN:5}
+  complaints-per-min: ${RATELIMIT_COMPLAINTS_PER_MIN:10}
 
 spring:
   datasource:
@@ -65,6 +84,19 @@ spring:
     locations: classpath:db/migration
     # Валидация строгая: расхождение миграции с применённой — падать сразу, а не ехать.
     validate-on-migrate: true
+  # SMTP-транспорт для SmtpNotificationService (включается APP_MAIL_ENABLED=true).
+  # Без флага письма идут в лог, эти свойства не используются.
+  mail:
+    host: ${MAIL_HOST:}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 
 management:
   endpoints:

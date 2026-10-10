@@ -54,6 +54,23 @@
           <p class="muted mt-16" style="font-size:12px">Регистрируясь, вы соглашаетесь на обработку данных для работы сервиса: имя и email, ничего лишнего.</p>
         </form>
 
+        <form id="resetRequestForm" class="hidden" novalidate>
+          <div class="field"><label for="resetEmail">Email</label>
+            <input id="resetEmail" type="email" autocomplete="email" placeholder="you@example.com">
+          </div>
+          <button class="btn btn-primary mt-16" type="submit" id="resetReqBtn" style="width:100%">Прислать ссылку</button>
+          <p class="muted mt-16" style="font-size:12px">Если такой аккаунт есть — письмо со ссылкой придёт в течение минуты. Ссылка живёт 1 час.</p>
+        </form>
+
+        <form id="resetConfirmForm" class="hidden" novalidate>
+          <div class="field"><label for="resetNew">Новый пароль (минимум 8 символов)</label>
+            <input id="resetNew" type="password" autocomplete="new-password">
+          </div>
+          <button class="btn btn-primary mt-16" type="submit" id="resetConfirmBtn" style="width:100%">Сменить пароль</button>
+        </form>
+
+        <p class="mt-16" style="font-size:12.5px"><button class="link-btn" type="button" id="forgotLink">Забыли пароль?</button></p>
+
         <div class="mt-16" id="googleBox"></div>
       </div>
     </div>

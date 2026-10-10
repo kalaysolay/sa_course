@@ -8,6 +8,14 @@
   function showError(message) {
     const box = document.getElementById('authError');
     box.textContent = message;
+    box.style.borderColor = 'rgba(255,107,107,.4)';
+    box.classList.remove('hidden');
+  }
+
+  function showOk(message) {
+    const box = document.getElementById('authError');
+    box.textContent = message;
+    box.style.borderColor = 'rgba(80,200,120,.45)';
     box.classList.remove('hidden');
   }
 
@@ -23,12 +31,19 @@
   }
 
   function setMode(mode) {
-    const login = mode !== 'register';
+    const login = mode === 'login';
+    const register = mode === 'register';
+    const resetRequest = mode === 'reset-request';
+    const reset = mode === 'reset';
     document.getElementById('loginForm').classList.toggle('hidden', !login);
-    document.getElementById('registerForm').classList.toggle('hidden', login);
-    document.getElementById('authTitle').textContent = login ? 'Вход' : 'Регистрация';
+    document.getElementById('registerForm').classList.toggle('hidden', !register);
+    document.getElementById('resetRequestForm').classList.toggle('hidden', !resetRequest);
+    document.getElementById('resetConfirmForm').classList.toggle('hidden', !reset);
+    document.getElementById('forgotLink').classList.toggle('hidden', reset || resetRequest);
+    document.getElementById('authTitle').textContent =
+      reset ? 'Новый пароль' : resetRequest ? 'Сброс пароля' : login ? 'Вход' : 'Регистрация';
     document.getElementById('tabLogin').classList.toggle('btn-primary', login);
-    document.getElementById('tabRegister').classList.toggle('btn-primary', !login);
+    document.getElementById('tabRegister').classList.toggle('btn-primary', register);
     hideError();
   }
 
@@ -47,7 +62,13 @@
       }
     }
 
-    const initial = AppUI.qs('mode') === 'register' ? 'register' : 'login';
+    const qsMode = AppUI.qs('mode') || 'login';
+    // Ссылка из письма: ?mode=reset&token=... — сразу форма нового пароля.
+    const resetToken = AppUI.qs('token') || '';
+    const initial = qsMode === 'register' ? 'register'
+      : qsMode === 'reset' && resetToken ? 'reset'
+      : qsMode === 'reset' ? 'reset-request'
+      : 'login';
     setMode(initial);
     document.getElementById('tabLogin').addEventListener('click', () => setMode('login'));
     document.getElementById('tabRegister').addEventListener('click', () => setMode('register'));
@@ -100,6 +121,48 @@
         showError(error && error.status === 409
           ? 'Такой email уже зарегистрирован — войдите.'
           : 'Не удалось зарегистрироваться, попробуйте позже.');
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    document.getElementById('forgotLink').addEventListener('click', () => setMode('reset-request'));
+
+    document.getElementById('resetRequestForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      hideError();
+      const email = document.getElementById('resetEmail').value.trim();
+      if (!/.+@.+\..+/.test(email)) {
+        showError('Похоже, в email опечатка.');
+        return;
+      }
+      const btn = document.getElementById('resetReqBtn');
+      btn.disabled = true;
+      try {
+        await Api.requestPasswordReset(email);
+        showOk('Готово: если такой аккаунт есть, письмо уже летит.');
+      } catch (error) {
+        showError('Не удалось отправить, попробуйте позже.');
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    document.getElementById('resetConfirmForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      hideError();
+      const password = document.getElementById('resetNew').value;
+      if (password.length < 8) {
+        showError('Пароль — минимум 8 символов.');
+        return;
+      }
+      const btn = document.getElementById('resetConfirmBtn');
+      btn.disabled = true;
+      try {
+        await Api.confirmPasswordReset(resetToken, password);
+        window.location.href = 'login.html';
+      } catch (error) {
+        showError('Ссылка устарела или уже использована — запросите новую.');
       } finally {
         btn.disabled = false;
       }

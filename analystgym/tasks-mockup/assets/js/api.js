@@ -326,6 +326,16 @@
       } catch (error) {
         return { googleEnabled: false };
       }
+    },
+
+    /* Сброс пароля: запрос всегда «принят» (бэк не палит, есть ли email),
+       подтверждение — по токену из письма (потребитель — login.html?mode=reset). */
+    async requestPasswordReset(email) {
+      return postJson('/api/auth/password/request', { email });
+    },
+
+    async confirmPasswordReset(token, password) {
+      return postJson('/api/auth/password/confirm', { token, password });
     }
   };
 
