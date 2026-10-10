@@ -73,8 +73,9 @@ Docker), команды (`compose up`, `./gradlew bootRun`, `./gradlew test`),
 
 ### Фаза 1 — Аккаунты + витрина каталога (1–2 недели) — ✅ ГОТОВА (2026-10-10)
 
-Что сделано: identity (register/login/refresh/logout/me, сброс пароля — заглушка
-без письма до Фазы 3), каталог read-API (`/api/tasks`, `/api/collections`,
+Что сделано: identity (register/login/refresh/logout/me, сброс пароля — токен
+в лог по контракту «письмо в лог», проверен живьём: 202/202-ghost/confirm-200/
+одноразовость/новый-200/старый-401), каталог read-API (`/api/tasks`, `/api/collections`,
 `/api/dictionaries`), сид из макета (V2 уровни/метки/подборки, V3 задачи),
 `api.js` с fetch-first и fallback на встроенные данные (каталог + подборки ждут
 `Api.ready`). Проверено: `./gradlew build` зелёный (11 unit-тестов identity +

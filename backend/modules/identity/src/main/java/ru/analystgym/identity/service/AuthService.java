@@ -5,11 +5,12 @@ import java.time.Instant;
 import java.util.HexFormat;
 import java.util.List;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import ru.analystgym.identity.domain.PasswordResetToken;
+import org.springframework.transaction.annotation.Transactional;import ru.analystgym.identity.domain.PasswordResetToken;
 import ru.analystgym.identity.domain.RefreshToken;
 import ru.analystgym.identity.domain.User;
 import ru.analystgym.identity.repo.PasswordResetRepository;
@@ -24,6 +25,8 @@ import ru.analystgym.identity.security.JwtService;
  */
 @Service
 public class AuthService {
+
+    private static final Logger log = LoggerFactory.getLogger(AuthService.class);
 
     private final UserRepository users;
     private final RefreshTokenRepository sessions;
@@ -98,8 +101,10 @@ public class AuthService {
     }
 
     /**
-     * Заглушка сброса: токен создаём и кладём в БД, но письма в Фазе 1 нет —
-     * сырой токен возвращаем вызывающему (админка/тесты), фронт заберёт по почте в Фазе 3.
+     * Заглушка сброса: писем в Фазе 1 нет — сырой токен пишем в лог
+     * (контракт roadmap: «письмо в лог»), оттуда его забирают тесты и админка.
+     * Фронт заберёт ссылку по почте в Фазе 3. В продегромкость лога с токенами
+     * убрать вместе с появлением почты (иначе токены осядут в лог-агрегаторе).
      */
     @Transactional
     public String requestReset(String email) {
@@ -107,6 +112,7 @@ public class AuthService {
         String raw = randomToken();
         Instant expires = Instant.now().plusSeconds(3600);
         resets.save(new PasswordResetToken(TokenHash.sha256(raw), user, expires));
+        log.info("Password reset for {}: dev-token={} (valid 1h, single-use)", user.getEmail(), raw);
         return raw;
     }
 
