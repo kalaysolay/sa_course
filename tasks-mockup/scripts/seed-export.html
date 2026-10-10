@@ -5,7 +5,23 @@ document.addEventListener("DOMContentLoaded", function() {
     var tags = SA_DATA.tags.map(function(t) { return { id: t.id, name: t.name, category: t.category, active: t.active !== false, synonyms: t.synonyms || [] }; });
     var collections = SA_DATA.collections.map(function(c) { return { id: c.id, name: c.name, tagline: c.tagline || "", description: c.description || "", icon: c.icon || "", audience: c.audience || "", taskIds: c.taskIds || [], active: c.active !== false }; });
     var tasks = SA_DATA.tasks.map(function(t) { return { id: t.id, title: t.title, level: t.level, tags: t.tags || [], timeMin: t.timeMin || 30, solvedRate: t.solvedRate || 0 }; });
-    document.getElementById("out").textContent = JSON.stringify({ levels: levels, tags: tags, collections: collections, tasks: tasks });
+    var full = SA_DATA.tasks.map(function(t) {
+      return {
+        id: t.id,
+        statement: t.statement || null,
+        starterTabs: t.starterTabs || [],
+        rubric: (t.rubric || []).map(function(c) {
+          return { id: c.id, title: c.title, weight: c.weight || "mid",
+            weightValue: (typeof c.weightValue === "number" ? c.weightValue : null),
+            focus: c.focus || "sa", keywords: c.keywords || [], why: c.why || "",
+            critical: c.critical === true };
+        }),
+        hints: t.hints || [],
+        interviewQuestions: t.interviewQuestions || [],
+        authorSolution: t.authorSolution || null
+      };
+    });
+    document.getElementById("out").textContent = JSON.stringify({ levels: levels, tags: tags, collections: collections, tasks: tasks, full: full });
   } catch (e) {
     document.getElementById("out").textContent = JSON.stringify({ fatal: String((e && e.message) || e) });
   }

@@ -9,12 +9,13 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.type.SqlTypes;
+import com.fasterxml.jackson.databind.JsonNode;
 
 /**
- * Задача каталога, сводка для списка (Фаза 1).
- * Полные тела (условие, рубрика, эталон) приедут отдельной миграцией
- * в Фазе 2 — тогда же появится сервисный слой; пока контроллеры читают
- * репозитории напрямую (осознанно, см. catalog/build.gradle).
+ * Задача каталога: сводка для списка + полные тела (Фаза 2).
+ * Полные тела (условие, стартовые вкладки, рубрика, подсказки, вопросы,
+ * эталон) приехали миграцией V4 из данных макета; эталон отдаём только
+ * через гейт practice-модуля (есть reviewed-попытка), не из каталога.
  */
 @Entity
 @Table(name = "tasks")
@@ -42,6 +43,36 @@ public class Task {
 
     @Column(name = "solved_rate", nullable = false)
     private int solvedRate = 0;
+
+    /** Условие задачи объектом (brief/context/goal/inputs/deliverables/...). */
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb")
+    private JsonNode statement;
+
+    /** Стартовые вкладки редактора (тип doc/plantuml/mermaid + контент). */
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "starter_tabs", columnDefinition = "jsonb")
+    private JsonNode starterTabs;
+
+    /** Рубрика — контракт оценки (критерии с весами, фокусом и маркерами). */
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb")
+    private JsonNode rubric;
+
+    /** Подсказки (открываются по одной, эталон скрыт до ревью). */
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb")
+    private JsonNode hints;
+
+    /** Вопросы интервьюера по задаче. */
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "interview_questions", columnDefinition = "jsonb")
+    private JsonNode interviewQuestions;
+
+    /** Эталонное решение автора: отдаём только после ревью (гейт в practice). */
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "author_solution", columnDefinition = "jsonb")
+    private JsonNode authorSolution;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -109,6 +140,54 @@ public class Task {
 
     public void setSolvedRate(int solvedRate) {
         this.solvedRate = solvedRate;
+    }
+
+    public JsonNode getStatement() {
+        return statement;
+    }
+
+    public void setStatement(JsonNode statement) {
+        this.statement = statement;
+    }
+
+    public JsonNode getStarterTabs() {
+        return starterTabs;
+    }
+
+    public void setStarterTabs(JsonNode starterTabs) {
+        this.starterTabs = starterTabs;
+    }
+
+    public JsonNode getRubric() {
+        return rubric;
+    }
+
+    public void setRubric(JsonNode rubric) {
+        this.rubric = rubric;
+    }
+
+    public JsonNode getHints() {
+        return hints;
+    }
+
+    public void setHints(JsonNode hints) {
+        this.hints = hints;
+    }
+
+    public JsonNode getInterviewQuestions() {
+        return interviewQuestions;
+    }
+
+    public void setInterviewQuestions(JsonNode interviewQuestions) {
+        this.interviewQuestions = interviewQuestions;
+    }
+
+    public JsonNode getAuthorSolution() {
+        return authorSolution;
+    }
+
+    public void setAuthorSolution(JsonNode authorSolution) {
+        this.authorSolution = authorSolution;
     }
 
     public Instant getCreatedAt() {

@@ -13,6 +13,8 @@ dependencies {
     // Новые модули следующих фаз добавляем сюда же строкой.
     implementation project(':modules:identity')
     implementation project(':modules:catalog')
+    implementation project(':modules:practice')
+    implementation project(':modules:review')
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'

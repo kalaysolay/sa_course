@@ -1,1 +1,13 @@
-// Модуль practice: черновики, попытки, решения (наполнение — Фаза 2).
+// Модуль practice: черновики, попытки, идемпотентный submit, воркер ревью.
+// Зависит от catalog (читает задачи и рубрики) и review (считает ревью),
+// сам ни от кого не зависит в обратную сторону (циклов нет).
+dependencies {
+    implementation project(':shared:persistence')
+    implementation project(':modules:catalog')
+    implementation project(':modules:review')
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}

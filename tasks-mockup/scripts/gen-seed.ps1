@@ -112,4 +112,33 @@ foreach ($t in $data.tasks) {
 $v3 += ''
 [IO.File]::WriteAllText((Join-Path $migDir 'V3__catalog_tasks.sql'), ($v3 -join "`n"), $utf8)
 
+# ---------- V4: full task bodies (Phase 2; needs seed.json with "full") ----------
+function J($o) {
+  if ($null -eq $o) { return 'NULL' }
+  $raw = ConvertTo-Json $o -Depth 20 -Compress
+  return "'" + ($raw -replace "'", "''") + "'::jsonb"
+}
+
+if ($data.full) {
+  $v4 = @()
+  $v4 += '-- Full task bodies: statement, starter tabs, rubric, hints, interview Qs, author solution.'
+  $v4 += '-- Source: tasks-mockup/assets/js/data-tasks-*.js (generated, do not edit by hand).'
+  $v4 += ''
+  $v4 += 'ALTER TABLE tasks ADD COLUMN IF NOT EXISTS statement JSONB NOT NULL DEFAULT ''{}'';'
+  $v4 += 'ALTER TABLE tasks ADD COLUMN IF NOT EXISTS starter_tabs JSONB NOT NULL DEFAULT ''[]'';'
+  $v4 += 'ALTER TABLE tasks ADD COLUMN IF NOT EXISTS rubric JSONB NOT NULL DEFAULT ''[]'';'
+  $v4 += 'ALTER TABLE tasks ADD COLUMN IF NOT EXISTS hints JSONB NOT NULL DEFAULT ''[]'';'
+  $v4 += 'ALTER TABLE tasks ADD COLUMN IF NOT EXISTS interview_questions JSONB NOT NULL DEFAULT ''[]'';'
+  $v4 += 'ALTER TABLE tasks ADD COLUMN IF NOT EXISTS author_solution JSONB;'
+  $v4 += ''
+  foreach ($t in $data.full) {
+    $v4 += ('UPDATE tasks SET statement = {0}, starter_tabs = {1}, rubric = {2}, hints = {3}, interview_questions = {4}, author_solution = {5}, updated_at = now() WHERE id = {6};' `
+      -f (J $t.statement), (J $t.starterTabs), (J $t.rubric), (J $t.hints), (J $t.interviewQuestions), (J $t.authorSolution), (Q $t.id))
+  }
+  $v4 += ''
+  [IO.File]::WriteAllText((Join-Path $migDir 'V4__tasks_full.sql'), ($v4 -join "`n"), $utf8)
+} else {
+  Write-Host 'No "full" in seed.json, V4 skipped (old seed without bodies).'
+}
+
 Write-Host "Migrations written."

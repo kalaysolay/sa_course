@@ -464,7 +464,9 @@
       const levelBoost = candidate.level === task.level ? 1 : 0;
       return { candidate, score: overlap * 2 + levelBoost };
     }).filter((item) => item.score > 0)
-      .sort((a, b) => b.score - a.score);
+      // Тай-брейк по id: порядок при равных баллах детерминирован и совпадает
+      // с бэком (MockReviewProvider) — иначе он висел бы на порядке строк в БД.
+      .sort((a, b) => (b.score - a.score) || (a.candidate.id < b.candidate.id ? -1 : (a.candidate.id > b.candidate.id ? 1 : 0)));
 
     return scored.slice(0, 3).map((item) => ({
       id: item.candidate.id,

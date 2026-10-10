@@ -24,7 +24,7 @@
 
   /* ==================== инициализация ==================== */
 
-  document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('DOMContentLoaded', async () => {
     AppUI.mountHeader('catalog');
     AppUI.mountFooter();
 
@@ -46,6 +46,9 @@
 
     document.title = `${task.title} — AnalystGym`;
     solution = loadSolution();
+    // Серверный черновик подтягиваем до отрисовки — но только когда
+    // локального нет: локальные правки всегда важнее серверной копии.
+    await pullServerDraft();
     activeAttempt = Store.lastAttempt(task.id);
 
     renderCrumbs();
@@ -58,7 +61,8 @@
     const last = Store.lastAttempt(task.id);
     if (last && last.status === 'in_review') {
       /* ревью не завершилось (обновление страницы) — перезапускаем на сохранённом снимке */
-      startReview(last, { resume: true });
+      if (last.server && window.Api && Api.serverPractice()) startServerPoll(last, { resume: true });
+      else startReview(last, { resume: true });
     } else if (last && last.status === 'reviewed') {
       showReview(last);
     }
@@ -84,6 +88,37 @@
   function persist() {
     Store.saveSolution(task.id, solution);
     paintSaved();
+    scheduleServerDraft();
+  }
+
+  /* Черновик на сервер — best-effort копией: локальный Store первичен,
+     сервер нужен для другого устройства. Ошибки глотаем молча, иначе
+     каждое движение курсора без сети давало бы тосты. */
+  let serverDraftTimer = null;
+  function scheduleServerDraft() {
+    if (!window.Api || !Api.serverPractice()) return;
+    clearTimeout(serverDraftTimer);
+    serverDraftTimer = setTimeout(() => {
+      Api.saveDraft(task.id, solution.tabs).catch(() => {});
+    }, 1500);
+  }
+
+  /* Серверный черновик забираем только когда локального нет вообще. */
+  async function pullServerDraft() {
+    try {
+      if (!window.Api) return;
+      await Api.ready;
+      if (!Api.serverPractice()) return;
+      if (Store.solution(task.id)) return;
+      const draft = await Api.getDraft(task.id);
+      const tabs = draft && Array.isArray(draft.tabs) ? draft.tabs.filter((t) => t && t.type) : [];
+      if (!tabs.length) return;
+      const activeOk = tabs.some((t) => t.id && (!solution.activeTabId || t.id === solution.activeTabId));
+      solution = { tabs, activeTabId: activeOk && solution.activeTabId ? solution.activeTabId : tabs[0].id, updatedAt: null };
+      Store.saveSolution(task.id, solution);
+    } catch (error) {
+      /* сервера нет или черновика нет — остаёмся на стартовых вкладках */
+    }
   }
 
   function schedulePersist() {
@@ -711,6 +746,11 @@
   }
 
   function submit() {
+    // Вошли и сервер рядом — решение считает бэк (Фаза 2), иначе как раньше локально.
+    if (window.Api && Api.serverPractice()) {
+      serverSubmit();
+      return;
+    }
     const attempt = {
       id: 'att_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
       taskId: task.id,
@@ -723,6 +763,125 @@
     activeAttempt = attempt;
     renderAttempts();
     startReview(attempt, {});
+  }
+
+  /* ==================== отправка через бэк (Фаза 2) ==================== */
+
+  async function serverSubmit() {
+    const tabs = JSON.parse(JSON.stringify(solution.tabs));
+    const key = 'web_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+    let res = null;
+    try {
+      res = await Api.submitAttempt(task.id, tabs, key);
+    } catch (error) {
+      // Сессия протухла посреди работы — не теряем решение, считаем локально.
+      if (error && error.status === 401) {
+        AppUI.toast('Сессия истекла — посчитаем ревью локально', 'warn');
+        submitLocalFallback(tabs);
+        return;
+      }
+      AppUI.toast('Не удалось отправить решение: ' + (error && error.message ? error.message : error), 'bad');
+      return;
+    }
+    const attempt = {
+      id: res.attemptId,
+      taskId: task.id,
+      submittedAt: new Date().toISOString(),
+      status: 'in_review',
+      tabs,
+      review: null,
+      server: true
+    };
+    Store.addAttempt(task.id, attempt);
+    activeAttempt = attempt;
+    renderAttempts();
+    startServerPoll(attempt, {});
+  }
+
+  function submitLocalFallback(tabs) {
+    const attempt = {
+      id: 'att_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
+      taskId: task.id,
+      submittedAt: new Date().toISOString(),
+      status: 'in_review',
+      tabs,
+      review: null
+    };
+    Store.addAttempt(task.id, attempt);
+    activeAttempt = attempt;
+    renderAttempts();
+    startReview(attempt, {});
+  }
+
+  const SERVER_STAGE_LABELS = { system: 'Подготовка', sa: 'Системный аналитик', arch: 'Архитектор', grading: 'Вердикт', done: 'Готово' };
+
+  /* Polling статуса попытки: прогресс показывает воркер бэка. */
+  function startServerPoll(attempt, options) {
+    reviewRunning = true;
+    el.reviewProgressSection.classList.remove('hidden');
+    el.reviewResultSection.classList.add('hidden');
+    el.reviewResultSection.innerHTML = '';
+    renderProgressSkeleton();
+
+    const bar = document.getElementById('reviewProgressBar');
+    const label = document.getElementById('reviewProgressLabel');
+    const submitBtn = document.getElementById('submitBtn');
+    if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Идёт ревью…'; }
+
+    if (options && options.resume) {
+      AppUI.toast('Ревью не завершилось в прошлый раз — проверяем статус на сервере', 'warn');
+    }
+
+    el.reviewProgressSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    const stepItems = Array.from(document.querySelectorAll('.rp-agent li[data-step]'));
+    let failures = 0;
+    const pollTimer = setInterval(async () => {
+      let state = null;
+      try {
+        state = await Api.getAttempt(attempt.id);
+        failures = 0;
+      } catch (error) {
+        failures += 1;
+        if (failures >= 5) {
+          clearInterval(pollTimer);
+          reviewRunning = false;
+          if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Отправить решение'; }
+          el.reviewProgressSection.classList.add('hidden');
+          AppUI.toast('Сервер недоступен — попробуйте отправить ещё раз', 'bad');
+        }
+        return;
+      }
+      const progress = Math.max(0, Math.min(100, state.progress || 0));
+      bar.style.width = `${progress}%`;
+      label.textContent = `${SERVER_STAGE_LABELS[state.stage] || 'Ревью'} · ${progress}%`;
+      // Шаги зажигаем пропорционально прогрессу (всего их 10, как в движке).
+      const lit = Math.round((progress / 100) * stepItems.length);
+      stepItems.forEach((item, index) => {
+        const done = index < lit;
+        item.dataset.state = done ? 'done' : 'pending';
+        item.querySelector('.mark').textContent = done ? '✓' : '·';
+      });
+
+      if (state.status === 'reviewed' && state.review) {
+        clearInterval(pollTimer);
+        reviewRunning = false;
+        Store.updateAttempt(task.id, attempt.id, { status: 'reviewed', review: state.review });
+        attempt.status = 'reviewed';
+        attempt.review = state.review;
+        activeAttempt = attempt;
+        if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Отправить ещё раз'; }
+        renderAttempts();
+        showReview(attempt);
+        AppUI.toast(`Ревью готово: ${state.review.grade.label} · ${state.review.grade.score}/100`, state.review.grade.code >= 4 ? 'ok' : 'warn');
+      } else if (state.status === 'failed') {
+        clearInterval(pollTimer);
+        reviewRunning = false;
+        if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Отправить решение'; }
+        el.reviewProgressSection.classList.add('hidden');
+        AppUI.toast('Ревью не удалось посчитать — попробуйте ещё раз', 'bad');
+      }
+    }, 1500);
   }
 
   /* ==================== процесс ревью ==================== */
@@ -813,6 +972,13 @@
     /* перезапускаем с флагом fast: в макете это честнее, чем подделывать события */
     const attempt = Store.lastAttempt(task.id);
     if (attempt && attempt.status === 'in_review') {
+      // Серверное ревью и так считается за ~секунду — ускорять нечего.
+      if (attempt.server) {
+        AppUI.toast('Серверное ревью уже идёт — статус обновится сам', 'warn');
+        button.disabled = false;
+        button.textContent = 'Ускорить (демо)';
+        return;
+      }
       Store.removeAttempt(task.id, attempt.id);
       startReview(Store.addAttempt(task.id, Object.assign({}, attempt, { id: 'att_' + Date.now().toString(36) })), { fast: true });
     }

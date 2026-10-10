@@ -25,24 +25,32 @@
     return response.json();
   }
 
-  async function postJson(path, body) {
+  async function postJson(path, body, extraHeaders) {
+    return sendJson('POST', path, body, extraHeaders);
+  }
+
+  async function putJson(path, body) {
+    return sendJson('PUT', path, body, null);
+  }
+
+  async function sendJson(method, path, body, extraHeaders) {
     // CSRF: сервер пишет readable-куку XSRF-TOKEN только когда токен материализован
     // (GET /api/auth/csrf ниже), на обычных GET куки нет — токен ленивый.
-    // Каждый POST обязан вернуть значение куки заголовком X-XSRF-TOKEN.
+    // Каждый не-GET обязан вернуть значение куки заголовком X-XSRF-TOKEN.
     await ensureCsrf();
-    const headers = Object.assign({}, JSON_HEADERS);
+    const headers = Object.assign({}, JSON_HEADERS, extraHeaders || {});
     // Заголовок — маскированный токен из тела /api/auth/csrf (см. ensureCsrf),
     // запасной вариант — сырая кука (с XOR-хендлером не сработает, но и не навредит).
     const token = csrfToken || cookie('XSRF-TOKEN');
     if (token) headers['X-XSRF-TOKEN'] = token;
     const response = await fetch(path, {
-      method: 'POST',
+      method,
       credentials: 'same-origin',
       headers,
       body: JSON.stringify(body || {})
     });
     if (!response.ok) {
-      const error = new Error('POST ' + path + ' -> ' + response.status);
+      const error = new Error(method + ' ' + path + ' -> ' + response.status);
       error.status = response.status;
       throw error;
     }
@@ -172,6 +180,50 @@
       const user = await getJson('/api/auth/me');
       Api.user = user;
       return user;
+    },
+
+    /* ---------- контур практики (Фаза 2): сервер, если есть и вошли ---------- */
+    serverPractice() {
+      return Api.mode === 'server' && !!Api.user;
+    },
+
+    async saveDraft(taskId, tabs) {
+      return putJson('/api/tasks/' + encodeURIComponent(taskId) + '/draft', { tabs: tabs || [] });
+    },
+
+    async getDraft(taskId) {
+      try {
+        return await getJson('/api/tasks/' + encodeURIComponent(taskId) + '/draft');
+      } catch (error) {
+        return null;
+      }
+    },
+
+    async submitAttempt(taskId, tabs, idempotencyKey) {
+      const extra = idempotencyKey ? { 'Idempotency-Key': idempotencyKey } : null;
+      return postJson('/api/attempts', { taskId, tabs: tabs || [] }, extra);
+    },
+
+    async getAttempt(attemptId) {
+      return getJson('/api/attempts/' + encodeURIComponent(attemptId));
+    },
+
+    async listAttempts(taskId) {
+      try {
+        return await getJson('/api/tasks/' + encodeURIComponent(taskId) + '/attempts');
+      } catch (error) {
+        return null;
+      }
+    },
+
+    async getReference(taskId) {
+      // 403 (эталон закрыт) и 404 глотаем: значит, показывать нечего.
+      try {
+        return await getJson('/api/tasks/' + encodeURIComponent(taskId) + '/reference');
+      } catch (error) {
+        return null;
+      }
+    },
     }
   };
 

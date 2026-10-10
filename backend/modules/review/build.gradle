@@ -1,1 +1,8 @@
-// Модуль review: пайплайн ревью, агенты, промпты, версии, A/B (Фаза 2+4).
+// Модуль review: пайплайн ревью, агенты, промпты (Фаза 2 — только mock).
+// Чистая библиотека без Spring и JPA: рубрику передаёт вызывающий модуль
+// (practice), прямых зависимостей на catalog здесь нет и быть не должно
+// (см. ModuleBoundariesTest.reviewDoesNotDependOnCatalog).
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation 'org.assertj:assertj-core'
+}

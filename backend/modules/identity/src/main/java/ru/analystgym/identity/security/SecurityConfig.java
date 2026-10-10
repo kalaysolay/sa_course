@@ -14,8 +14,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 /**
- * Карта доступа Фазы 1. Открыто: auth-эндпоинты, чтение каталога,
- * статика и health. Всё остальное API — только с валидным JWT.
+ * Карта доступа (Фазы 1–2). Открыто: auth-эндпоинты, чтение каталога
+ * и полные тела задач (без эталона), статика и health.
+ * Черновики/попытки/эталон — только своим. Всё остальное API — с JWT.
  * CSRF включён осознанно: куки шлёт браузер сам, поэтому каждый
  * не-GET запрос фронта обязан слать заголовок X-XSRF-TOKEN
  * (значение — из readable-куки XSRF-TOKEN, см. api.js в Фазе 1).
@@ -57,11 +58,15 @@ public class SecurityConfig {
                         // Health обязан быть публичным: его дёргают Caddy, compose-healthcheck
                         // и CI-smoke без кук (контракт Фазы 0).
                         .requestMatchers("/api/health").permitAll()
+                        // Контур практики: черновики/попытки/эталон — только своим.
+                        // Стоит раньше публичного GET /api/tasks/**: первое совпадение
+                        // побеждает, иначе гейт эталона был бы открыт гостям.
+                        .requestMatchers("/api/tasks/*/draft", "/api/tasks/*/attempts",
+                                "/api/tasks/*/reference", "/api/attempts/**").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/tasks/**", "/api/collections/**", "/api/dictionaries/**").permitAll()
                         // /error обязан быть публичным: иначе контейнерный error-dispatch
                         // на 404 контроллера пере-проверяется цепочкой и маскарадит 404 в 401.
                         .requestMatchers("/error").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/tasks/**", "/api/collections/**", "/api/dictionaries/**").permitAll()
                         .requestMatchers("/", "/*.html", "/assets/**", "/docs/**", "/actuator/health", "/favicon.ico").permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
