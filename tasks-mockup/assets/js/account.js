@@ -52,19 +52,42 @@
     const pro = user.role && user.role !== 'STUDENT'
       ? `<span class="badge badge-accent">${AppUI.esc(user.role)}</span>`
       : '<span class="badge">студент</span>';
+    const initials = String(user.name || user.email || '?').trim().split(/\s+/)
+      .map((w) => w[0]).join('').slice(0, 2).toUpperCase();
     host.innerHTML = `
+      <div class="row" style="gap:12px;align-items:center;margin-bottom:12px">
+        <span class="agent-avatar" style="flex:0 0 44px;width:44px;height:44px;font-size:16px">${AppUI.esc(initials)}</span>
+        <div>
+          <div id="accountName" style="font-weight:600;font-size:16px">${AppUI.esc(user.name || '')}</div>
+          <div class="muted" style="font-size:12px">${AppUI.esc(user.email || '')}</div>
+        </div>
+      </div>
       <div class="row" style="gap:8px;flex-wrap:wrap;margin-bottom:12px">${pro}</div>
-      <div class="field"><label for="profileName">Имя</label>
-        <input id="profileName" maxlength="100" value="${AppUI.esc(user.name || '')}">
+      <div id="nameEditBox" class="hidden">
+        <div class="field"><label for="profileName">Новое имя</label>
+          <input id="profileName" maxlength="100" value="${AppUI.esc(user.name || '')}">
+        </div>
+        <div class="row mt-16" style="gap:8px">
+          <button class="btn btn-primary btn-sm" type="button" id="saveProfileBtn">Сохранить</button>
+          <button class="btn btn-ghost btn-sm" type="button" id="cancelNameBtn">Отмена</button>
+        </div>
       </div>
-      <div class="field"><label>Email</label>
-        <input value="${AppUI.esc(user.email || '')}" disabled>
-      </div>
-      <div class="row mt-16" style="gap:8px;flex-wrap:wrap">
-        <button class="btn btn-primary btn-sm" type="button" id="saveProfileBtn">Сохранить</button>
+      <div class="row" id="profileActions" style="gap:8px;flex-wrap:wrap">
+        <button class="btn btn-outline btn-sm" type="button" id="profileEditBtn">Изменить имя</button>
         <button class="btn btn-ghost btn-sm" type="button" id="logoutBtn">Выйти</button>
       </div>
       <div id="googleBox" class="mt-16"></div>`;
+
+    document.getElementById('profileEditBtn').addEventListener('click', () => {
+      document.getElementById('nameEditBox').classList.remove('hidden');
+      document.getElementById('profileActions').classList.add('hidden');
+      document.getElementById('profileName').focus();
+    });
+
+    document.getElementById('cancelNameBtn').addEventListener('click', () => {
+      document.getElementById('nameEditBox').classList.add('hidden');
+      document.getElementById('profileActions').classList.remove('hidden');
+    });
 
     document.getElementById('saveProfileBtn').addEventListener('click', async () => {
       const name = document.getElementById('profileName').value.trim();
@@ -205,16 +228,23 @@
 
   function renderSecurity() {
     document.getElementById('securityBody').innerHTML = `
-      <div class="field"><label for="pwCurrent">Текущий пароль</label>
-        <input id="pwCurrent" type="password" autocomplete="current-password">
-      </div>
-      <div class="field"><label for="pwNew">Новый пароль</label>
-        <input id="pwNew" type="password" autocomplete="new-password">
-      </div>
-      <div class="field"><label for="pwNew2">Новый пароль ещё раз</label>
-        <input id="pwNew2" type="password" autocomplete="new-password">
-      </div>
-      <button class="btn btn-outline btn-sm mt-16" type="button" id="pwBtn">Сменить пароль</button>`;
+      <details class="fold" id="pwFold">
+        <summary>Смена пароля</summary>
+        <div class="fold-body">
+          <div class="field"><label for="pwCurrent">Текущий пароль</label>
+            <input id="pwCurrent" type="password" autocomplete="current-password">
+          </div>
+          <div class="field"><label for="pwNew">Новый пароль</label>
+            <input id="pwNew" type="password" autocomplete="new-password">
+          </div>
+          <div class="field"><label for="pwNew2">Новый пароль ещё раз</label>
+            <input id="pwNew2" type="password" autocomplete="new-password">
+          </div>
+          <button class="btn btn-outline btn-sm mt-16" type="button" id="pwBtn">Сменить пароль</button>
+          <p class="muted mt-16" style="font-size:12px">После смены другие сессии завершатся автоматически.</p>
+        </div>
+      </details>`;
+
 
     document.getElementById('pwBtn').addEventListener('click', async () => {
       const current = document.getElementById('pwCurrent').value;
