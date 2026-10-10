@@ -75,6 +75,7 @@
       </div>
       <div class="row" id="profileActions" style="gap:8px;flex-wrap:wrap">
         <button class="btn btn-outline btn-sm" type="button" id="profileEditBtn">Изменить имя</button>
+        <button class="btn btn-ghost btn-sm" type="button" id="securityBtn">Безопасность</button>
         <button class="btn btn-ghost btn-sm" type="button" id="logoutBtn">Выйти</button>
       </div>`;
 
@@ -107,6 +108,18 @@
     document.getElementById('logoutBtn').addEventListener('click', async () => {
       try { await Api.logout(); } catch (e) { /* всё равно уходим */ }
       window.location.href = 'index.html';
+    });
+
+    /* Переключение видов правой колонки: профиль <-> безопасность. */
+    document.getElementById('securityBtn').addEventListener('click', () => {
+      document.getElementById('mainPanels').classList.add('hidden');
+      document.getElementById('securityPanel').classList.remove('hidden');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+    document.getElementById('backToProfileBtn').addEventListener('click', () => {
+      document.getElementById('securityPanel').classList.add('hidden');
+      document.getElementById('mainPanels').classList.remove('hidden');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     });
   }
 

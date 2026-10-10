@@ -43,7 +43,7 @@
         </aside>
 
         <!-- ============ ИСТОРИЯ ============ -->
-        <div>
+        <div id="mainPanels">
           <div class="panel mb-16" id="attemptsPanel">
             <div class="panel-head">
               <p class="panel-title">Мои попытки</p>
@@ -74,9 +74,10 @@
             <div class="panel-body" id="ordersBody"><p class="muted">Загрузка…</p></div>
           </div>
 
-          <div class="panel mb-16" id="securityPanel">
+          <div class="panel mb-16 hidden" id="securityPanel">
             <div class="panel-head">
               <p class="panel-title">Безопасность</p>
+              <button class="btn btn-ghost btn-sm" type="button" id="backToProfileBtn">← Вернуться в профиль</button>
             </div>
             <div class="panel-body">
               <div id="pwBody"><p class="muted">Загрузка…</p></div>
