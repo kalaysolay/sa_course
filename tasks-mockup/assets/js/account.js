@@ -35,7 +35,6 @@
     accountBox.classList.remove('hidden');
 
     renderProfile(user);
-    renderSecurity(user);
     await Promise.all([
       loadPro(),
       loadAttempts(),
@@ -74,9 +73,9 @@
       </div>
       <div class="row" id="profileActions" style="gap:8px;flex-wrap:wrap">
         <button class="btn btn-outline btn-sm" type="button" id="profileEditBtn">Изменить имя</button>
+        <a class="btn btn-ghost btn-sm" href="security.html">Безопасность</a>
         <button class="btn btn-ghost btn-sm" type="button" id="logoutBtn">Выйти</button>
-      </div>
-      <div id="googleBox" class="mt-16"></div>`;
+      </div>`;
 
     document.getElementById('profileEditBtn').addEventListener('click', () => {
       document.getElementById('nameEditBox').classList.remove('hidden');
@@ -108,28 +107,6 @@
       try { await Api.logout(); } catch (e) { /* всё равно уходим */ }
       window.location.href = 'index.html';
     });
-
-    paintGoogleBox();
-  }
-
-  /* Вход через Google: кнопка ведёт на серверный OAuth-флоу; без ключей
-     сервер отвечает 409, фронт честно показывает заглушку. */
-  async function paintGoogleBox() {
-    const host = document.getElementById('googleBox');
-    if (!host) return;
-    let status = null;
-    try { status = await Api.oauthStatus(); } catch (e) { status = null; }
-    if (status && status.googleEnabled) {
-      host.innerHTML = `
-        <button class="btn btn-outline btn-sm" type="button" id="googleBtn">Привязать Google-вход</button>
-        <p class="muted mt-16" style="font-size:12px">Привязка идёт по подтверждённой почте Google к этому же аккаунту.</p>`;
-      document.getElementById('googleBtn').addEventListener('click', () => {
-        window.location.href = '/api/auth/oauth2/google';
-      });
-    } else {
-      host.innerHTML = `
-        <p class="muted" style="font-size:12px">Вход через Google появится после подключения ключей — кнопка уже заложена здесь.</p>`;
-    }
   }
 
   /* ==================== подписка ==================== */
@@ -225,51 +202,6 @@
   }
 
   /* ==================== безопасность ==================== */
-
-  function renderSecurity() {
-    document.getElementById('securityBody').innerHTML = `
-      <details class="fold" id="pwFold">
-        <summary>Смена пароля</summary>
-        <div class="fold-body">
-          <div class="field"><label for="pwCurrent">Текущий пароль</label>
-            <input id="pwCurrent" type="password" autocomplete="current-password">
-          </div>
-          <div class="field"><label for="pwNew">Новый пароль</label>
-            <input id="pwNew" type="password" autocomplete="new-password">
-          </div>
-          <div class="field"><label for="pwNew2">Новый пароль ещё раз</label>
-            <input id="pwNew2" type="password" autocomplete="new-password">
-          </div>
-          <button class="btn btn-outline btn-sm mt-16" type="button" id="pwBtn">Сменить пароль</button>
-          <p class="muted mt-16" style="font-size:12px">После смены другие сессии завершатся автоматически.</p>
-        </div>
-      </details>`;
-
-
-    document.getElementById('pwBtn').addEventListener('click', async () => {
-      const current = document.getElementById('pwCurrent').value;
-      const next = document.getElementById('pwNew').value;
-      const next2 = document.getElementById('pwNew2').value;
-      if (!current || next.length < 8) {
-        AppUI.toast('Новый пароль — минимум 8 символов', 'warn');
-        return;
-      }
-      if (next !== next2) {
-        AppUI.toast('Пароли не совпадают', 'warn');
-        return;
-      }
-      try {
-        await Api.changePassword(current, next);
-        AppUI.toast('Пароль сменён, другие сессии завершены', 'ok');
-        document.getElementById('pwCurrent').value = '';
-        document.getElementById('pwNew').value = '';
-        document.getElementById('pwNew2').value = '';
-      } catch (error) {
-        const code = error && error.status;
-        AppUI.toast(code === 401 ? 'Текущий пароль неверный' : 'Не удалось сменить пароль', 'bad');
-      }
-    });
-  }
 
   /* ==================== история ==================== */
 
