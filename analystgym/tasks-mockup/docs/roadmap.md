@@ -338,7 +338,7 @@ Rate limits, audit-log, письма (сброс, «ревью готово»), 
 | 2 | `RateLimiter`: два конструктора без `@Autowired` — контекст не встал | `@Autowired` на основном (юнит-тесты это не ловят — только живой boot) |
 | 3 | `Clock` — абстрактный класс, не интерфейс (record не наследует) | Обычный static final class в тесте |
 | 4 | PS-редирект портит бинарник дампа (UTF-16) | Дамп/рестор целиком внутри docker (volume), побайтово не таскаем |
-| 5 | Compose-контекст `backend/` против `COPY backend/...` в Dockerfile | Контекст — корень (`context: ..`), образ из GHCR |
+| 5 | Compose-контекст `backend/` против `COPY backend/...` в Dockerfile | Контекст — `analystgym/` (`context: ..` от deploy), образ из GHCR |
 | 6 | Dockerfile врал про тесты (`bootJar` их не гоняет) | `gradle build :app:bootJar` + те же тесты в release-джобе |
 
 **Не входит (после MVP — Фаза 5/6):**

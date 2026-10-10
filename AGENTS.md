@@ -43,9 +43,9 @@ Orchestrator управляет workflow и состоянием. Он не пи
 
 ---
 
-# AnalystGym (backend `backend/`, mockup `tasks-mockup/`)
+# AnalystGym (backend `analystgym/backend/`, mockup `analystgym/tasks-mockup/`)
 
-Spec anchor: `tasks-mockup/docs/product-spec.md`. Architecture: `tasks-mockup/docs/architecture.md`. Plan: `tasks-mockup/docs/roadmap.md`. Admin guide: `tasks-mockup/docs/admin-guide.md`.
+Spec anchor: `analystgym/tasks-mockup/docs/product-spec.md`. Architecture: `analystgym/tasks-mockup/docs/architecture.md`. Plan: `analystgym/tasks-mockup/docs/roadmap.md`. Admin guide: `analystgym/tasks-mockup/docs/admin-guide.md`.
 
 > **Область действия раздела.** Всё ниже относится **только к реализации
 > самого приложения** (бэкенд + макет/фронт). К работе генераторов курса

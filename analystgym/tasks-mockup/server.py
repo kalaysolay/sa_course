@@ -3,7 +3,7 @@
 Serves tasks-mockup/ over HTTP so that <script defer> loading, localStorage
 and vendored Mermaid/PlantUML libraries work exactly like in production.
 
-Usage:
+Usage (из каталога analystgym/):
     python tasks-mockup/server.py            # http://127.0.0.1:5180
     python tasks-mockup/server.py --port 8080
 """

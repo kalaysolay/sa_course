@@ -11,9 +11,9 @@ node_modules/
 .DS_Store
 compliance_project_example/
 # AnalystGym backend: сборочный мусор и сгенерированная статика
-backend/.gradle/
-backend/**/build/
-backend/app/src/main/resources/static/
+analystgym/backend/.gradle/
+analystgym/backend/**/build/
+analystgym/backend/app/src/main/resources/static/
 !runs/20260809T093219Z_PROF-ANALYST-TYPES_9292d0/
 !runs/20260809T093219Z_PROF-ANALYST-TYPES_9292d0/**
 !output/M01/PROF-ANALYST-TYPES/
