@@ -30,7 +30,8 @@ class QualityRulesTest {
                 mock(ru.analystgym.practice.repo.ReviewRepository.class),
                 mock(ru.analystgym.catalog.repo.TaskRepository.class),
                 mock(ru.analystgym.identity.repo.UserRepository.class),
-                mock(ru.analystgym.notify.service.NotificationService.class));
+                mock(ru.analystgym.notify.service.NotificationOutbox.class),
+                mock(ru.analystgym.practice.service.ReviewRevisions.class),mock(org.springframework.jdbc.core.JdbcTemplate.class),"mock");
     }
 
     private static Complaint complaintOf(String status) {

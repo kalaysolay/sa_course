@@ -129,6 +129,7 @@ public class ReviewPipeline {
         execution.stage("grading", 90);
         var result = LlmReviewer.buildReview(plan.input(), tabs, plan.candidates(),
                 new LlmReviewer.ParsedAnswer(states, evidence, parts), personas, "llm:contract-v2");
+        if(plan.routes().stream().anyMatch(r->r.baseUrl().startsWith("mock://"))) result=MockReviewProvider.asDemonstration(result);
         return new LlmOutcome(result, "", "", Map.copyOf(versions), 0, 0);
     }
 

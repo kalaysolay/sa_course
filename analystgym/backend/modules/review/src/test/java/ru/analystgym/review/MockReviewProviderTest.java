@@ -35,7 +35,7 @@ class MockReviewProviderTest {
         // Пустое решение: JS ставит колпак score<=6 и грейд 1.
         ReviewResult review = MockReviewProvider.buildReview(task(), List.of(), List.of());
 
-        assertThat(review.engine()).isEqualTo("mock-agents/v1");
+        assertThat(review.engine()).isEqualTo("mock-agents/v2");
         assertThat(review.grade().score()).isLessThanOrEqualTo(6);
         assertThat(review.grade().code()).isEqualTo(1);
         assertThat(review.signals().empty()).isTrue();

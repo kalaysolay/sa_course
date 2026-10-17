@@ -106,6 +106,20 @@
 
     owner() { return owner; },
 
+    /** Гостевой результат переносится только через серверную привязку по секрету прохождения. */
+    guestAssessment() {
+      try { return JSON.parse(window.localStorage.getItem(PREFIX + 'guest') || '{}').assessment || null; }
+      catch (error) { return memory.get(PREFIX + 'guest')?.assessment || null; }
+    },
+
+    clearGuestAssessment() {
+      let guest;
+      try { guest = JSON.parse(window.localStorage.getItem(PREFIX + 'guest') || '{}'); }
+      catch (error) { guest = memory.get(PREFIX + 'guest') || {}; }
+      guest.assessment = null; memory.set(PREFIX + 'guest', guest);
+      try { window.localStorage.setItem(PREFIX + 'guest', JSON.stringify(guest)); } catch (error) { /* память */ }
+    },
+
     /** Читаем актуальный ключ и из соседней вкладки перед повторной отправкой. */
     pendingSubmission(taskId) {
       const pending = submissionRecord(taskId).pending;

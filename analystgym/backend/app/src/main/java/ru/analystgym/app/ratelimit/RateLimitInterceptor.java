@@ -31,7 +31,7 @@ public class RateLimitInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
                              Object handler) throws Exception {
-        if (!"POST".equalsIgnoreCase(request.getMethod())) {
+        if (!"POST".equalsIgnoreCase(request.getMethod()) && !"PUT".equalsIgnoreCase(request.getMethod())) {
             return true;
         }
         String path = request.getRequestURI();
@@ -44,8 +44,10 @@ public class RateLimitInterceptor implements HandlerInterceptor {
             bucket = "reset";
         } else if ("/api/attempts".equals(path)) {
             bucket = "submit";
-        } else if ("/api/assessment/submissions".equals(path)) {
+        } else if ("/api/assessment/submissions".equals(path) || "/api/assessment/runs".equals(path) || path.matches("/api/assessment/runs/[^/]+/finish")) {
             bucket = "assessment";
+        } else if (path.startsWith("/api/assessment/runs/")) {
+            bucket = "assessment-progress";
         } else if ("/api/complaints".equals(path)) {
             bucket = "complaints";
         } else if ("/api/waitlist".equals(path)) {

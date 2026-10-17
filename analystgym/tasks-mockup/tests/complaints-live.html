@@ -1,0 +1,47 @@
+<!doctype html><html lang="ru"><meta charset="utf-8"><title>Проверка исправления ревью</title>
+<pre id="result">RUNNING</pre><script>
+// Только отдельный live-server.py и одноразовая БД: аккаунт браузерного теста имеет роль METHODIST.
+(async () => {
+  const output = document.getElementById('result'), checks = [];
+  const check = (ok, message) => { if (!ok) throw new Error(message); checks.push(message); };
+  const until = async predicate => { const end = Date.now() + 30000; while (!await predicate()) { if (Date.now() > end) throw new Error('Таймаут интерфейса'); await new Promise(r => setTimeout(r, 150)); } };
+  const open = async url => {
+    const frame = document.createElement('iframe'); frame.style.width = '1200px'; frame.style.height = '850px';
+    const target = new URL(url, location.href); target.searchParams.set('qa', crypto.randomUUID()); frame.src = target;
+    await new Promise(r => { frame.onload = r; document.body.append(frame); }); await frame.contentWindow.Api.ready; return frame;
+  };
+  try {
+    let frame = await open('../account.html'), w = frame.contentWindow;
+    check(w.Api.user?.role === 'METHODIST', 'Изолированный тестовый аккаунт методиста');
+    const task = await w.Api.getTask('int-idempotency');
+    const submitted = await w.Api.submitReliable(task.id, [{ id: 'doc', type: 'doc', title: 'Решение', content: 'Клиент отправляет запрос создания платежа. Нужно обрабатывать повторы запросов после сетевого таймаута, иначе возможно повторное списание. Предлагаю хранить результат обработки и возвращать его повторно.' }], task.version);
+    let attempt;
+    await until(async () => { attempt = await w.Api.getAttempt(submitted.attemptId); return attempt.status === 'reviewed'; });
+    check(attempt.review.engine.startsWith('mock-') && attempt.review.grade.score <= 45, 'Демонстрационный движок явно ограничивает балл');
+    const complaint = await w.Api.fileComplaint(submitted.attemptId, 'Методист проверяет исправление критериев в тестовом сценарии.', attempt.review.revision);
+    frame.remove(); frame = await open('../admin.html#complaints'); w = frame.contentWindow;
+    await until(() => w.document.querySelector('[data-complaint="' + complaint.id + '"]'));
+    w.document.querySelector('[data-complaint="' + complaint.id + '"]').click();
+    await until(() => w.document.querySelector('select[name="action"]'));
+    w.document.querySelector('select[name="action"]').value = 'Исправить критерии';
+    w.document.querySelector('textarea[name="resolution"]').value = 'Тестовый разбор методиста: критерии учтены, исправляем результат с сохранением исходной версии.';
+    w.document.querySelectorAll('select[name^="criterion_"]').forEach(select => { select.value = 'hit'; });
+    w.document.querySelector('form button[type="submit"]').click();
+    let closed;
+    await until(async () => { closed = (await w.Api.myComplaints())?.find(c => c.id === complaint.id); return closed?.status === 'resolved'; });
+    check(closed.outcome === 'corrected' && closed.reviewSnapshot.grade.score === attempt.review.grade.score, 'Жалоба закрыта исправлением, оспоренный результат сохранён');
+    const updated = await w.Api.getAttempt(submitted.attemptId), history = await w.Api.reviewRevisions(submitted.attemptId);
+    check(updated.review.revision === 2 && updated.review.grade.score > attempt.review.grade.score, 'Текущее ревью получает исправленный балл и новую версию');
+    check(history.length === 2 && history[0].result.grade.score === attempt.review.grade.score, 'История содержит исходное и исправленное ревью');
+    frame.remove(); frame = await open('../task.html?id=' + task.id + '&attempt=' + submitted.attemptId); w = frame.contentWindow;
+    await until(() => w.document.getElementById('reviewHistoryBtn'));
+    check(w.document.body.textContent.includes('Исправлено методистом'), 'Студент видит исправление в самом ревью');
+    w.document.getElementById('reviewHistoryBtn').click();
+    await until(() => w.document.body.textContent.includes('Версия 2'));
+    check(w.document.body.textContent.includes('Версия 1'), 'Интерфейс открывает обе версии');
+    const notifications = await w.Api.notifications();
+    check(notifications.some(n => n.link.includes(submitted.attemptId)), 'Решение жалобы создаёт уведомление со ссылкой на исходную попытку');
+    output.textContent = 'PASS ' + checks.length + '\n' + checks.join('\n');
+  } catch (error) { output.textContent = 'FAIL\n' + error.stack; }
+})();
+</script></html>

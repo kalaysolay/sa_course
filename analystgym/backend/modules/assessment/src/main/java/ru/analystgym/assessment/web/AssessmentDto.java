@@ -27,6 +27,9 @@ public final class AssessmentDto {
     public record SubmitRequest(Map<String, Integer> answers, Integer durationSec) {
     }
 
+    public record StartRequest(UUID id) { }
+    public record ProgressRequest(Map<String,Integer> answers, Map<String,Boolean> flags, Integer index, Long version) { }
+
     public record SubmitResponse(UUID submissionId, AssessmentResult result) {
     }
 

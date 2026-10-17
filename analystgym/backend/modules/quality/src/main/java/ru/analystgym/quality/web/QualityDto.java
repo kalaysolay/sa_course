@@ -13,7 +13,7 @@ public final class QualityDto {
     private QualityDto() {
     }
 
-    public record FileComplaintRequest(UUID attemptId, String reason) {
+    public record FileComplaintRequest(UUID attemptId, String reason, Integer reviewRevision) {
     }
 
     public record ComplaintView(
@@ -28,10 +28,10 @@ public final class QualityDto {
             String promptVersion,
             String status,
             String resolution,
-            String createdAt, Long version) {
+            String createdAt, Long version, int reviewRevision, String outcome, UUID recheckAttemptId, JsonNode reviewSnapshot, List<java.util.Map<String,Object>> decisions) {
     }
 
-    public record ResolveRequest(String status, String resolution, Long version) {
+    public record ResolveRequest(String status, String resolution, Long version, String action, java.util.Map<String,String> states) {
     }
 
     public record Dashboard(

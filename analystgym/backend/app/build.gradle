@@ -51,7 +51,7 @@ dependencies {
 tasks.register('syncMockup', Sync) {
     description = 'Копирует tasks-mockup в статику приложения.'
     from("${rootDir}/../tasks-mockup") {
-        exclude 'server.py', 'check-mockup.py', 'scripts/**', 'tests/**', 'assets/js/data-tasks-*.js'
+        exclude 'server.py', 'check-mockup.py', 'scripts/**', 'tests/**', 'assets/js/data-tasks-*.js', 'assets/js/questions.js'
     }
     into 'src/main/resources/static'
 }
@@ -62,7 +62,7 @@ processResources {
     // Удаляем и старую копию из инкрементальной сборки: исключения Copy её не очищают.
     doFirst {
         delete fileTree("${layout.buildDirectory.get()}/resources/main/static/assets/js") {
-            include 'data-tasks-*.js'
+            include 'data-tasks-*.js', 'questions.js'
         }
     }
 }
@@ -81,6 +81,7 @@ configurations {
 dependencies {
     integrationTestImplementation 'org.testcontainers:junit-jupiter:1.20.4'
     integrationTestImplementation 'org.testcontainers:postgresql:1.20.4'
+    integrationTestImplementation 'org.springframework.boot:spring-boot-starter-mail'
 }
 tasks.register('integrationTest', Test) {
     description = 'Сценарии сессий и черновиков с реальной PostgreSQL (нужен Docker).'

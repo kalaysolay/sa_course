@@ -248,10 +248,24 @@ window.AdminServer = (function () {
   }
 
   function complaintsView(rows) {
-    host.innerHTML = '<h2>Жалобы</h2>' + table(['Студент / задача', 'Причина', 'Статус', 'Решение', ''], rows.map(r => [esc(r.userName + ' · ' + r.taskTitle), esc(r.reason), esc(r.status), esc(r.resolution || '—'), ['resolved', 'rejected'].includes(r.status) ? 'Закрыта' : button('Разобрать', 'data-complaint', r.id)]));
+    host.innerHTML = '<h2>Жалобы</h2>' + table(['Студент / задача', 'Причина', 'Статус', 'Решение', ''], rows.map(r => [esc(r.userName + ' · ' + r.taskTitle), esc(r.reason), esc(r.status + (r.outcome ? ' · ' + r.outcome : '')), esc(r.resolution || '—'), button('Исходное ревью', 'data-complaint-source', r.id) + (['resolved', 'rejected'].includes(r.status) ? 'Закрыта' : button('Разобрать', 'data-complaint', r.id))]));
+    host.querySelectorAll('[data-complaint-source]').forEach(b => b.onclick = () => {
+      const item = rows.find(r => r.id === b.dataset.complaintSource), review = item.reviewSnapshot;
+      AppUI.modal({ title: 'Оспоренное ревью v' + item.reviewRevision, wide: true,
+        html: `<p>${esc(item.reason)}</p><p>${esc(review?.summary || 'Исторический снимок отсутствует')}</p>` + table(['Критерий', 'Исходное состояние'], (review?.criteria || []).map(c => [esc(c.title), esc(c.state)])) + '<h3>История действий</h3>' + (item.decisions || []).map(d => `<p>${esc(d.action)} · ${esc(d.resolution || '')}</p>`).join('') });
+    });
     host.querySelectorAll('[data-complaint]').forEach(b => b.onclick = () => {
       const item = rows.find(r => r.id === b.dataset.complaint);
-      form('Разбор жалобы · ' + item.taskTitle, item, [['status', 'Статус', 'select', ['review', 'resolved', 'rejected']], ['resolution', 'Итог разбора', 'textarea']], body => Api.patch(root + 'complaints/' + enc(item.id), body));
+      const criteria = item.reviewSnapshot?.criteria || [];
+      const actions = { 'Взять в работу': null, 'Отклонить с объяснением': 'reject', 'Исправить критерии': 'correct', 'Запустить повторную проверку': 'recheck' };
+      const editable = { ...item, action: 'Взять в работу', ...Object.fromEntries(criteria.map((c, i) => ['criterion_' + i, c.state])) };
+      const fields = [['action', 'Действие (повторная проверка использует текущий движок сервера)', 'select', Object.keys(actions)], ['resolution', 'Объяснение студенту: минимум 10 символов', 'textarea'], ...criteria.map((c, i) => ['criterion_' + i, c.title, 'select', ['hit', 'partial', 'miss']])];
+      form('Разбор ревью v' + item.reviewRevision + ' · ' + item.taskTitle, editable, fields, body => {
+        const action = actions[body.action];
+        return Api.patch(root + 'complaints/' + enc(item.id), { version: item.version, action,
+          status: action === 'correct' ? 'resolved' : action === 'reject' ? 'rejected' : 'review', resolution: body.resolution,
+          states: Object.fromEntries(criteria.map((c, i) => [c.id, body['criterion_' + i]])) });
+      });
     });
   }
 

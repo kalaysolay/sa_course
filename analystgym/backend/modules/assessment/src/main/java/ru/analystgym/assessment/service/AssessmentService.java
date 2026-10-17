@@ -1,7 +1,6 @@
 package ru.analystgym.assessment.service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -27,15 +26,11 @@ import ru.analystgym.catalog.repo.TaskRepository;
 import ru.analystgym.practice.repo.AttemptRepository;
 
 /**
- * Диагностика (UC-D01–D03, UC-SYS02): вопросы без ответов, приём ответов
- * целиком, подсчёт движком, история замеров, план прокачки.
- * Прогресс «на полпути» живёт в localStorage фронта (как в макете);
- * сервер хранит только финишированные замеры.
+ * История и планы диагностики. Начатые прохождения и снимки банка ведёт AssessmentRuns.
  */
 @Service
 public class AssessmentService {
 
-    private static final int MAX_DURATION_SEC = 7200;
 
     private final QuestionRepository questions;
     private final SubmissionRepository submissions;
@@ -68,47 +63,9 @@ public class AssessmentService {
         return cards;
     }
 
-    /**
-     * Финиш диагностики: валидируем ответы, считаем, сохраняем замер.
-     * Неизвестный id вопроса и индекс вне вариантов — 400 (контракт).
-     * Порядок банка — id asc (детерминирован); в макете — порядок файла:
-     * на подсчёт не влияет, отличается только порядок detail[].
-     */
+    /** Сохраняет результат зафиксированного прохождения, не читая текущий банк. */
     @Transactional
-    public AssessmentSubmission submit(UUID userId, Map<String, Integer> answers, Integer durationSec) {
-        List<Question> bank = questions.findByActiveTrueOrderByIdAsc();
-        if (bank.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "empty bank");
-        }
-        Map<String, Question> byId = new HashMap<>();
-        for (Question question : bank) {
-            byId.put(question.getId(), question);
-        }
-        Map<String, Integer> given = answers == null ? Map.of() : answers;
-        for (Map.Entry<String, Integer> entry : given.entrySet()) {
-            Question question = byId.get(entry.getKey());
-            if (question == null) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "unknown question");
-            }
-            int options = question.getOptions() != null && question.getOptions().isArray()
-                    ? question.getOptions().size() : 0;
-            Integer chosen = entry.getValue();
-            if (chosen == null || chosen < 0 || chosen >= options) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "bad answer index");
-            }
-        }
-        int duration = durationSec == null ? 0 : durationSec;
-        if (duration < 0 || duration > MAX_DURATION_SEC) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "bad duration");
-        }
-        List<AssessmentResult.QuestionInput> inputs = new ArrayList<>();
-        for (Question question : bank) {
-            inputs.add(new AssessmentResult.QuestionInput(question.getId(), question.getCompetency(),
-                    question.getDifficulty(), question.getQuestion(), strings(question.getOptions()),
-                    question.getAnswer(), question.getExplain()));
-        }
-        AssessmentResult result = AssessmentEngine.compute(inputs, given);
-
+    public AssessmentSubmission saveFrozen(UUID userId, Map<String,Integer> given, int duration, AssessmentResult result) {
         AssessmentSubmission submission = new AssessmentSubmission();
         submission.setId(UUID.randomUUID());
         submission.setUserId(userId);
@@ -118,7 +75,7 @@ public class AssessmentService {
         submission.setScoreRounded(result.scoreRounded());
         submission.setGradeId(result.grade() == null ? "" : result.grade().id());
         submission.setResult(mapper.valueToTree(result));
-        return submissions.save(submission);
+        return submissions.saveAndFlush(submission);
     }
 
     @Transactional(readOnly = true)

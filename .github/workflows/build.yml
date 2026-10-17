@@ -38,4 +38,4 @@ jobs:
 
       - name: Browser session logic
         working-directory: analystgym/tasks-mockup
-        run: node --test tests/session.test.cjs
+        run: node --test tests/session.test.cjs tests/evaluation.test.cjs

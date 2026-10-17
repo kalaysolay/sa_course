@@ -8,20 +8,41 @@
   let result = null;
   let filterCompetency = 'all';
   let showOnlyWrong = false;
+  let serverPlan = null;
 
   document.addEventListener('DOMContentLoaded', async () => {
     if (window.Api) await Api.ready;
     AppUI.mountHeader('assessment');
     AppUI.mountFooter();
 
-    saved = Store.assessment();
     const host = document.getElementById('resultsHost');
+    const requested = AppUI.qs('submission');
+    try {
+      if (Api.mode === 'unavailable') throw new Error('Сервер недоступен');
+      saved = Api.mode === 'server' ? (requested ? await Api.assessmentSubmission(requested) : await AssessmentSession.load()) : Store.assessment();
+      if (requested && saved) saved = { ...saved, server: true, finishedAt: saved.createdAt };
+      if (Api.mode === 'server' && Api.user && saved?.submissionId) serverPlan = await Api.assessmentPlan(saved.submissionId);
+    } catch (error) {
+      host.innerHTML = '<div class="empty-state"><h3>Результат не загружен</h3><p>Не удалось прочитать сохранённый серверный результат. Локальная копия остаётся в браузере.</p><button class="btn btn-primary" onclick="location.reload()">Повторить загрузку</button></div>';
+      return;
+    }
+
+    const guest = Store.guestAssessment();
+    if (Api.mode === 'server' && Api.user && guest?.runId && guest.guestToken && !requested) {
+      const offer = document.createElement('div'); offer.className = 'info-box';
+      offer.innerHTML = '<p>В этом браузере есть гостевая диагностика. Сохранить её в текущий аккаунт?</p><button class="btn btn-primary" id="claimGuestAssessment">Сохранить гостевую диагностику</button>';
+      host.before(offer);
+      offer.querySelector('button').onclick = async () => {
+        try { await AssessmentSession.claimGuest(); location.reload(); }
+        catch (error) { AppUI.toast(error.status === 410 ? 'Срок гостевого прохождения истёк.' : 'Не удалось привязать прохождение. Возможно, оно уже принадлежит другому аккаунту.', 'warn'); }
+      };
+    }
 
     if (!saved || !saved.result) {
       host.innerHTML = `
         <div class="empty-state mt-48">
           <h3>Результата пока нет</h3>
-          <p class="muted" style="margin-bottom:16px">Пройдите диагностику — 55 вопросов, 20–25 минут. Результат сохранится в этом браузере.</p>
+          <p class="muted" style="margin-bottom:16px">Пройдите диагностику знаний. Серверное прохождение сохраняет вопросы и прогресс; после входа результат доступен в аккаунте.</p>
           <div class="row" style="gap:10px;justify-content:center">
             <a class="btn btn-primary" href="assessment.html">Начать диагностику</a>
             <a class="btn btn-ghost" href="catalog.html">Сначала посмотреть задачи</a>
@@ -50,16 +71,19 @@
   }
 
   function render(host) {
-    const grade = result.grade;
-    const market = Scoring.marketView(result);
-    const narrative = Scoring.narrative(result);
-    const plan = Scoring.buildPlan(result, 4);
+    const grade = Scoring.scoreBand(result.scoreRounded);
+    const market = serverPlan?.market || Scoring.marketView(result);
+    const narrative = serverPlan?.narrative || Scoring.narrative(result);
+    const plan = Api.mode === 'server' && Api.user ? (serverPlan?.tasks || []) : Scoring.buildPlan(result, 4);
     const durationMin = saved.durationSec ? Math.max(1, Math.round(saved.durationSec / 60)) : null;
 
     host.innerHTML = `
       <section class="result-hero">
         <p class="eyebrow">Результат диагностики · ${AppUI.esc(AppUI.dateTime(saved.finishedAt))}</p>
-        <h1 style="font-size:clamp(26px,3.6vw,40px);margin-bottom:18px">Ваш профиль аналитика</h1>
+        <h1 style="font-size:clamp(26px,3.6vw,40px);margin-bottom:18px">Ваш профиль знаний</h1>
+        <p class="info-box">${saved.server ? (saved.bankVersion ? 'Результат рассчитан и сохранён сервером по снимку вопросов.' : 'Сохранённый серверный результат. В старых прохождениях версия банка не фиксировалась.') : 'Демонстрация: результат рассчитан локально.'} ${saved.guestToken ? 'Гостевой доступ ограничен сроком. Чтобы открыть результат на другом устройстве, войдите и сохраните его в аккаунт.' : ''}</p>
+        ${saved.unsyncedBackup ? `<details><summary>Неподтверждённая локальная копия ответов</summary><p>Серверный тест уже завершён; эти ответы не вошли в результат.</p><pre>${AppUI.esc(JSON.stringify(saved.unsyncedBackup, null, 2))}</pre></details>` : ''}
+        ${saved.guestToken ? '<a class="btn btn-outline" href="login.html?next=results.html">Войти и сохранить результат</a>' : ''}
 
         <div class="level-card">
           <div class="level-ring" style="--pct:${Math.max(4, Math.min(100, result.scoreRounded))}">
@@ -77,7 +101,7 @@
               ${AppUI.esc(market.label)}. ${AppUI.esc(market.note)}
             </p>
             <div class="row" style="gap:10px;flex-wrap:wrap">
-              <a class="btn btn-primary" href="${AppUI.esc(levelCatalogUrl(result))}">К задачам по моему уровню</a>
+              <a class="btn btn-primary" href="${AppUI.esc(serverPlan?.catalogUrl || levelCatalogUrl(result))}">К задачам по темам для практики</a>
               <a class="btn btn-ghost" href="assessment.html">Пройти заново</a>
               <button class="btn btn-ghost" type="button" id="copyResult">Скопировать результат</button>
             </div>
@@ -129,7 +153,7 @@
                 <div class="mono" style="font-size:10.5px;letter-spacing:.1em;color:var(--warn);margin-bottom:12px">ЧТО ПОДТЯНУТЬ</div>
                 ${result.gaps.length
                   ? result.gaps.map((c) => `<div style="padding:6px 0;border-bottom:1px dashed var(--line-soft);font-size:13.5px"><strong>${AppUI.esc(c.name)}</strong> <span class="dim">· ${c.pct}%</span><div class="muted" style="font-size:12px">${AppUI.esc(c.short)}</div></div>`).join('')
-                  : '<p class="muted" style="font-size:13px">Пробелов ниже 70% не нашли. Берите задачи уровня Senior и сложные подборки.</p>'}
+                  : '<p class="muted" style="font-size:13px">По отвеченным вопросам нет зон ниже 70%. Попробуйте практические задачи.</p>'}
               </div>
             </div>
           </div>
@@ -247,7 +271,7 @@
     const grade = result.grade;
     const lines = [
       `Диагностика AnalystGym · ${new Date(saved.finishedAt).toLocaleDateString('ru-RU')}`,
-      `Уровень: ${grade.name} (${grade.title}) — ${result.scoreRounded}/100`,
+      `Знания по банку вопросов: ${Scoring.scoreBand(result.scoreRounded).name} — ${result.scoreRounded}/100`,
       `Верных ответов: ${result.correctCount} из ${result.answeredCount}`,
       '',
       'Компетенции:',
@@ -260,7 +284,7 @@
     const text = lines.join('\n');
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(text)
-        .then(() => AppUI.toast('Результат скопирован — можно вставить в резюме или чат', 'ok'))
+        .then(() => AppUI.toast('Профиль знаний скопирован', 'ok'))
         .catch(() => fallbackCopy(text));
     } else {
       fallbackCopy(text);

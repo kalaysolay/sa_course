@@ -18,6 +18,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 @Entity
 @Table(name = "reviews")
 public class Review {
+    @Column(nullable=false)
+    private int revision=1;
+    public int getRevision(){return revision;}
+    public void setRevision(int revision){this.revision=revision;}
 
     @Id
     @Column(name = "attempt_id", nullable = false)

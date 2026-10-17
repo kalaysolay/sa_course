@@ -11,7 +11,7 @@ function browser(fetch, saved = new Map()) {
   document.cookie = '';
   document.readyState = 'complete';
   const c = {
-    document, navigator: {}, crypto: require('node:crypto').webcrypto, Event, TextEncoder, AbortSignal, console,
+    document, navigator: {}, crypto: require('node:crypto').webcrypto, Event, TextEncoder, AbortSignal, console, setTimeout, clearTimeout,
     location: { protocol: 'http:', reload() { c.reloaded = true; } },
     addEventListener: events.addEventListener.bind(events), dispatchEvent: events.dispatchEvent.bind(events),
     localStorage: { getItem: k => saved.get(k) || null, setItem: (k, v) => saved.set(k, v) },
@@ -26,6 +26,102 @@ function browser(fetch, saved = new Map()) {
 
 const response = (data, status = 200) => new Response(JSON.stringify(data), {
   status, headers: { 'Content-Type': 'application/json' }
+});
+
+function runView(extra = {}) {
+  return { id: 'run', version: 0, bankVersion: 'bank-v1', status: 'active', questions: [{ id: 'old', options: ['А', 'Б'] }],
+    answers: {}, flags: {}, index: 0, startedAt: 1000, result: null, ...extra };
+}
+
+test('Поздние ответы диагностики не попадают в другой аккаунт после переключения', async () => {
+  for (const operation of ['begin', 'load', 'finish', 'claimGuest']) {
+    const c = browser(); c.Api = { mode: 'server', user: { id: 'a' } };
+    c.Store.setUser(null); c.Store.saveAssessment({ ...runView(), runId: 'run', server: true, guestToken: 'guest' });
+    c.Store.setUser('a'); c.Store.saveAssessment({ ...runView(), runId: 'run', server: true }); c.load('assessment-session.js');
+    let release;
+    const delayed = async () => { await new Promise(resolve => { release = resolve; }); return runView(); };
+    c.Api.startAssessmentRun = c.Api.getAssessmentRun = c.Api.finishAssessmentRun = c.Api.claimAssessmentRun = delayed;
+    const pending = c.AssessmentSession[operation]();
+    while (!release) await new Promise(resolve => setImmediate(resolve));
+    c.dispatchEvent(new Event('ag:before-account-change')); c.Store.setUser('b'); c.Api.user = { id: 'b' };
+    release(); await assert.rejects(pending, /Аккаунт изменился/);
+    assert.equal(c.Store.assessment(), null, operation);
+  }
+});
+
+test('Привязка гостя сохраняет ещё не отправленные ответы и завершённый конфликт отдельной копией', async () => {
+  const c = browser(); c.Api = { mode: 'server', user: { id: 'a' } }; c.load('assessment-session.js');
+  c.Store.setUser(null); c.Store.saveAssessment({ ...runView(), runId: 'run', server: true, guestToken: 'guest', dirty: true, answers: { old: 1 } });
+  c.Store.setUser('a'); c.Api.claimAssessmentRun = async () => runView({ version: 1 });
+  c.Api.saveAssessmentRun = async (id, token, p) => runView({ version: 2, answers: p.answers });
+  await c.AssessmentSession.claimGuest();
+  assert.equal(c.Store.assessment().answers.old, 1); assert.equal(c.Store.assessment().dirty, false);
+  assert.equal(c.Store.guestAssessment(), null);
+  c.Store.setUser(null); c.Store.saveAssessment({ ...runView(), runId: 'run', server: true, guestToken: 'guest', dirty: true, answers: { old: 1 } });
+  c.Store.setUser('a'); c.Api.claimAssessmentRun = async () => runView({ status: 'completed', answers: { old: 0 } });
+  await c.AssessmentSession.claimGuest();
+  assert.equal(c.Store.assessment().answers.old, 0); assert.equal(c.Store.assessment().unsyncedBackup.answers.old, 1);
+});
+
+test('Истёкшее гостевое прохождение позволяет начать новое с сохранением прежней локальной копии', async () => {
+  const c = browser(); c.Api = { mode: 'server', user: null }; c.Store.setUser(null); c.load('assessment-session.js');
+  c.Store.saveAssessment({ ...runView(), runId: 'run', server: true, guestToken: 'guest', answers: { old: 1 } });
+  c.Api.getAssessmentRun = async () => { throw Object.assign(new Error('Истёк'), { status: 410 }); };
+  assert.equal((await c.AssessmentSession.load()).unavailable, true);
+  c.Api.startAssessmentRun = async id => runView({ id }); await c.AssessmentSession.begin();
+  assert.notEqual(c.Store.assessment().runId, 'run');
+  assert.equal(c.Store.assessment().previousRunBackup.answers.old, 1);
+});
+
+test('Диагностика повторяет потерянный старт с прежними идентификатором и гостевым секретом', async () => {
+  const c = browser(); c.Api = { mode: 'server', user: null }; c.Store.setUser(null); c.load('assessment-session.js');
+  const starts = [];
+  c.Api.startAssessmentRun = async (id, token) => { starts.push({ id, token }); if (starts.length === 1) throw new Error('Сеть'); return runView({ id }); };
+  await assert.rejects(c.AssessmentSession.begin());
+  const first = c.Store.assessment(); assert.equal(first.starting, true); assert.ok(first.guestToken.length >= 32);
+  await c.AssessmentSession.begin();
+  assert.deepEqual(starts[0], starts[1]); assert.equal(c.Store.assessment().bankVersion, 'bank-v1');
+});
+
+test('Ответ сервера на прошлый прогресс не затирает новые ответы во время сохранения', async () => {
+  const c = browser(); c.Api = { mode: 'server', user: { id: 'a' } }; c.Store.setUser('a'); c.load('assessment-session.js');
+  c.Store.saveAssessment({ ...runView(), runId: 'run', server: true, sync: 'saved' });
+  let release, sent = [];
+  c.Api.saveAssessmentRun = async (id, token, progress) => {
+    sent.push(JSON.parse(JSON.stringify(progress)));
+    if (sent.length === 1) await new Promise(resolve => { release = resolve; });
+    return runView({ version: sent.length, answers: progress.answers });
+  };
+  c.AssessmentSession.save({ answers: { old: 0 }, flags: {}, index: 0 });
+  const pending = c.AssessmentSession.flush();
+  c.AssessmentSession.save({ answers: { old: 1 }, flags: {}, index: 0 }); release(); await pending;
+  assert.equal(sent.length, 2); assert.equal(sent[1].version, 1);
+  assert.equal(c.Store.assessment().answers.old, 1); assert.equal(c.Store.assessment().version, 2);
+  assert.equal(c.Store.assessment().dirty, false);
+});
+
+test('Конфликт диагностики и сеть сохраняют локальную копию, завершение использует только серверный результат', async () => {
+  const c = browser(); c.Api = { mode: 'server', user: { id: 'a' } }; c.Store.setUser('a'); c.load('assessment-session.js');
+  c.Store.saveAssessment({ ...runView(), runId: 'run', server: true, sync: 'saved' });
+  c.Api.saveAssessmentRun = async () => { const error = new Error('Версия'); error.status = 409; throw error; };
+  c.AssessmentSession.save({ answers: { old: 1 }, flags: {}, index: 0 });
+  await assert.rejects(c.AssessmentSession.flush());
+  assert.equal(c.Store.assessment().sync, 'conflict'); assert.equal(c.Store.assessment().answers.old, 1);
+  c.Api.getAssessmentRun = async () => runView({ version: 4 }); c.AppUI.confirm = async () => true;
+  c.Api.saveAssessmentRun = async (id, token, p) => runView({ version: p.version + 1, answers: p.answers });
+  await c.AssessmentSession.retry();
+  c.Api.finishAssessmentRun = async () => runView({ status: 'completed', result: { scoreRounded: 17 }, finishedAt: '2026-10-17T00:00:00Z' });
+  await c.AssessmentSession.finish();
+  assert.equal(c.Store.assessment().result.scoreRounded, 17); assert.equal(c.Store.assessment().sync, 'saved');
+});
+
+test('Загрузка диагностики использует замороженные серверные вопросы и сохраняет неподтверждённые ответы', async () => {
+  const c = browser(); c.Api = { mode: 'server', user: { id: 'a' } }; c.Store.setUser('a'); c.load('assessment-session.js');
+  c.Store.saveAssessment({ ...runView(), runId: 'run', server: true, dirty: true, answers: { old: 1 } });
+  c.Api.getAssessmentRun = async () => runView({ version: 2, answers: { old: 0 } });
+  await c.AssessmentSession.load();
+  assert.equal(c.Store.assessment().sync, 'conflict'); assert.equal(c.Store.assessment().answers.old, 1);
+  assert.equal(c.Store.assessment().questions[0].id, 'old');
 });
 
 test('Серверный каталог полностью заменяет встроенные задачи и игнорирует локальные правки', async () => {

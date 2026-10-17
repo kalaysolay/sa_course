@@ -13,6 +13,7 @@
   let startedAt = null;
   let timerId = null;
   let finished = false;
+  let server = false;
 
   const el = {};
 
@@ -26,19 +27,31 @@
       'quizQuestion', 'quizOptions', 'prevBtn', 'nextBtn', 'flagBtn', 'startBtn', 'quitBtn']
       .forEach((id) => { el[id] = document.getElementById(id); });
 
-    questions = (SA_DATA.questions || []).slice();
+    server = Api.mode === 'server';
+    let saved;
+    const syncBox = document.createElement('div'); syncBox.id = 'assessmentSync'; syncBox.setAttribute('role', 'status');
+    el.introScreen.before(syncBox);
+    window.addEventListener('ag:assessment-sync', renderSync);
+    try {
+      if (Api.mode === 'unavailable') throw new Error('Сервер недоступен');
+      saved = server ? await AssessmentSession.load() : Store.assessment();
+      questions = server ? ((!saved?.unavailable && saved?.questions) || await Api.getQuestions()) : (SA_DATA.questions || []).slice();
+    } catch (error) {
+      el.startBtn.disabled = true;
+      syncBox.innerHTML = '<p>Не удалось загрузить серверную диагностику. <button class="btn btn-ghost" onclick="location.reload()">Повторить загрузку</button></p>';
+      return;
+    }
     el.introCount.textContent = `${questions.length} вопросов`;
 
     renderIntro();
 
-    const saved = Store.assessment();
-    if (saved && !saved.finishedAt && saved.answers && Object.keys(saved.answers).length) {
+    if (saved && !saved.unavailable && !saved.finishedAt && saved.answers && Object.keys(saved.answers).length) {
       resume(saved);
-    } else if (saved && saved.finishedAt) {
+    } else if (saved && !saved.unavailable && saved.finishedAt) {
       renderPreviousResult(saved);
     }
 
-    el.startBtn.addEventListener('click', () => start(false));
+    el.startBtn.addEventListener('click', () => start(false).catch(() => AppUI.toast('Не удалось начать тест. Повтор сохранит тот же идентификатор прохождения.', 'warn')));
     el.quitBtn.addEventListener('click', quit);
     el.prevBtn.addEventListener('click', () => go(index - 1));
     el.nextBtn.addEventListener('click', () => {
@@ -47,7 +60,23 @@
     });
     el.flagBtn.addEventListener('click', toggleFlag);
     document.addEventListener('keydown', onKey);
+    renderSync();
+    el.startBtn.disabled = false;
   });
+
+  function renderSync() {
+    const host = document.getElementById('assessmentSync'); if (!host) return;
+    if (!server) { host.innerHTML = '<p class="info-box">Демонстрация диагностики: вопросы и результат хранятся в этом браузере.</p>'; return; }
+    const s = Store.assessment();
+    const labels = { saved: 'Прогресс сохранён на сервере', local: 'Ответы сохранены в браузере, ожидают синхронизации', error: 'Сервер не подтвердил сохранение. Локальная копия сохранена', conflict: 'Прогресс изменён на другом устройстве. Локальная копия сохранена' };
+    labels.conflict_completed = 'Тест завершён на другом устройстве. Показан серверный результат; ваши неподтверждённые ответы сохранены отдельной копией.';
+    labels.expired = 'Прежнее прохождение недоступно или срок гостевого доступа истёк. Можно начать новый тест; локальная копия прежнего останется в браузере.';
+    host.innerHTML = `<p>${AppUI.esc(labels[s?.sync] || 'Серверная диагностика: банк фиксируется при старте')}${s?.bankVersion ? ' · банк ' + AppUI.esc(s.bankVersion.slice(0, 10)) : ''}${s?.guestToken ? ' · гостевое прохождение до ' + AppUI.esc(AppUI.dateTime(s.expiresAt)) : ''}</p>` +
+      (['error', 'conflict'].includes(s?.sync) ? '<button class="btn btn-outline" id="retryAssessmentSync">Восстановить сохранение</button>' : '');
+    const backup = s?.unavailable ? s : s?.previousRunBackup;
+    if (backup) host.innerHTML += `<details><summary>Локальная копия прежнего прохождения</summary><pre>${AppUI.esc(JSON.stringify(backup, null, 2))}</pre></details>`;
+    host.querySelector('#retryAssessmentSync')?.addEventListener('click', () => AssessmentSession.retry().catch(() => AppUI.toast('Сохранение пока не подтверждено. Повторите позже.', 'warn')));
+  }
 
   /* ==================== вступительный экран ==================== */
 
@@ -74,27 +103,32 @@
       <div class="info-box mb-24">
         <div class="ib-title">Предыдущая диагностика · ${AppUI.esc(AppUI.dateTime(saved.finishedAt))}</div>
         <div class="row" style="gap:10px;flex-wrap:wrap">
-          <span class="badge badge-accent">${AppUI.esc(result.grade.name)} · ${result.scoreRounded}/100</span>
+          <span class="badge badge-accent">${AppUI.esc(Scoring.scoreBand(result.scoreRounded).name)} · ${result.scoreRounded}/100</span>
           ${result.weakest ? `<span class="badge badge-warn">зона роста: ${AppUI.esc(result.weakest.name)} (${result.weakest.pct}%)</span>` : ''}
           ${result.strongest ? `<span class="badge badge-ok">опора: ${AppUI.esc(result.strongest.name)} (${result.strongest.pct}%)</span>` : ''}
         </div>
         <div class="row mt-16" style="gap:10px;flex-wrap:wrap">
           <a class="btn btn-ghost btn-sm" href="results.html">Открыть полный результат</a>
-          <span class="mono dim" style="font-size:11.5px;align-self:center">повторное прохождение перезапишет результат</span>
+          <span class="mono dim" style="font-size:11.5px;align-self:center">серверная история сохраняет предыдущие результаты</span>
         </div>
       </div>`;
   }
 
   /* ==================== запуск ==================== */
 
-  function start(resumeMode) {
+  async function start(resumeMode) {
     if (!resumeMode) {
+      if (server) {
+        el.startBtn.disabled = true;
+        try { const s = await AssessmentSession.begin(); questions = s.questions; startedAt = s.startedAt; }
+        finally { el.startBtn.disabled = false; }
+      }
       answers = {};
       flags = {};
       index = 0;
-      startedAt = Date.now();
+      startedAt = server ? Store.assessment().startedAt : Date.now();
       finished = false;
-      Store.saveAssessment({ startedAt, answers, flags, index, finishedAt: null, result: null });
+      if (!server) Store.saveAssessment({ startedAt, answers, flags, index, finishedAt: null, result: null });
     }
     el.introScreen.classList.add('hidden');
     el.quizScreen.classList.remove('hidden');
@@ -104,7 +138,7 @@
   }
 
   function resume(saved) {
-    questions = (SA_DATA.questions || []).slice();
+    questions = server ? saved.questions : (SA_DATA.questions || []).slice();
     answers = saved.answers || {};
     flags = saved.flags || {};
     index = Math.min(saved.index || 0, questions.length - 1);
@@ -116,7 +150,7 @@
       title: 'Продолжить диагностику?',
       html: `
         <p>Вы ответили на <strong>${answeredCount}</strong> из <strong>${questions.length}</strong> вопросов и закрыли вкладку.
-        Прогресс сохранён в этом браузере.</p>
+        ${server ? 'Используем сохранённое прохождение с зафиксированным банком.' : 'Прогресс сохранён в этом браузере.'}</p>
         <div class="row mt-16" style="gap:10px;flex-wrap:wrap">
           <span class="badge badge-ok">продолжить с вопроса ${index + 1}</span>
           <span class="badge">начато ${AppUI.esc(AppUI.timeAgo(new Date(startedAt).toISOString()))}</span>
@@ -144,6 +178,10 @@
   }
 
   function save() {
+    if (server) {
+      if (!finished) AssessmentSession.save({ startedAt, answers, flags, index });
+      return;
+    }
     Store.saveAssessment({
       startedAt,
       answers,
@@ -216,6 +254,7 @@
   }
 
   function choose(optionIndex) {
+    if (finished) return;
     const q = questions[index];
     answers[q.id] = optionIndex;
     el.quizOptions.querySelectorAll('.option').forEach((button) => {
@@ -231,12 +270,14 @@
   }
 
   function toggleFlag() {
+    if (finished) return;
     const q = questions[index];
     flags[q.id] = !flags[q.id];
     paint();
   }
 
   function go(target) {
+    if (finished) return;
     if (target < 0 || target >= questions.length) return;
     index = target;
     paint();
@@ -288,8 +329,14 @@
     const flagged = questions.filter((q) => flags[q.id] && answers[q.id] !== undefined);
 
     const proceed = async () => {
+      if (finished) return;
       finished = true;
       clearInterval(timerId);
+      if (server) {
+        try { await AssessmentSession.finish(); window.location.href = 'results.html'; }
+        catch (error) { finished = false; startTimer(); renderSync(); AppUI.toast('Результат не подтверждён сервером. Ответы сохранены; восстановите сохранение и повторите завершение.', 'warn'); }
+        return;
+      }
       const result = Scoring.compute(answers);
       const durationSec = Math.max(1, Math.round((Date.now() - startedAt) / 1000));
       Store.saveAssessment({
@@ -301,16 +348,6 @@
         durationSec,
         result
       });
-      // Замер на сервер — best-effort копией (история замеров, UC-D03):
-      // локальный результат первичен, редирект не ждёт дольше одного ответа.
-      try {
-        if (window.Api) {
-          await Api.ready;
-          if (Api.serverPractice()) await Api.submitAssessment(answers, durationSec);
-        }
-      } catch (error) {
-        /* без сети история останется только локальной — это штатно */
-      }
       window.location.href = 'results.html';
     };
 
@@ -331,7 +368,7 @@
 
     AppUI.confirm({
       title: 'Завершить диагностику?',
-      text: 'Ответы отправятся на расчёт профиля. Вы увидите уровень, разбивку по семи компетенциям, сильные зоны, пробелы и план прокачки.',
+      text: 'Ответы отправятся на расчёт профиля знаний: результаты по компетенциям и темы для практики. Тест не определяет профессиональный грейд.',
       confirmText: 'Показать результат',
       cancelText: 'Проверить ответы'
     }).then((ok) => { if (ok) proceed(); });

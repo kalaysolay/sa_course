@@ -17,6 +17,19 @@ import org.hibernate.annotations.UpdateTimestamp;
 @Entity
 @Table(name = "complaints")
 public class Complaint {
+    @Column(name="review_revision",nullable=false) private int reviewRevision=1;
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.JSON)
+    @Column(name="review_snapshot",columnDefinition="jsonb") private com.fasterxml.jackson.databind.JsonNode reviewSnapshot;
+    @Column private String outcome;
+    @Column(name="recheck_attempt_id") private UUID recheckAttemptId;
+    public int getReviewRevision(){return reviewRevision;}
+    public void setReviewRevision(int value){reviewRevision=value;}
+    public com.fasterxml.jackson.databind.JsonNode getReviewSnapshot(){return reviewSnapshot;}
+    public void setReviewSnapshot(com.fasterxml.jackson.databind.JsonNode value){reviewSnapshot=value;}
+    public String getOutcome(){return outcome;}
+    public void setOutcome(String value){outcome=value;}
+    public UUID getRecheckAttemptId(){return recheckAttemptId;}
+    public void setRecheckAttemptId(UUID value){recheckAttemptId=value;}
 
     @jakarta.persistence.Version
     private Long version;

@@ -17,7 +17,6 @@ import ru.analystgym.catalog.domain.Task;
 import ru.analystgym.catalog.repo.TaskRepository;
 import ru.analystgym.identity.domain.User;
 import ru.analystgym.identity.repo.UserRepository;
-import ru.analystgym.notify.service.NotificationService;
 import ru.analystgym.practice.domain.Attempt;
 import ru.analystgym.practice.domain.Review;
 import ru.analystgym.practice.repo.AttemptRepository;
@@ -52,7 +51,10 @@ public class QualityService {
     private final ReviewRepository reviews;
     private final TaskRepository tasks;
     private final UserRepository users;
-    private final NotificationService notify;
+    private final ru.analystgym.notify.service.NotificationOutbox outbox;
+    private final ru.analystgym.practice.service.ReviewRevisions revisions;
+    private final org.springframework.jdbc.core.JdbcTemplate db;
+    private final String engine;
 
     public QualityService(
             ComplaintRepository complaints,
@@ -60,18 +62,20 @@ public class QualityService {
             ReviewRepository reviews,
             TaskRepository tasks,
             UserRepository users,
-            NotificationService notify) {
+            ru.analystgym.notify.service.NotificationOutbox outbox,
+            ru.analystgym.practice.service.ReviewRevisions revisions, org.springframework.jdbc.core.JdbcTemplate db,
+            @org.springframework.beans.factory.annotation.Value("${review.engine:mock}") String engine) {
         this.complaints = complaints;
         this.attempts = attempts;
         this.reviews = reviews;
         this.tasks = tasks;
         this.users = users;
-        this.notify = notify;
+        this.outbox=outbox;this.revisions=revisions;this.db=db;this.engine=engine;
     }
 
     /** Подача жалобы: только своя reviewed-попытка, причина 10–2000 символов. */
     @Transactional
-    public Complaint fileComplaint(UUID userId, UUID attemptId, String reason) {
+    public Complaint fileComplaint(UUID userId, UUID attemptId, String reason, Integer expectedRevision) {
         Attempt attempt = attempts.findByIdAndUserId(attemptId, userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         if (!"reviewed".equals(attempt.getStatus())) {
@@ -81,8 +85,10 @@ public class QualityService {
         if (text.length() < MIN_REASON || text.length() > MAX_REASON) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "bad reason length");
         }
-        Review review = reviews.findById(attemptId).orElseThrow(
+        Review review = reviews.lockById(attemptId).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.CONFLICT, "review missing"));
+        if(expectedRevision==null || review.getRevision()!=expectedRevision) throw new ResponseStatusException(HttpStatus.CONFLICT,"review_changed");
+        if(db.queryForObject("SELECT count(*) FROM complaints WHERE attempt_id=? AND review_revision=? AND status IN ('new','review')",Long.class,attemptId,expectedRevision)>0) throw new ResponseStatusException(HttpStatus.CONFLICT,"complaint_already_open");
         Complaint complaint = new Complaint();
         complaint.setId(UUID.randomUUID());
         complaint.setUserId(userId);
@@ -91,7 +97,8 @@ public class QualityService {
         complaint.setScore(review.getScore());
         complaint.setReason(text);
         complaint.setExcerpt(excerptOf(attempt.getTabs()));
-        complaint.setPromptVersion(review.getEngine());
+        complaint.setPromptVersion(review.getPromptVersions()==null?"{}":review.getPromptVersions().toString());
+        complaint.setReviewRevision(review.getRevision());complaint.setReviewSnapshot(review.getResult().deepCopy());
         complaint.setStatus("new");
         return complaints.save(complaint);
     }
@@ -118,11 +125,18 @@ public class QualityService {
      */
     @Transactional
     public Complaint resolve(UUID complaintId, String status, String resolution, Long version) {
+        return resolve(complaintId,status,resolution,version,null,null,null);
+    }
+
+    /** Закрытие — отклонение с причиной или реальное исправление; повторная проверка остаётся открытой до результата. */
+    @Transactional
+    public Complaint resolve(UUID complaintId, String status, String resolution, Long version,String action,Map<String,String> states,UUID actor) {
         Complaint complaint = complaints.findById(complaintId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         if (version == null || !version.equals(complaint.getVersion())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "edit_conflict");
         }
+        if(resolution!=null && resolution.length()>2000) throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"resolution_too_long");
         if (!List.of("review", "resolved", "rejected").contains(status)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "bad status");
         }
@@ -132,14 +146,54 @@ public class QualityService {
         if ("new".equals(complaint.getStatus()) && "new".equals(status)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "bad status");
         }
-        if ("resolved".equals(status) && (resolution == null || resolution.trim().isEmpty())) {
+        if (("resolved".equals(status) || "rejected".equals(status) || "recheck".equals(action)) && (resolution == null || resolution.trim().length()<10 || resolution.trim().length()>2000)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "resolution required");
         }
+        if("recheck_pending".equals(complaint.getOutcome())) throw new ResponseStatusException(HttpStatus.CONFLICT,"recheck_in_progress");
+        if("correct".equals(action) && "resolved".equals(status)) {
+            revisions.correct(complaint.getAttemptId(),complaint.getReviewRevision(),actor,resolution.trim(),states);complaint.setOutcome("corrected");
+        } else if("recheck".equals(action) && "review".equals(status)) {
+            complaint.setRecheckAttemptId(revisions.recheck(complaint.getAttemptId(),complaint.getReviewRevision(),engine));complaint.setOutcome("recheck_pending");
+        } else if("reject".equals(action) && "rejected".equals(status)) complaint.setOutcome("rejected");
+        else if(!"review".equals(status) || action!=null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"complaint_action_required");
         complaint.setStatus(status);
         complaint.setResolution(resolution == null || resolution.isBlank() ? null : resolution.trim());
         complaints.saveAndFlush(complaint);
-        notify.complaintResolved(complaint.getUserId(), complaint.getId(), status);
+        decision(complaint,action==null?"review":action,actor);
+        if(!"review".equals(status) || "recheck".equals(action)) notifyComplaint(complaint);
         return complaint;
+    }
+
+    /** Планировщик повторяет финализацию после рестарта/ошибки БД; сетевых действий в транзакции нет. */
+    @Transactional
+    public void reconcileRecheck(UUID id) {
+        var complaint=complaints.findById(id).orElseThrow();
+        if(!"recheck_pending".equals(complaint.getOutcome())) return;
+        var child=attempts.findById(complaint.getRecheckAttemptId()).orElseThrow();
+        if("failed".equals(child.getStatus())) {
+            complaint.setOutcome("recheck_failed");complaint.setResolution("Повторная проверка завершилась технической ошибкой. Жалоба остаётся в работе.");
+        } else if("reviewed".equals(child.getStatus())) {
+            var current=reviews.lockById(complaint.getAttemptId()).orElseThrow();
+            if(current.getRevision()!=complaint.getReviewRevision()) {
+                complaint.setOutcome("recheck_conflict");complaint.setResolution("Ревью уже исправлено другим разбором. Требуется решение сотрудника.");
+            } else {
+                var actors=db.queryForList("SELECT actor_id FROM complaint_decisions WHERE complaint_id=? AND action='recheck' ORDER BY version DESC LIMIT 1",UUID.class,complaint.getId());
+                revisions.adopt(complaint.getAttemptId(),complaint.getReviewRevision(),child.getId(),actors.isEmpty()?null:actors.get(0),complaint.getResolution());
+                complaint.setStatus("resolved");complaint.setOutcome("rechecked");
+            }
+        } else return;
+        complaints.saveAndFlush(complaint);decision(complaint,complaint.getOutcome(),null);notifyComplaint(complaint);
+    }
+
+    private void decision(Complaint c,String action,UUID actor) {
+        db.update("INSERT INTO complaint_decisions(complaint_id,version,action,actor_id,resolution,recheck_attempt_id) VALUES(?,?,?,?,?,?)",c.getId(),c.getVersion(),action,actor,c.getResolution(),c.getRecheckAttemptId());
+    }
+
+    private void notifyComplaint(Complaint c) {
+        var user=users.findById(c.getUserId()).orElseThrow();
+        String link="/task.html?id="+c.getTaskId()+"&attempt="+c.getAttemptId();
+        outbox.enqueue(user.getId(),user.getEmail(),"complaint:"+c.getId()+":"+c.getVersion(),"AnalystGym: решение по жалобе",
+                "Статус: "+c.getStatus()+". "+c.getResolution()+"\nОткройте кабинет и актуальное ревью: "+link,link);
     }
 
     /** Дашборд: KPI + требующие внимания + MISS-топ + свежие жалобы. */
@@ -325,7 +379,9 @@ public class QualityService {
                     nameOf(complaint.getUserId()), complaint.getScore(), complaint.getReason(),
                     complaint.getExcerpt(), complaint.getPromptVersion(), complaint.getStatus(),
                     complaint.getResolution(),
-                    complaint.getCreatedAt() == null ? null : complaint.getCreatedAt().toString(), complaint.getVersion()));
+                    complaint.getCreatedAt() == null ? null : complaint.getCreatedAt().toString(), complaint.getVersion(),
+                    complaint.getReviewRevision(),complaint.getOutcome(),complaint.getRecheckAttemptId(),complaint.getReviewSnapshot(),
+                    db.queryForList("SELECT d.version,d.action,d.actor_id AS \"actorId\",u.name AS \"actorName\",d.resolution,d.created_at AS \"createdAt\" FROM complaint_decisions d LEFT JOIN users u ON u.id=d.actor_id WHERE complaint_id=? ORDER BY d.version",complaint.getId())));
         }
         return result;
     }

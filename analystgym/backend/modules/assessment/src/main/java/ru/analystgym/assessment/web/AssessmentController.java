@@ -32,27 +32,66 @@ import ru.analystgym.assessment.web.AssessmentDto.SubmitResponse;
 public class AssessmentController {
 
     private final AssessmentService assessment;
+    private final ru.analystgym.assessment.service.AssessmentRuns runs;
 
-    public AssessmentController(AssessmentService assessment) {
+    public AssessmentController(AssessmentService assessment, ru.analystgym.assessment.service.AssessmentRuns runs) {
         this.assessment = assessment;
+        this.runs = runs;
     }
 
     @GetMapping("/questions")
     public List<QuestionCard> questions(Authentication authentication) {
-        currentUser(authentication);
         return assessment.questionCards();
     }
 
     @PostMapping("/submissions")
     public ResponseEntity<SubmitResponse> submit(
             @RequestBody SubmitRequest body, Authentication authentication) {
-        UUID userId = currentUser(authentication);
-        AssessmentSubmission submission = assessment.submit(
-                userId, body == null ? null : body.answers(),
-                body == null ? null : body.durationSec());
-        var view = assessment.submissionOf(userId, submission.getId());
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new SubmitResponse(submission.getId(), view.result()));
+        throw new ResponseStatusException(HttpStatus.GONE,"assessment_run_required");
+    }
+
+    /** Публичны только точечные операции прохождения с секретом гостя; история требует входа. */
+    @PostMapping("/runs")
+    public ru.analystgym.assessment.service.AssessmentRuns.View start(@RequestBody AssessmentDto.StartRequest request,
+            @org.springframework.web.bind.annotation.RequestHeader(value="X-Assessment-Token",required=false) String token, Authentication auth) {
+        return runs.start(request.id(),optionalUser(auth),token);
+    }
+
+    @GetMapping("/runs/current")
+    public ResponseEntity<ru.analystgym.assessment.service.AssessmentRuns.View> current(Authentication auth) {
+        var view=runs.current(currentUser(auth));
+        return view==null ? ResponseEntity.noContent().build() : ResponseEntity.ok(view);
+    }
+
+    @GetMapping("/runs/{id}")
+    public ru.analystgym.assessment.service.AssessmentRuns.View run(@PathVariable UUID id,
+            @org.springframework.web.bind.annotation.RequestHeader(value="X-Assessment-Token",required=false) String token, Authentication auth) {
+        return runs.get(id,optionalUser(auth),token);
+    }
+
+    @org.springframework.web.bind.annotation.PutMapping("/runs/{id}")
+    public ru.analystgym.assessment.service.AssessmentRuns.View progress(@PathVariable UUID id, @RequestBody AssessmentDto.ProgressRequest request,
+            @org.springframework.web.bind.annotation.RequestHeader(value="X-Assessment-Token",required=false) String token, Authentication auth) {
+        return runs.update(id,optionalUser(auth),token,request,false);
+    }
+
+    @PostMapping("/runs/{id}/finish")
+    public ru.analystgym.assessment.service.AssessmentRuns.View finish(@PathVariable UUID id, @RequestBody AssessmentDto.ProgressRequest request,
+            @org.springframework.web.bind.annotation.RequestHeader(value="X-Assessment-Token",required=false) String token, Authentication auth) {
+        return runs.update(id,optionalUser(auth),token,request,true);
+    }
+
+    @PostMapping("/runs/{id}/claim")
+    public ru.analystgym.assessment.service.AssessmentRuns.View claim(@PathVariable UUID id,
+            @org.springframework.web.bind.annotation.RequestHeader(value="X-Assessment-Token",required=false) String token, Authentication auth) {
+        return runs.claim(id,currentUser(auth),token);
+    }
+
+    private static UUID optionalUser(Authentication auth) { return auth!=null && auth.getPrincipal() instanceof UUID id ? id : null; }
+
+    @org.springframework.web.bind.annotation.ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<java.util.Map<String,String>> rejected(ResponseStatusException e) {
+        return ResponseEntity.status(e.getStatusCode()).body(java.util.Map.of("error",e.getReason()==null?"request_rejected":e.getReason()));
     }
 
     @GetMapping("/submissions")

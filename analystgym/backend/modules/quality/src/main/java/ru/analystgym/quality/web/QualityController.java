@@ -53,7 +53,7 @@ public class QualityController {
         if (body == null || body.attemptId() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "attemptId required");
         }
-        var saved = quality.fileComplaint(userId, body.attemptId(), body.reason());
+        var saved = quality.fileComplaint(userId, body.attemptId(), body.reason(),body.reviewRevision());
         var view = quality.myComplaints(userId).stream()
                 .filter(c -> c.id().equals(saved.getId())).findFirst()
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.CONFLICT));
@@ -75,11 +75,11 @@ public class QualityController {
     @PatchMapping("/api/admin/complaints/{id}")
     public ComplaintView resolve(
             @PathVariable UUID id, @RequestBody ResolveRequest body, Authentication authentication) {
-        staff(authentication);
+        var actor=staff(authentication);
         if (body == null || body.status() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "status required");
         }
-        var saved = quality.resolve(id, body.status(), body.resolution(), body.version());
+        var saved = quality.resolve(id, body.status(), body.resolution(), body.version(),body.action(),body.states(),actor.getId());
         return quality.complaintQueue("all").stream()
                 .filter(c -> c.id().equals(saved.getId())).findFirst()
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.CONFLICT));

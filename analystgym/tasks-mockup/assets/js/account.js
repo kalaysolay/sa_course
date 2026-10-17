@@ -8,6 +8,9 @@
 
 (function () {
   const FEED_LIMIT = 10;
+  const complaintStatus = { new: 'Получена', review: 'В работе', resolved: 'Решена', rejected: 'Отклонена' };
+  const complaintOutcome = { corrected: 'Результат исправлен', recheck_pending: 'Назначена повторная проверка', rechecked: 'Результат пересмотрен', recheck_failed: 'Ошибка повторной проверки, разбор продолжается', recheck_conflict: 'Требуется сверка с другим исправлением', rejected: 'Оценка оставлена без изменения' };
+  const complaintAction = { review: 'Взята в работу', correct: 'Исправлены критерии', reject: 'Отклонена', recheck: 'Назначена повторная проверка', ...complaintOutcome };
 
   document.addEventListener('DOMContentLoaded', async () => {
     AppUI.mountHeader('account');
@@ -49,7 +52,8 @@
       loadAttempts(),
       loadAssessment(),
       loadComplaints(),
-      loadOrders()
+      loadOrders(),
+      loadNotifications()
     ]);
   });
 
@@ -269,6 +273,7 @@
     const host = document.getElementById('assessmentBody');
     let history = null;
     try { history = await Api.assessmentHistory(); } catch (e) { history = null; }
+    if (history === null && Api.mode === 'server') { host.innerHTML = '<p>История диагностики не загружена. Обновите страницу для повтора.</p>'; return; }
     const local = window.Store ? Store.assessment() : null;
     if ((!history || !history.length) && !(local && local.result)) {
       host.innerHTML = '<p class="muted">Замеров пока нет — <a href="assessment.html" style="color:var(--accent)">пройдите диагностику</a>.</p>';
@@ -278,12 +283,12 @@
       <div class="plan-item" style="margin-bottom:6px">
         <span class="n">${AppUI.esc(AppUI.dateTime(item.createdAt))}</span>
         <div>
-          <div class="t">${AppUI.esc(item.gradeName || item.gradeId || '')}</div>
+          <div class="t"><a href="results.html?submission=${AppUI.esc(item.submissionId)}">Профиль знаний</a></div>
           <div class="s">верно ${item.correctCount} из ${item.answeredCount}</div>
         </div>
         <span class="badge">${item.scoreRounded}/100</span>
       </div>`).join('');
-    const localNote = local && local.result
+    const localNote = local && local.result && !local.server
       ? `<p class="muted" style="font-size:12px">Локальный замер в этом браузере: ${local.result.scoreRounded}/100 — серверная история выше.</p>`
       : '';
     host.innerHTML = `${rows}${localNote}<a class="btn btn-ghost btn-sm mt-16" href="results.html">Последний результат</a>`;
@@ -293,6 +298,7 @@
     const host = document.getElementById('complaintsBody');
     let list = null;
     try { list = await Api.myComplaints(); } catch (e) { list = null; }
+    if (list === null) { host.innerHTML = '<p>Жалобы не загружены. Обновите страницу для повтора.</p>'; return; }
     if (!list || !list.length) {
       host.innerHTML = '<p class="muted">Жалоб нет. Оспорить ревью можно кнопкой «Оспорить» в карточке ревью.</p>';
       return;
@@ -302,7 +308,9 @@
         <span class="n">${AppUI.esc(AppUI.dateTime(item.createdAt))}</span>
         <div>
           <div class="t">${AppUI.esc(item.taskTitle || item.taskId)}</div>
-          <div class="s">${AppUI.esc(item.status)}${item.resolution ? ' · ' + AppUI.esc(item.resolution.slice(0, 80)) : ''}</div>
+          <div class="s">${AppUI.esc(complaintStatus[item.status] || item.status)} · ревью v${item.reviewRevision}${item.outcome ? ' · ' + AppUI.esc(complaintOutcome[item.outcome] || item.outcome) : ''}${item.resolution ? ' · ' + AppUI.esc(item.resolution) : ''}</div>
+          <a href="task.html?id=${AppUI.esc(item.taskId)}&amp;attempt=${AppUI.esc(item.attemptId)}">Открыть актуальное ревью и историю</a>
+          <details><summary>История разбора</summary>${(item.decisions || []).map(d => `<p>${AppUI.esc(complaintAction[d.action] || d.action)} · ${AppUI.esc(d.actorName || 'Система')}: ${AppUI.esc(d.resolution || '')}</p>`).join('')}</details>
         </div>
         <span class="badge">${item.score}/100</span>
       </div>`).join('');
@@ -329,6 +337,14 @@
         </div>
         <span class="badge">${order.amount} ₽</span>
       </div>`).join('');
+  }
+
+  async function loadNotifications() {
+    const host = document.getElementById('notificationsBody');
+    try {
+      const list = await Api.notifications();
+      host.innerHTML = list.length ? list.map(n => `<article><h4>${AppUI.esc(n.subject)}</h4><p>${AppUI.esc(n.body)}</p><a href="${AppUI.esc(n.link)}">Открыть результат</a></article>`).join('') : '<p>Уведомлений пока нет.</p>';
+    } catch (error) { host.textContent = 'Не удалось загрузить уведомления. Повторите загрузку страницы.'; }
   }
 })();
 

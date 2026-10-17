@@ -23,7 +23,7 @@ import java.util.regex.Pattern;
 public final class MockReviewProvider {
 
     /** Идентификатор движка — тот же, что ставит макет (виден в карточке ревью). */
-    public static final String ENGINE = "mock-agents/v1";
+    public static final String ENGINE = "mock-agents/v2";
 
     private static final Map<String, Integer> WEIGHTS = Map.of("high", 3, "mid", 2, "low", 1);
     private static final Map<String, Double> STATE_POINTS = Map.of("hit", 1.0, "partial", 0.55, "miss", 0.0);
@@ -37,7 +37,7 @@ public final class MockReviewProvider {
             new GradeDef(2, 26, "Слабое решение", "bad", "Ключевые аспекты задачи не раскрыты"),
             new GradeDef(3, 46, "Решение с пробелами", "warn", "Направление верное, но решение неполное"),
             new GradeDef(4, 66, "Хорошее решение", "ok", "Решение рабочее, есть что усилить"),
-            new GradeDef(5, 85, "Сильное решение", "accent", "Решение уровня уверенного сеньора"));
+            new GradeDef(5, 85, "Сильное решение", "accent", "Подробное и обоснованное решение"));
 
     private record Persona(String id, String name, String role, String initials, List<String> checks) {
     }
@@ -817,7 +817,7 @@ public final class MockReviewProvider {
         }
 
         List<ReviewResult.CriterionReview> criteria = List.copyOf(rubric);
-        return new ReviewResult(
+        return asDemonstration(new ReviewResult(
                 "rev_" + Long.toString(System.currentTimeMillis(), 36) + randomSuffix(),
                 task.id(), Instant.now().toString(), ENGINE,
                 grade,
@@ -828,7 +828,19 @@ public final class MockReviewProvider {
                 new ReviewResult.Stats(solution.words, solution.tabs.size(), solution.diagramTabs,
                         rubric.size(), split.hits().size(), split.partials().size(),
                         split.misses().size()),
-                buildRecommendations(task, candidates));
+                buildRecommendations(task, candidates)));
+    }
+
+    /** Поиск слов демонстрирует интерфейс, но не подтверждает качество даже при совпадении всей рубрики. */
+    public static ReviewResult asDemonstration(ReviewResult r) {
+        int score=Math.min(45,r.grade().score());
+        var grade=new ReviewResult.Grade(gradeFor(score).code(),"Демо: совпадения маркеров","Демонстрация, не оценка качества","info",score);
+        var agents=r.agents().stream().map(a->new ReviewResult.AgentReview(a.id(),a.name(),a.role(),a.initials(),a.checks(),Math.min(4,a.score()),a.coverage(),
+                a.covered(),a.missed(),"Демонстрационный поиск маркеров. Он не проверяет смысл, противоречия и реализуемость решения.",a.improve(),a.questions())).toList();
+        return new ReviewResult(r.id(),r.taskId(),r.submittedAt(),r.engine().startsWith("llm")?"llm-demo/v2":"mock-agents/v2",grade,
+                "Демо показывает совпадения слов из рубрики. Балл ограничен 45/100 и не подтверждает качество решения.",
+                List.of("Маркеры могут встречаться в перечне терминов, отрицании или неверном решении. Для оценки нужен содержательный разбор."),
+                r.criteria(),agents,r.signals(),r.stats(),r.recommendations());
     }
 
     private static String randomSuffix() {

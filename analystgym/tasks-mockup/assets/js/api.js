@@ -199,7 +199,7 @@
 
   // Эталоны встроены только в отдельный макет. В серверной сборке этих файлов нет.
   async function loadDemo() {
-    for (const name of ['data-tasks-1.js', 'data-tasks-2.js']) {
+    for (const name of ['data-tasks-1.js', 'data-tasks-2.js', 'questions.js']) {
       await new Promise((resolve, reject) => {
         const script = document.createElement('script');
         script.src = './assets/js/' + name;
@@ -225,6 +225,14 @@
       else if (Api.mode === 'embedded') await loadDemo();
       else throw new Error('Сервер недоступен');
     } catch (error) { Api.catalogError = error; }
+    // Загружаем до ready и со старой кэшированной HTML-страницей, где нового script ещё нет.
+    if (/(assessment|results)\.html$/.test(window.location.pathname || '') && !window.AssessmentSession) {
+      try { await new Promise((resolve, reject) => {
+        const script = document.createElement('script'); script.src = './assets/js/assessment-session.js';
+        script.onload = resolve; script.onerror = () => reject(new Error('Не удалось загрузить диагностику'));
+        document.head.appendChild(script);
+      }); } catch (error) { Api.catalogError = error; }
+    }
     try {
       changeUser(Api.mode === 'server' ? await Api.me() : null, Api.mode === 'server');
     } catch (error) {
@@ -370,6 +378,16 @@
       return getJson('/api/assessment/questions');
     },
 
+    startAssessmentRun(id, token) { return postJson('/api/assessment/runs', { id }, token ? { 'X-Assessment-Token': token } : null); },
+    getAssessmentRun(id, token) { return requestJson('GET', '/api/assessment/runs/' + encodeURIComponent(id), null, token ? { 'X-Assessment-Token': token } : null); },
+    currentAssessmentRun() { return getJson('/api/assessment/runs/current'); },
+    saveAssessmentRun(id, token, progress) { return sendJson('PUT', '/api/assessment/runs/' + encodeURIComponent(id), progress, token ? { 'X-Assessment-Token': token } : null); },
+    finishAssessmentRun(id, token, progress) { return postJson('/api/assessment/runs/' + encodeURIComponent(id) + '/finish', progress, token ? { 'X-Assessment-Token': token } : null); },
+    claimAssessmentRun(id, token) { return postJson('/api/assessment/runs/' + encodeURIComponent(id) + '/claim', {}, { 'X-Assessment-Token': token }); },
+    assessmentSubmission(id) { return getJson('/api/assessment/submissions/' + encodeURIComponent(id)); },
+    notifications() { return getJson('/api/notifications'); },
+    reviewRevisions(id) { return getJson('/api/attempts/' + encodeURIComponent(id) + '/revisions'); },
+
     async submitAssessment(answers, durationSec) {
       return postJson('/api/assessment/submissions', { answers: answers || {}, durationSec: durationSec || 0 });
     },
@@ -391,8 +409,8 @@
       }
     },
 
-    /* ---------- жалобы (Фаза 3, UC-S08) ---------- */    async fileComplaint(attemptId, reason) {
-      return postJson('/api/complaints', { attemptId, reason });
+    /* ---------- жалобы (Фаза 3, UC-S08) ---------- */    async fileComplaint(attemptId, reason, reviewRevision) {
+      return postJson('/api/complaints', { attemptId, reason, reviewRevision });
     },
 
     async myComplaints() {

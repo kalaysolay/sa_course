@@ -244,7 +244,7 @@
             <div class="progress-chip" title="Ваш прогресс в макете">
               <span class="avatar">Я</span>
               <span>
-                ${levelName ? `уровень <b>${UI.esc(levelName)}</b>` : `решено <b>${stats.reviewed}</b>`}
+                ${levelName ? `знания: <b>${UI.esc(levelName)}</b>` : `решено <b>${stats.reviewed}</b>`}
               </span>
             </div>` : ''}
           ${isCourse
@@ -356,7 +356,7 @@
     const demo = !window.Api || Api.mode === 'embedded';
     const about = isCourse
       ? 'Курсы для системных и бизнес-аналитиков: короткие уроки без воды, практика на тренажёре, прогресс по курсу.'
-      : 'Тренажёр собеседований для системных и бизнес-аналитиков: задачи с реальных проектов, ревью двумя ИИ-агентами и диагностика уровня.';
+      : 'Тренажёр для системных и бизнес-аналитиков: практические задачи, предварительное автоматическое ревью и диагностика знаний.';
     mount.className = 'site-footer';
     mount.innerHTML = `
       <div class="wrap">

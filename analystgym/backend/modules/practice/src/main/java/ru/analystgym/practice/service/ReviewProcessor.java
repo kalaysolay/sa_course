@@ -28,15 +28,20 @@ public class ReviewProcessor {
     private final ReviewRepository reviews;
     private final ReviewCallRepository calls;
     private final ObjectMapper mapper;
+    private final ReviewRevisions revisions;
+    private final ru.analystgym.notify.service.NotificationOutbox outbox;
+    private final ru.analystgym.identity.repo.UserRepository users;
     private final int leaseSeconds, maxTries, retrySeconds;
 
     public ReviewProcessor(ReviewJobRepository jobs, AttemptRepository attempts, ReviewRepository reviews,
-                           ReviewCallRepository calls, ObjectMapper mapper,
+                           ReviewCallRepository calls, ObjectMapper mapper, ReviewRevisions revisions,
+                           ru.analystgym.notify.service.NotificationOutbox outbox, ru.analystgym.identity.repo.UserRepository users,
                            @Value("${review.queue.lease-seconds:30}") int leaseSeconds,
                            @Value("${review.queue.max-tries:3}") int maxTries,
                            @Value("${review.queue.retry-seconds:2}") int retrySeconds) {
         if (leaseSeconds < 3 || maxTries < 1 || retrySeconds < 1) throw new IllegalArgumentException("Некорректные настройки очереди");
         this.jobs = jobs; this.attempts = attempts; this.reviews = reviews; this.calls = calls; this.mapper = mapper;
+        this.revisions=revisions;this.outbox=outbox;this.users=users;
         this.leaseSeconds = leaseSeconds; this.maxTries = maxTries; this.retrySeconds = retrySeconds;
     }
 
@@ -136,14 +141,18 @@ public class ReviewProcessor {
         int output = history.stream().mapToInt(c -> c.getOutputTokens() == null ? 0 : c.getOutputTokens()).sum();
         var review = new Review(); review.setAttemptId(attempt.getId());
         review.setEngine(result.engine()); review.setGradeCode(result.grade().code()); review.setScore(result.grade().score());
-        review.setResult(mapper.valueToTree(result)); review.setPromptVersions(mapper.valueToTree(promptVersions));
+        var reviewJson=(com.fasterxml.jackson.databind.node.ObjectNode)mapper.valueToTree(result);reviewJson.put("revision",1);
+        review.setResult(reviewJson); review.setPromptVersions(mapper.valueToTree(promptVersions));
         review.setInputTokens(input); review.setOutputTokens(output);
         // Старые сводные поля сохраняем; полная трасса по каждому агенту/повтору находится в review_calls.
         var accepted = history.stream().filter(c -> "accepted".equals(c.getStatus())).toList();
         review.setProvider(accepted.stream().map(ReviewCall::getProvider).distinct().reduce((a, b) -> a + "," + b).orElse(""));
         review.setModel(accepted.stream().map(c -> c.getActualModel() == null ? c.getRequestedModel() : c.getActualModel())
                 .distinct().reduce((a, b) -> a + "," + b).orElse(""));
-        reviews.save(review); attempt.setStatus("reviewed");
+        reviews.saveAndFlush(review); revisions.record(review,null,null);attempt.setStatus("reviewed");
+        var user=users.findById(attempt.getUserId()).orElseThrow();
+        outbox.enqueue(user.getId(),user.getEmail(),"review:"+attempt.getId()+":1","AnalystGym: ревью готово",
+                "Проверка задачи «"+claim.plan().input().title()+"» завершена. Результат: "+result.grade().score()+"/100.\nОткройте задачу в кабинете.","/task.html?id="+attempt.getTaskId()+"&attempt="+attempt.getId());
         job.setStatus("done"); job.setStage("done"); job.setProgress(100); job.setError(null);
         job.setLeaseToken(null); job.setLeaseUntil(null);
         return Optional.of(new DoneInfo(attempt.getUserId(), claim.plan().input().title(), result.grade().score()));
@@ -166,7 +175,7 @@ public class ReviewProcessor {
         var attempt = attempts.findById(attemptId).orElseThrow(() -> new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND));
         return Map.of("task", attempt.getTaskSnapshot() == null ? mapper.nullNode() : attempt.getTaskSnapshot(),
                 "plan", attempt.getReviewPlan() == null ? mapper.nullNode() : attempt.getReviewPlan(),
-                "calls", calls.findByAttemptIdOrderByStartedAtAsc(attemptId),
+                "calls", calls.findByAttemptIdOrderByStartedAtAsc(attemptId),"revisions",revisions.history(attemptId),
                 "chargedTokens", attempt.getChargedTokens(), "callCount", attempt.getCallCount());
     }
 

@@ -42,10 +42,13 @@ public class PracticeController {
 
     private final PracticeService practice;
     private final ru.analystgym.review.ReviewPipeline pipeline;
+    private final ru.analystgym.practice.service.ReviewRevisions revisions;
+    @org.springframework.beans.factory.annotation.Value("${review.engine:mock}") private String engine;
 
-    public PracticeController(PracticeService practice, ru.analystgym.review.ReviewPipeline pipeline) {
+    public PracticeController(PracticeService practice, ru.analystgym.review.ReviewPipeline pipeline,ru.analystgym.practice.service.ReviewRevisions revisions) {
         this.practice = practice;
         this.pipeline = pipeline;
+        this.revisions=revisions;
     }
 
     @PutMapping("/tasks/{id}/draft")
@@ -104,8 +107,18 @@ public class PracticeController {
         return practice.taskContext(currentUser(authentication), id);
     }
 
+    @GetMapping("/attempts/{id}/revisions")
+    public List<Map<String,Object>> revisions(@PathVariable UUID id,Authentication auth) {
+        practice.attemptView(currentUser(auth),id);
+        return revisions.history(id);
+    }
+
     @GetMapping("/review/limits")
-    public ru.analystgym.review.ReviewPlan.Limits limits() { return pipeline.limits(); }
+    public Map<String,Object> limits() {
+        var l=pipeline.limits();
+        return Map.of("maxSolutionChars",l.maxSolutionChars(),"maxInputBytes",l.maxInputBytes(),"maxOutputTokens",l.maxOutputTokens(),
+                "tokenBudget",l.tokenBudget(),"maxCalls",l.maxCalls(),"engine",engine,"qualityStatus","uncalibrated");
+    }
 
     /** Коды нужны фронту, чтобы отличить конфликт версии от повторного использования ключа. */
     @ExceptionHandler(ResponseStatusException.class)

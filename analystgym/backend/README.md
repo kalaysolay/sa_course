@@ -2,6 +2,22 @@
 
 ## Быстрый старт
 
+V15 (аудит 11–13): прохождения диагностики фиксируют банк и прогресс;
+старый POST `/api/assessment/submissions` заменён стартом `/runs`, сохранением
+`PUT /runs/{id}` и финишем `/runs/{id}/finish`. Гостевой доступ — секрет
+X-Assessment-Token на 7 дней, привязка после входа через `/runs/{id}/claim`.
+Жалобы исправляют ревью или назначают повтор; история исходного результата
+сохраняется. Уведомления `/api/notifications` доступны сразу; письма ждут
+SMTP в outbox. Для реальной доставки задать APP_MAIL_ENABLED=true, APP_MAIL_FROM,
+APP_SITE_BASE_URL и MAIL_*; таймауты SMTP по 10 с. Обновить клиент вместе с сервером.
+
+Новые настройки: ASSESSMENT_GUEST_DAYS=7 (1–30), QUALITY_RECHECK_ENABLED=true,
+QUALITY_RECHECK_POLL_MS=2000, NOTIFICATION_MAX_TRIES=5,
+NOTIFICATION_RETRY_SECONDS=30, NOTIFICATION_LEASE_SECONDS=120,
+NOTIFICATION_POLL_MS=1000. При выключенной почте очередь не помечается доставленной.
+Mock теперь явно демонстрационный и ограничен; настоящая модель не объявляется
+откалиброванной. Методика: `../tasks-mockup/docs/review-calibration.md`.
+
 ```bash
 # 1. Статика макета подтянется сама при сборке (таска syncMockup).
 # 2. Поднять всё:

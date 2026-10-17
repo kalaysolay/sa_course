@@ -72,8 +72,18 @@
       try { reviewLimits = await Api.getReviewLimits(); } catch (error) { /* Сервер проверит лимит при submit. */ }
       await restoreServerSubmission();
     }
+    const demo = Api.mode === 'embedded' || reviewLimits?.engine === 'mock';
+    el.taskHost.insertAdjacentHTML('afterbegin', `<p class="info-box">${demo ? 'Демонстрационный режим: поиск маркеров не проверяет смысл решения. Демо-балл ограничен 45/100.' : 'Автоматическое ревью — предварительная обратная связь по рубрике. Качество ещё не подтверждено калибровкой методиста. Оценку можно оспорить.'}</p>`);
 
-    const last = Store.lastAttempt(task.id);
+    let last = Store.lastAttempt(task.id);
+    const selectedId = AppUI.qs('attempt');
+    if (selectedId && Api.serverPractice()) {
+      try {
+        const selected = await Api.getAttempt(selectedId);
+        if (selected.taskId !== task.id) throw new Error('Попытка другой задачи');
+        last = { id: selectedId, taskId: task.id, status: selected.status, review: selected.review, submittedAt: selected.submittedAt, server: true, tabs: [] };
+      } catch (error) { AppUI.toast('Не удалось открыть указанную попытку.', 'warn'); }
+    }
     if (last && last.status === 'in_review') {
       /* ревью не завершилось (обновление страницы) — перезапускаем на сохранённом снимке */
       if (last.server) {
@@ -1126,7 +1136,15 @@
 
   /* ==================== показ ревью ==================== */
 
-  function showReview(attempt) {
+  async function showReview(attempt) {
+    if (attempt.server) {
+      const owner = Store.owner();
+      try {
+        const fresh = await Api.getAttempt(attempt.id);
+        if (Store.owner() !== owner || !task) return;
+        if (fresh.review) { attempt.review = fresh.review; attempt.status = fresh.status; Store.updateAttempt(task.id, attempt.id, { review: fresh.review, status: fresh.status }); }
+      } catch (error) { AppUI.toast('Не удалось обновить ревью. Сохранённая копия может быть устаревшей.', 'warn'); }
+    }
     el.reviewProgressSection.classList.add('hidden');
     activeAttempt = attempt;
     renderReview(attempt);
@@ -1156,6 +1174,8 @@
             <span class="badge badge-violet">${AppUI.esc(review.engine)}</span>
           </div>
         </div>
+
+        <p class="info-box">${String(review.engine).includes('mock') || String(review.engine).includes('demo') ? 'Демонстрация поиска маркеров. Это не оценка качества решения.' : String(review.engine).includes('human') ? 'Ревью исправлено методистом.' : 'Предварительное автоматическое ревью; калибровка качества методистом ещё не подтверждена.'}${review.correctionReason ? ' Причина исправления: ' + AppUI.esc(review.correctionReason) : ''}</p>
 
         <!-- вердикт -->
         <div class="verdict-head">
@@ -1232,11 +1252,19 @@
             </div>` : '<div class="grow"></div>'}
           <span class="note">ревью ${AppUI.timeAgo(attempt.submittedAt)}</span>
           ${attempt.server ? '<button class="btn btn-ghost btn-sm" type="button" id="taskContextBtn">Условие этой попытки</button>' : ''}
+          ${attempt.server ? '<button class="btn btn-ghost btn-sm" type="button" id="reviewHistoryBtn">История исправлений</button>' : ''}
           <button class="btn btn-ghost btn-sm" type="button" id="complainBtn">Оспорить</button>
           <button class="btn btn-outline btn-sm" type="button" id="openAuthorBtn">Смотреть эталон</button>
           <button class="btn btn-primary btn-sm" type="button" id="resubmitBtn">Доработать и отправить снова</button>
         </div>
       </div>`;
+
+    document.getElementById('reviewHistoryBtn')?.addEventListener('click', async () => {
+      try {
+        const history = await Api.reviewRevisions(attempt.id);
+        AppUI.modal({ title: 'История ревью', wide: true, html: history.map(r => `<h3>Версия ${r.revision} · ${r.result.grade.score}/100</h3><p>${AppUI.esc(r.actorName || 'Автоматическая проверка')} · ${AppUI.esc(AppUI.dateTime(r.createdAt))}</p><p>${AppUI.esc(r.reason || 'Исходный результат')}</p><p>${AppUI.esc(r.result.summary)}</p><ul>${(r.result.criteria || []).map(c => `<li>${AppUI.esc(c.title)}: ${AppUI.esc(c.state)}</li>`).join('')}</ul>`).join('') });
+      } catch (error) { AppUI.toast('Не удалось загрузить историю исправлений.', 'warn'); }
+    });
 
     document.getElementById('taskContextBtn')?.addEventListener('click', async () => {
       try {
@@ -1281,7 +1309,7 @@
         return;
       }
       try {
-        await Api.fileComplaint(attempt.id, reason.trim());
+        await Api.fileComplaint(attempt.id, reason.trim(), attempt.review.revision || 1);
         AppUI.toast('Жалоба отправлена методисту', 'ok');
       } catch (error) {
         AppUI.toast('Не удалось отправить жалобу: ' + (error && error.message ? error.message : error), 'bad');

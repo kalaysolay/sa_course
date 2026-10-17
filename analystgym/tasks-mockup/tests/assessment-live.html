@@ -1,0 +1,59 @@
+<!doctype html><html lang="ru"><meta charset="utf-8"><title>Браузерная диагностика с тестовым backend</title>
+<pre id="result">RUNNING</pre><script>
+// Только на отдельном tests/live-server.py и пустой тестовой БД; создаёт одноразовый аккаунт.
+(async () => {
+  const output = document.getElementById('result'), checks = [];
+  const check = (ok, message) => { if (!ok) throw new Error(message); checks.push(message); };
+  const until = async predicate => { const end = Date.now() + 20000; while (!predicate()) { if (Date.now() > end) throw new Error('Таймаут интерфейса'); await new Promise(r => setTimeout(r, 50)); } };
+  const frames = [];
+  const open = async url => {
+    const frame = document.createElement('iframe'); frame.style.width = '1200px'; frame.style.height = '850px'; frame.src = url + (url.includes('?') ? '&' : '?') + 'qa=' + crypto.randomUUID(); frames.push(frame);
+    await new Promise(r => { frame.onload = r; document.body.append(frame); });
+    await frame.contentWindow.Api.ready; return frame;
+  };
+  try {
+    let frame = await open('../assessment.html'), w = frame.contentWindow;
+    if (w.Api.user) { await w.Api.logout(); frame.remove(); frame = await open('../assessment.html'); w = frame.contentWindow; }
+    check(w.Api.mode === 'server', 'Диагностика использует сервер');
+    await until(() => !w.document.getElementById('startBtn').disabled);
+    w.AppUI.confirm = async () => true;
+    w.document.getElementById('startBtn').click();
+    await until(() => w.document.querySelector('#quizOptions button'));
+    let s = w.Store.assessment();
+    check(!!s.runId && !!s.bankVersion && !!s.guestToken, 'Гостевое прохождение имеет снимок банка и секрет');
+    check(s.questions.every(q => q.answer === undefined && q.explain === undefined), 'До завершения ответы не приходят в браузер');
+    w.document.querySelector('#quizOptions button').click(); await w.AssessmentSession.flush();
+    const id = w.Store.assessment().runId;
+    frame.remove(); frame = await open('../assessment.html'); w = frame.contentWindow;
+    await until(() => w.document.getElementById('quizQuestion').textContent.length > 0);
+    check(w.Store.assessment().runId === id && Object.keys(w.Store.assessment().answers).length === 1, 'Перезагрузка восстанавливает серверный прогресс');
+    // Меняем только черновик тестового прохождения, затем завершаем через настоящий интерфейс.
+    await w.AssessmentSession.flush();
+    w.AppUI.confirm = async () => true;
+    w.document.querySelector('#quizDots [data-go="' + (w.Store.assessment().questions.length - 1) + '"]').click();
+    w.document.getElementById('nextBtn').click();
+    await until(() => frame.contentWindow.location.pathname.endsWith('results.html'));
+    w = frame.contentWindow; await until(() => w.document.getElementById('resultsHost').textContent.includes('Ваш профиль знаний'));
+    s = w.Store.assessment();
+    check(s.status === 'completed' && s.result.questionsCount === s.questions.length, 'Интерфейс показывает сохранённый результат сервера');
+    check(!w.document.getElementById('resultsHost').textContent.includes('оффер'), 'Нет обещания оффера');
+    const email = 'browser-' + crypto.randomUUID() + '@example.com';
+    w.AppUI.confirm = async () => false;
+    await w.Api.register(email, 'browser-test-password', 'Браузерный тест');
+    frame.remove(); frame = await open('../results.html'); w = frame.contentWindow;
+    await until(() => w.document.getElementById('claimGuestAssessment'));
+    w.document.getElementById('claimGuestAssessment').click();
+    await until(() => frame.contentWindow.Store.assessment()?.submissionId);
+    w = frame.contentWindow;
+    const submission = w.Store.assessment().submissionId;
+    check(!!submission && !w.Store.assessment().guestToken, 'Гость явно привязан к вошедшему аккаунту');
+    const second = await open('../results.html?submission=' + submission);
+    await until(() => second.contentWindow.document.getElementById('resultsHost').textContent.includes('Ваш профиль знаний'));
+    check(second.contentWindow.document.getElementById('resultsHost').textContent.includes('Профиль по компетенциям'), 'История открывается по серверному идентификатору');
+    const account = await open('../account.html');
+    await until(() => account.contentWindow.document.querySelector('#assessmentBody a[href*="submission="]'));
+    check(!!account.contentWindow.document.querySelector('#assessmentBody a[href*="submission="]'), 'Кабинет ведёт к конкретному сохранённому результату');
+    output.textContent = 'PASS ' + checks.length + '\n' + checks.join('\n');
+  } catch (error) { output.textContent = 'FAIL\n' + error.stack; }
+})();
+</script></html>

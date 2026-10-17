@@ -488,7 +488,7 @@
     let score = Math.round(100 * (0.82 * coverage + 0.18 * structure));
     if (coverage < 0.12) score = Math.min(score, 22);
     if (signals.empty) score = Math.min(score, 6);
-    score = Math.max(0, Math.min(100, score));
+    score = Math.max(0, Math.min(45, score));
 
     const grade = gradeFor(score);
     const hits = rubric.filter((c) => c.state === 'hit');
@@ -506,11 +506,11 @@
         role: persona.role,
         initials: persona.initials,
         checks: persona.checks,
-        score: Math.round(10 * (0.85 * ownCoverage + 0.15 * structure)),
+        score: Math.min(4, Math.round(10 * (0.85 * ownCoverage + 0.15 * structure))),
         coverage: Math.round(ownCoverage * 100),
         covered: buildCovered(own, solution, signals, agentId),
         missed: buildMissed(own, signals, agentId, solution),
-        narrative: buildNarrative(own, signals, agentId, ownCoverage, task),
+        narrative: 'Демонстрационный поиск маркеров. Он не проверяет смысл, противоречия и реализуемость решения.',
         improve: buildImprove(own, signals, agentId, task),
         questions: buildQuestions(own, task, agentId)
       };
@@ -537,16 +537,16 @@
       id: 'rev_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
       taskId: task.id,
       submittedAt: new Date().toISOString(),
-      engine: 'mock-agents/v1',
+      engine: 'mock-agents/v2',
       grade: {
         code: grade.code,
-        label: grade.label,
-        headline: grade.headline,
-        tone: grade.tone,
+        label: 'Демо: совпадения маркеров',
+        headline: 'Демонстрация, не оценка качества',
+        tone: 'info',
         score
       },
-      summary: buildSummary(grade, coverage, hits, misses, criticalMisses, rubric.length),
-      why,
+      summary: 'Демо показывает совпадения слов из рубрики. Балл ограничен 45/100 и не подтверждает качество решения.',
+      why: ['Маркеры могут встречаться в перечне терминов, отрицании или неверном решении. Для оценки нужен содержательный разбор.'],
       criteria: rubric,
       agents,
       signals,

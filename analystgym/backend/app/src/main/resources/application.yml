@@ -108,8 +108,23 @@ spring:
       mail:
         smtp:
           auth: true
+          connectiontimeout: 10000
+          timeout: 10000
+          writetimeout: 10000
           starttls:
             enable: true
+
+assessment:
+  guest-days: ${ASSESSMENT_GUEST_DAYS:7}
+quality:
+  recheck:
+    enabled: ${QUALITY_RECHECK_ENABLED:true}
+  recheck-poll-ms: ${QUALITY_RECHECK_POLL_MS:2000}
+notifications:
+  max-tries: ${NOTIFICATION_MAX_TRIES:5}
+  retry-seconds: ${NOTIFICATION_RETRY_SECONDS:30}
+  lease-seconds: ${NOTIFICATION_LEASE_SECONDS:120}
+  poll-ms: ${NOTIFICATION_POLL_MS:1000}
 
 management:
   endpoints:

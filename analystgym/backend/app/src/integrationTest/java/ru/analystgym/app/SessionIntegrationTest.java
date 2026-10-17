@@ -37,7 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(properties = {
         "app.admin-emails=boss@example.com", "app.google.enabled=false", "app.mail.enabled=false",
         "ratelimit.login-per-min=1000", "ratelimit.register-per-min=1000", "ratelimit.reset-per-min=1000",
-        "review.engine=mock", "review.queue.enabled=false"
+        "review.engine=mock", "review.queue.enabled=false", "quality.recheck.enabled=false"
 })
 @AutoConfigureMockMvc
 class SessionIntegrationTest {
@@ -64,17 +64,154 @@ class SessionIntegrationTest {
     @Autowired ru.analystgym.practice.repo.ReviewCallRepository calls;
     @Autowired ru.analystgym.review.ReviewPipeline pipeline;
     @Autowired org.springframework.jdbc.core.JdbcTemplate jdbc;
+    @Autowired ru.analystgym.assessment.service.AssessmentRuns assessmentRuns;
+    @Autowired ru.analystgym.quality.service.QualityService quality;
+    @Autowired ru.analystgym.practice.service.ReviewRevisions revisionService;
+    @Autowired ru.analystgym.notify.service.NotificationOutbox outbox;
 
     @org.junit.jupiter.api.BeforeEach
     void изолироватьОчередьТестовойБазы() {
         // Воркеры отключены; незавершённые сценарии предыдущего теста не захватываются следующим.
         jdbc.update("UPDATE review_jobs SET status='failed', stage='failed', lease_token=NULL, lease_until=NULL WHERE status <> 'done'");
         jdbc.update("UPDATE attempts SET status='failed' WHERE status IN ('queued','in_review')");
+        jdbc.update("UPDATE user_notifications SET status='sent',lease_token=NULL,lease_until=NULL");
     }
 
     private UUID studentId() throws Exception {
         String address = email(); register(address);
         return users.findByEmail(address).orElseThrow().getId();
+    }
+
+    @Test
+    void гостевойТестФиксируетБанкИСохраняетсяПослеВходаНаДругомУстройстве() throws Exception {
+        mvc.perform(get("/assets/js/questions.js")).andExpect(status().isNotFound());
+        UUID id=UUID.randomUUID();String token=UUID.randomUUID().toString().replace("-","");
+        mvc.perform(post("/api/assessment/runs").contentType("application/json").header("X-Assessment-Token",token)
+                .content(json.writeValueAsString(Map.of("id",id)))).andExpect(status().isForbidden());
+        var started=bodyOf(mvc.perform(post("/api/assessment/runs").with(csrf()).contentType("application/json").header("X-Assessment-Token",token)
+                .content(json.writeValueAsString(Map.of("id",id)))).andExpect(status().isOk()).andReturn());
+        assertThat(started.path("questions").findValues("answer")).isEmpty();
+        assertThat(started.path("questions").findValues("explain")).isEmpty();
+        String questionId=started.path("questions").get(0).path("id").asText();
+        int answer=jdbc.queryForObject("SELECT answer FROM questions WHERE id=?",Integer.class,questionId);
+        String original=jdbc.queryForObject("SELECT question FROM questions WHERE id=?",String.class,questionId);
+        try {
+            jdbc.update("UPDATE questions SET active=false,question='Другой текст' WHERE id=?",questionId);
+            var progress=new ru.analystgym.assessment.web.AssessmentDto.ProgressRequest(Map.of(questionId,answer),Map.of(questionId,true),0,0L);
+            var saved=assessmentRuns.update(id,null,token,progress,false);
+            assertThat(saved.version()).isEqualTo(1);
+            assertThat(assessmentRuns.start(id,null,token).bankVersion()).isEqualTo(started.path("bankVersion").asText());
+            var finish=new ru.analystgym.assessment.web.AssessmentDto.ProgressRequest(Map.of(questionId,answer),Map.of(questionId,true),0,1L);
+            var complete=assessmentRuns.update(id,null,token,finish,true);
+            assertThat(complete.result().path("correctCount").asInt()).isEqualTo(1);
+            assertThat(complete.result().path("detail").get(0).path("question").asText()).isEqualTo(original);
+            assertThat(assessmentRuns.update(id,null,token,finish,true).result()).isEqualTo(complete.result());
+            var registered=register(email());var access=cookie(registered,"ag_access");
+            var claimed=bodyOf(mvc.perform(post("/api/assessment/runs/"+id+"/claim").with(csrf()).cookie(access).header("X-Assessment-Token",token))
+                    .andExpect(status().isOk()).andReturn());
+            UUID owner=UUID.fromString(bodyOf(registered).path("id").asText());
+            assertThat(assessmentRuns.claim(id,owner,token).submissionId().toString()).isEqualTo(claimed.path("submissionId").asText());
+            assertThat(jdbc.queryForObject("SELECT count(*) FROM assessment_submissions WHERE user_id=?",Integer.class,owner)).isEqualTo(1);
+            mvc.perform(get("/api/assessment/runs/"+id).header("X-Assessment-Token",token)).andExpect(status().isNotFound());
+            var other=cookie(register(email()),"ag_access");
+            mvc.perform(get("/api/assessment/runs/"+id).cookie(other)).andExpect(status().isNotFound());
+            mvc.perform(get("/api/assessment/submissions/"+claimed.path("submissionId").asText()).cookie(access)).andExpect(status().isOk());
+            var secondSession=auth.login(users.findById(owner).orElseThrow().getEmail(),"password123");
+            mvc.perform(get("/api/assessment/runs/"+id).cookie(new Cookie("ag_access",secondSession.access())))
+                    .andExpect(status().isOk()).andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath("$.result.correctCount").value(1));
+        } finally {jdbc.update("UPDATE questions SET active=true,question=? WHERE id=?",original,questionId);}
+    }
+
+    @Test
+    void версияПрогрессаЗащищаетУстройстваАЧужойИИстёкшийТокенНеДаётДоступ() throws Exception {
+        UUID id=UUID.randomUUID();String token="a".repeat(64);var run=assessmentRuns.start(id,null,token);
+        String q=run.questions().get(0).id();
+        var progress=new ru.analystgym.assessment.web.AssessmentDto.ProgressRequest(Map.of(q,0),Map.of(),0,0L);
+        try(var executor=Executors.newFixedThreadPool(2)) {
+            var gate=new java.util.concurrent.CountDownLatch(1);
+            Callable<Boolean> change=()->{gate.await();try{assessmentRuns.update(id,null,token,progress,false);return true;}catch(org.springframework.web.server.ResponseStatusException e){assertThat(e.getStatusCode().value()).isEqualTo(409);return false;}};
+            var a=executor.submit(change);var b=executor.submit(change);gate.countDown();
+            assertThat(List.of(a.get(10,java.util.concurrent.TimeUnit.SECONDS),b.get(10,java.util.concurrent.TimeUnit.SECONDS))).containsExactlyInAnyOrder(true,false);
+        }
+        assertThatThrownBy(()->assessmentRuns.get(id,null,"b".repeat(64))).hasMessageContaining("404");
+        jdbc.update("UPDATE assessment_runs SET expires_at=now()-interval '1 day' WHERE id=?",id);
+        assertThatThrownBy(()->assessmentRuns.get(id,null,token)).hasMessageContaining("410");
+        assertThatThrownBy(()->assessmentRuns.claim(id,studentId(),token)).hasMessageContaining("410");
+    }
+
+    private UUID readyAttempt(UUID user,com.fasterxml.jackson.databind.JsonNode task) {
+        UUID id=submit(user,task,UUID.randomUUID().toString(),"Контракт. Сервис валидирует запрос, возвращает результат и сохраняет состояние. "+"Обоснование решения. ".repeat(100));
+        var claim=processor.claim().orElseThrow();
+        processor.finish(claim,ru.analystgym.review.MockReviewProvider.buildReview(claim.plan().input(),claim.tabs(),claim.plan().candidates()),Map.of());
+        return id;
+    }
+
+    @Test
+    void исправлениеЖалобыМеняетРезультатИСохраняетИсториюИУведомлениеАтомарно() throws Exception {
+        var task=publishedTask(staff("METHODIST"));var user=studentId();var actor=studentId();UUID id=readyAttempt(user,task);
+        var original=reviews.findById(id).orElseThrow().getResult().deepCopy();
+        var filed=quality.fileComplaint(user,id,"Не учтён критерий контракта",1);
+        assertThatThrownBy(()->quality.fileComplaint(user,id,"Повторная открытая жалоба",1)).hasMessageContaining("complaint_already_open");
+        assertThatThrownBy(()->quality.resolve(filed.getId(),"resolved","Только текст без исправления",filed.getVersion(),null,null,actor)).hasMessageContaining("complaint_action_required");
+        var corrected=quality.resolve(filed.getId(),"resolved","Критерий раскрыт, добавлено обоснование",filed.getVersion(),"correct",Map.of("contract","hit"),actor);
+        assertThat(corrected.getOutcome()).isEqualTo("corrected");
+        var current=reviews.findById(id).orElseThrow();
+        assertThat(current.getRevision()).isEqualTo(2);assertThat(current.getEngine()).isEqualTo("human-review/v1");
+        assertThat(current.getScore()).isGreaterThan(original.path("grade").path("score").asInt());
+        var history=revisionService.history(id);assertThat(history).hasSize(2);
+        assertThat(history.get(0).get("result")).isEqualTo(original);
+        assertThat(history.get(1).get("actorId")).isEqualTo(actor);
+        assertThat(quality.myComplaints(user).get(0).reviewSnapshot()).isEqualTo(original);
+        assertThat(quality.myComplaints(user).get(0).decisions()).hasSize(1);
+        assertThat(outbox.mine(user)).hasSize(2); // готовность исходного ревью + решение по жалобе
+        assertThatThrownBy(()->quality.fileComplaint(user,id,"Старый экран с первой оценкой",1)).hasMessageContaining("review_changed");
+    }
+
+    @Test
+    void повторнаяПроверкаЗакрываетЖалобуТолькоПослеГотовогоРезультата() throws Exception {
+        var task=publishedTask(staff("METHODIST"));var user=studentId();UUID id=readyAttempt(user,task);
+        var c=quality.fileComplaint(user,id,"Нужна независимая повторная проверка",1);
+        c=quality.resolve(c.getId(),"review","Проверить исходное решение повторно",c.getVersion(),"recheck",null,studentId());
+        UUID complaintId=c.getId();var child=c.getRecheckAttemptId();
+        assertThat(c.getStatus()).isEqualTo("review");assertThat(c.getOutcome()).isEqualTo("recheck_pending");
+        quality.reconcileRecheck(complaintId);assertThat(reviews.findById(id).orElseThrow().getRevision()).isEqualTo(1);
+        var claim=processor.claim().orElseThrow();assertThat(claim.attemptId()).isEqualTo(child);
+        processor.finish(claim,ru.analystgym.review.MockReviewProvider.buildReview(claim.plan().input(),claim.tabs(),claim.plan().candidates()),Map.of());
+        quality.reconcileRecheck(complaintId);quality.reconcileRecheck(complaintId);
+        var finalComplaint=quality.myComplaints(user).get(0);
+        assertThat(finalComplaint.status()).isEqualTo("resolved");assertThat(finalComplaint.outcome()).isEqualTo("rechecked");
+        assertThat(reviews.findById(id).orElseThrow().getRevision()).isEqualTo(2);
+        assertThat(revisionService.history(id)).hasSize(2);
+        assertThat(finalComplaint.decisions()).hasSize(2);
+    }
+
+    @Test
+    void ошибкаПовторнойПроверкиОставляетЖалобуВРаботе() throws Exception {
+        var task=publishedTask(staff("METHODIST"));var user=studentId();UUID id=readyAttempt(user,task);
+        var c=quality.fileComplaint(user,id,"Повторная проверка решения",1);
+        c=quality.resolve(c.getId(),"review","Проверить решение ещё раз по рубрике",c.getVersion(),"recheck",null,studentId());
+        var claim=processor.claim().orElseThrow();processor.fail(claim,"provider_unavailable",false);
+        quality.reconcileRecheck(c.getId());
+        assertThat(quality.myComplaints(user).get(0).outcome()).isEqualTo("recheck_failed");
+        assertThat(quality.myComplaints(user).get(0).status()).isEqualTo("review");
+        assertThat(reviews.findById(id).orElseThrow().getRevision()).isEqualTo(1);
+    }
+
+    @Test
+    void письмоПовторяетсяПослеSMTPСбояБезПовторногоРешенияЖалобы() throws Exception {
+        var user=studentId();outbox.enqueue(user,"local@example.com","mail-test","Тема","Текст","/account.html");
+        outbox.enqueue(user,"local@example.com","mail-test","Тема","Текст","/account.html");
+        var mail=org.mockito.Mockito.mock(org.springframework.mail.javamail.JavaMailSender.class);
+        org.mockito.Mockito.doThrow(new org.springframework.mail.MailSendException("SMTP недоступен")).doNothing().when(mail).send(org.mockito.ArgumentMatchers.any(org.springframework.mail.SimpleMailMessage.class));
+        var delivery=new ru.analystgym.notify.service.NotificationDelivery(outbox,mail,"sender@example.com");
+        try {
+            delivery.sendNext();assertThat(outbox.mine(user).get(0).get("emailStatus")).isEqualTo("pending");
+            assertThat(outbox.claim()).isEmpty();
+            jdbc.update("UPDATE user_notifications SET next_run_at=now()-interval '1 second' WHERE user_id=?",user);
+            delivery.sendNext();assertThat(outbox.mine(user)).hasSize(1);
+            assertThat(outbox.mine(user).get(0).get("emailStatus")).isEqualTo("sent");
+            org.mockito.Mockito.verify(mail,org.mockito.Mockito.times(2)).send(org.mockito.ArgumentMatchers.any(org.springframework.mail.SimpleMailMessage.class));
+        } finally {delivery.close();}
     }
 
     private UUID submit(UUID user, com.fasterxml.jackson.databind.JsonNode task, String key, String text) {
@@ -560,7 +697,7 @@ class SessionIntegrationTest {
         review.setResult(json.createObjectNode()); review.setPromptVersions(json.createObjectNode());
         reviews.saveAndFlush(review);
         var filed = bodyOf(mvc.perform(post("/api/complaints").with(csrf()).cookie(student).contentType("application/json")
-                .content(json.writeValueAsString(Map.of("attemptId", attempt.getId(), "reason", "Не учтён критерий контракта API"))))
+                .content(json.writeValueAsString(Map.of("attemptId", attempt.getId(), "reason", "Не учтён критерий контракта API", "reviewRevision",1))))
                 .andExpect(status().isCreated()).andReturn());
         var reviewer = staff("REVIEWER");
         var queue = bodyOf(mvc.perform(get("/api/admin/complaints?status=all").cookie(reviewer)).andReturn());
