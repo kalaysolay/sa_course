@@ -25,7 +25,8 @@
   let tagCategory = 'all';
   let tagShowHidden = false;
 
-  document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('DOMContentLoaded', async () => {
+    if (window.Api) await Api.ready;
     AppUI.mountHeader('admin');
     AppUI.mountFooter();
     dict = Store.dictionaries();

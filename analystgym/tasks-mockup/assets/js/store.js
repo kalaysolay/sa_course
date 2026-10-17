@@ -5,9 +5,12 @@
    ============================================================ */
 
 (function () {
-  const KEY = 'sa-trainer:v1';
+  const PREFIX = 'sa-trainer:v2:';
+  let owner = null;
   let backend = 'localStorage';
-  let memory = null;
+  const memory = new Map();
+
+  function key() { return PREFIX + (owner || 'guest'); }
 
   function blank() {
     return {
@@ -26,28 +29,30 @@
   }
 
   function read() {
+    if (memory.has(key())) return memory.get(key());
     try {
-      const raw = window.localStorage.getItem(KEY);
+      const raw = window.localStorage.getItem(key());
       if (!raw) return blank();
       const parsed = JSON.parse(raw);
       return Object.assign(blank(), parsed);
     } catch (error) {
       backend = 'memory';
-      if (!memory) memory = blank();
-      return memory;
+      return memory.get(key()) || blank();
     }
   }
 
   function write(state) {
     try {
-      window.localStorage.setItem(KEY, JSON.stringify(state));
+      window.localStorage.setItem(key(), JSON.stringify(state));
+      memory.set(key(), state);
     } catch (error) {
       backend = 'memory';
-      memory = state;
+      memory.set(key(), state);
     }
   }
 
-  let state = read();
+  // До проверки /me не читаем даже гостевые данные: они могут мигнуть на странице чужого аккаунта.
+  let state = blank();
 
   /* Статусы задачи во внутреннем workflow издательства */
   const TASK_STATUSES = [
@@ -78,6 +83,47 @@
   }
 
   const Store = {
+    /** Переключение выполняется после проверки сервера, а не по сохранённому в браузере userId. */
+    setUser(userId) {
+      owner = userId ? String(userId) : null;
+      state = read();
+    },
+
+    owner() { return owner; },
+
+    dismissGuestImport() {
+      state.guestImportOffered = true;
+      write(state);
+    },
+
+    /** Предлагаем переносить только явно гостевые v2-черновики, старый общий v1 не присваиваем. */
+    guestDraftCount() {
+      if (!owner) return 0;
+      try {
+        const guest = memory.get(PREFIX + 'guest') || JSON.parse(window.localStorage.getItem(PREFIX + 'guest') || '{}');
+        return Object.keys(guest.solutions || {}).length;
+      } catch (error) {
+        return Object.keys((memory.get(PREFIX + 'guest') || {}).solutions || {}).length;
+      }
+    },
+
+    importGuestDrafts() {
+      if (!owner) return 0;
+      let guest;
+      try { guest = memory.get(PREFIX + 'guest') || JSON.parse(window.localStorage.getItem(PREFIX + 'guest') || '{}'); }
+      catch (error) { guest = memory.get(PREFIX + 'guest') || {}; }
+      let count = 0;
+      Object.entries(guest.solutions || {}).forEach(([id, solution]) => {
+        if (state.solutions[id]) return; // Конфликтующий гостевой черновик остаётся доступен гостю.
+        state.solutions[id] = JSON.parse(JSON.stringify(solution));
+        delete guest.solutions[id];
+        count++;
+      });
+      write(state);
+      memory.set(PREFIX + 'guest', guest);
+      try { window.localStorage.setItem(PREFIX + 'guest', JSON.stringify(guest)); } catch (error) { /* память */ }
+      return count;
+    },
     get backend() { return backend; },
 
     all() { return state; },
@@ -193,8 +239,8 @@
       return state.solutions[taskId] || null;
     },
 
-    saveSolution(taskId, solution) {
-      state.solutions[taskId] = Object.assign({}, solution, { updatedAt: Date.now() });
+    saveSolution(taskId, solution, touch = true) {
+      state.solutions[taskId] = Object.assign({}, solution, touch ? { updatedAt: Date.now() } : {});
       write(state);
       return state.solutions[taskId];
     },

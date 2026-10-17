@@ -18,7 +18,11 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @EntityScan("ru.analystgym")
 public class AnalystGymApplication {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
+        if (args.length == 1 && "--bootstrap-admin".equals(args[0])) {
+            BootstrapAdminCommand.run(System.getenv());
+            return;
+        }
         SpringApplication.run(AnalystGymApplication.class, args);
     }
 }

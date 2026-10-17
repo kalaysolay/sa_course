@@ -9,7 +9,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -42,7 +41,6 @@ public class AuthController {
     private final AuthService auth;
     private final UserRepository users;
     private final JwtService jwt;
-    private final PasswordEncoder passwords;
     private final SessionCookies cookies;
     private final boolean googleEnabled;
 
@@ -50,13 +48,11 @@ public class AuthController {
             AuthService auth,
             UserRepository users,
             JwtService jwt,
-            PasswordEncoder passwords,
             SessionCookies cookies,
             @Value("${app.google.enabled:false}") boolean googleEnabled) {
         this.auth = auth;
         this.users = users;
         this.jwt = jwt;
-        this.passwords = passwords;
         this.cookies = cookies;
         this.googleEnabled = googleEnabled;
     }
@@ -70,7 +66,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<MeResponse> login(@Valid @RequestBody LoginRequest req) {
-        User user = users.findByEmail(req.email().trim().toLowerCase())
+        User user = users.findByEmail(req.email().trim().toLowerCase(java.util.Locale.ROOT))
                 .orElseThrow(AuthService.InvalidCredentialsException::new);
         AuthService.TokenPair pair = auth.login(req.email(), req.password());
         return withCookies(pair, HttpStatus.OK, toMe(user));
@@ -133,18 +129,9 @@ public class AuthController {
     public Map<String, String> changePassword(
             @RequestBody Map<String, String> body, Authentication authentication) {
         UUID userId = requireUser(authentication);
-        String current = body == null ? "" : body.getOrDefault("currentPassword", "");
-        String next = body == null ? "" : body.getOrDefault("newPassword", "");
-        if (next.length() < 8 || next.length() > 100) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "bad password");
-        }
-        User user = users.findById(userId).orElseThrow(AuthService.InvalidSessionException::new);
-        if (!passwords.matches(current, user.getPasswordHash())) {
-            throw new AuthService.InvalidSessionException();
-        }
-        user.setPasswordHash(passwords.encode(next));
-        users.save(user);
-        auth.logoutAll(userId);
+        String current = body == null ? "" : body.get("currentPassword");
+        String next = body == null ? "" : body.get("newPassword");
+        auth.changePassword(userId, current, next);
         return Map.of("status", "ok");
     }
 
@@ -218,7 +205,7 @@ public class AuthController {
 
     private UUID userIdOf(String accessToken) {
         // Access — свежий JWT из issuePair: подпись обязана сойтись (иначе баг наш, не клиента).
-        return jwt.parse(accessToken)
+        return jwt.parseAccess(accessToken)
                 .map(c -> UUID.fromString(c.getSubject()))
                 .orElseThrow(AuthService.InvalidSessionException::new);
     }

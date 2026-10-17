@@ -21,8 +21,7 @@ nano deploy/.env
 ```
 
 Заполнить обязательно: `POSTGRES_PASSWORD`, `APP_JWT_SECRET`
-(`openssl rand -hex 32`, минимум 32 символа), `APP_ADMIN_EMAILS`
-(свой email — первый вход даст SUPERADMIN), `APP_DOMAIN`,
+(`openssl rand -hex 32`, минимум 32 символа), `APP_DOMAIN`,
 `APP_SITE_BASE_URL`, `APP_COOKIES_SECURE=true`.
 `.env` в git не коммитится. Остальные группы — ниже, по мере подключения.
 
@@ -34,8 +33,19 @@ docker compose -f deploy/docker-compose.yml logs -f app  # до "Started Analyst
 curl https://analystgym.ru/api/health                     # {"status":"UP"}
 ```
 
-Дальше: зарегистрироваться на сайте с email из `APP_ADMIN_EMAILS` —
-станете SUPERADMIN, роли остальным — через `PUT /api/admin/users/{id}/role`.
+После применения миграций создать первого администратора отдельной командой.
+В текущем терминале задать `APP_BOOTSTRAP_ADMIN_EMAIL` и
+`APP_BOOTSTRAP_ADMIN_PASSWORD` (пароль не передавать аргументом командной строки), затем:
+
+```bash
+docker compose -f deploy/docker-compose.yml exec -e APP_BOOTSTRAP_ADMIN_EMAIL -e APP_BOOTSTRAP_ADMIN_PASSWORD app java -jar /app/app.jar --bootstrap-admin
+unset APP_BOOTSTRAP_ADMIN_PASSWORD APP_BOOTSTRAP_ADMIN_EMAIL
+```
+
+Команда использует APP_DB_* контейнера, не запускает HTTP/воркеры и отказывается
+повышать существующий аккаунт или создавать второго SUPERADMIN. Для остальных
+сотрудников — `PUT /api/admin/users/{id}/role`. Старый APP_ADMIN_EMAILS не действует.
+После обновления с V11 потребуется повторный вход пользователей.
 
 ## 3. Подключения (каждое — независимо, всё через env)
 

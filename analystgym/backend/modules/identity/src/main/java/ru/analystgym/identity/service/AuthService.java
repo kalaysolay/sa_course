@@ -5,8 +5,6 @@ import java.time.Instant;
 import java.util.HexFormat;
 import java.util.List;
 import java.util.UUID;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -18,7 +16,7 @@ import ru.analystgym.identity.repo.PasswordResetRepository;
 import ru.analystgym.identity.repo.RefreshTokenRepository;
 import ru.analystgym.identity.repo.UserRepository;
 import ru.analystgym.identity.security.JwtService;
-import ru.analystgym.identity.security.Roles;
+import ru.analystgym.identity.security.PasswordPolicy;
 import ru.analystgym.notify.service.NotificationService;
 
 /**
@@ -29,8 +27,6 @@ import ru.analystgym.notify.service.NotificationService;
 @Service
 public class AuthService {
 
-    private static final Logger log = LoggerFactory.getLogger(AuthService.class);
-
     private final UserRepository users;
     private final RefreshTokenRepository sessions;
     private final PasswordResetRepository resets;
@@ -38,8 +34,6 @@ public class AuthService {
     private final JwtService jwt;
     private final long refreshTtlSeconds;
     private final NotificationService notify;
-    /** Bootstrap суперадминов: email из app.admin-emails (нижний регистр). */
-    private final java.util.Set<String> adminEmails;
     private final SecureRandom random = new SecureRandom();
 
     public AuthService(
@@ -49,7 +43,6 @@ public class AuthService {
             PasswordEncoder passwords,
             JwtService jwt,
             @Value("${app.jwt.refresh-ttl-seconds:2592000}") long refreshTtlSeconds,
-            @Value("${app.admin-emails:}") String adminEmailsCsv,
             NotificationService notify) {
         this.users = users;
         this.sessions = sessions;
@@ -58,14 +51,6 @@ public class AuthService {
         this.jwt = jwt;
         this.refreshTtlSeconds = refreshTtlSeconds;
         this.notify = notify;
-        java.util.Set<String> admins = new java.util.HashSet<>();
-        for (String raw : adminEmailsCsv.split(",")) {
-            String email = raw.trim().toLowerCase(java.util.Locale.ROOT);
-            if (!email.isEmpty()) {
-                admins.add(email);
-            }
-        }
-        this.adminEmails = java.util.Set.copyOf(admins);
     }
 
     /** Пара токенов для установки в куки. Access — JWT, refresh — JWT + запись в БД. */
@@ -74,25 +59,23 @@ public class AuthService {
 
     @Transactional
     public User register(String email, String rawPassword, String name) {
+        PasswordPolicy.validate(rawPassword);
         String norm = normalize(email);
         users.findByEmail(norm).ifPresent(u -> {
             throw new EmailTakenException();
         });
         User user = User.of(norm, passwords.encode(rawPassword), name.trim());
-        // Первый вход команды: email из bootstrap-списка сразу суперадмин.
-        if (adminEmails.contains(norm)) {
-            user.setRole(Roles.SUPERADMIN);
-        }
         return users.save(user);
     }
 
     @Transactional
     public TokenPair login(String email, String rawPassword) {
-        User user = users.findByEmail(normalize(email)).orElseThrow(InvalidCredentialsException::new);
+        UUID userId = users.findIdByEmail(normalize(email)).orElseThrow(InvalidCredentialsException::new);
+        User user = lockUser(userId);
         if (!passwords.matches(rawPassword, user.getPasswordHash())) {
             throw new InvalidCredentialsException();
         }
-        return issuePair(user);
+        return issuePair(user, UUID.randomUUID());
     }
 
     /**
@@ -107,12 +90,11 @@ public class AuthService {
         User user = users.findByEmail(norm).orElse(null);
         if (user == null) {
             user = User.of(norm, passwords.encode("oauth-" + UUID.randomUUID()), name.trim());
-            if (adminEmails.contains(norm)) {
-                user.setRole(Roles.SUPERADMIN);
-            }
             users.save(user);
+        } else {
+            user = lockUser(user.getId());
         }
-        return new OAuthLogin(user, issuePair(user));
+        return new OAuthLogin(user, issuePair(user, UUID.randomUUID()));
     }
 
     /** Пользователь + свежая пара токенов для установки в куки. */
@@ -122,12 +104,16 @@ public class AuthService {
     /** Ротация: старый refresh отзывается, выдаётся новая пара (защита от переиспользования). */
     @Transactional
     public TokenPair refresh(String rawRefresh) {
+        var claims = jwt.parseRefresh(rawRefresh).orElseThrow(InvalidSessionException::new);
+        User user = lockUser(UUID.fromString(claims.getSubject()));
         RefreshToken session = sessions
                 .findByTokenHashAndRevokedFalse(TokenHash.sha256(rawRefresh))
                 .filter(s -> s.isAlive(Instant.now()))
+                .filter(s -> s.getSessionId().toString().equals(claims.get("sid", String.class)))
+                .filter(s -> user.getId().equals(s.getUser().getId()))
                 .orElseThrow(InvalidSessionException::new);
         session.revoke();
-        return issuePair(session.getUser());
+        return issuePair(user, session.getFamilyId());
     }
 
     @Transactional
@@ -135,13 +121,19 @@ public class AuthService {
         if (rawRefresh == null) {
             return;
         }
-        sessions.findByTokenHashAndRevokedFalse(TokenHash.sha256(rawRefresh))
-                .ifPresent(RefreshToken::revoke);
+        var claims = jwt.parseRefresh(rawRefresh).orElse(null);
+        if (claims == null) {
+            return;
+        }
+        lockUser(UUID.fromString(claims.getSubject()));
+        sessions.findById(TokenHash.sha256(rawRefresh)).ifPresent(session ->
+                sessions.findByFamilyIdAndRevokedFalse(session.getFamilyId()).forEach(RefreshToken::revoke));
     }
 
     /** «Выйти везде»: отзываем все живые сессии пользователя. */
     @Transactional
     public void logoutAll(UUID userId) {
+        lockUser(userId);
         List<RefreshToken> alive = sessions.findByUserIdAndRevokedFalse(userId);
         alive.forEach(RefreshToken::revoke);
     }
@@ -153,7 +145,9 @@ public class AuthService {
      */
     @Transactional
     public String requestReset(String email) {
-        User user = users.findByEmail(normalize(email)).orElseThrow(InvalidCredentialsException::new);
+        User found = users.findByEmail(normalize(email)).orElseThrow(InvalidCredentialsException::new);
+        User user = lockUser(found.getId());
+        resets.invalidateForUser(user.getId());
         String raw = randomToken();
         Instant expires = Instant.now().plusSeconds(3600);
         resets.save(new PasswordResetToken(TokenHash.sha256(raw), user, expires));
@@ -163,27 +157,49 @@ public class AuthService {
 
     @Transactional
     public void confirmReset(String rawToken, String newPassword) {
+        PasswordPolicy.validate(newPassword);
+        String tokenHash = TokenHash.sha256(rawToken == null ? "" : rawToken);
+        UUID userId = resets.userIdOf(tokenHash).orElseThrow(InvalidSessionException::new);
+        User user = lockUser(userId);
         PasswordResetToken reset = resets
-                .findByTokenHashAndUsedFalse(TokenHash.sha256(rawToken))
+                .findByTokenHashAndUsedFalse(tokenHash)
                 .filter(t -> t.isAlive(Instant.now()))
                 .orElseThrow(InvalidSessionException::new);
         reset.markUsed();
-        User user = reset.getUser();
         user.setPasswordHash(passwords.encode(newPassword));
+        resets.invalidateForUser(userId);
         // Смена пароля вышибает все сессии — угонщик с украденным refresh вылетает.
         logoutAll(user.getId());
     }
 
-    private TokenPair issuePair(User user) {
-        String access = jwt.accessToken(user.getId(), user.getRole());
-        String refresh = jwt.refreshToken(user.getId());
+    /** Смена пароля и отзыв всех сессий выполняются в одной транзакции. */
+    @Transactional
+    public void changePassword(UUID userId, String currentPassword, String newPassword) {
+        PasswordPolicy.validate(newPassword);
+        User user = lockUser(userId);
+        if (currentPassword == null || !passwords.matches(currentPassword, user.getPasswordHash())) {
+            throw new InvalidCredentialsException();
+        }
+        user.setPasswordHash(passwords.encode(newPassword));
+        resets.invalidateForUser(userId);
+        logoutAll(userId);
+    }
+
+    private TokenPair issuePair(User user, UUID familyId) {
+        UUID sessionId = UUID.randomUUID();
+        String access = jwt.accessToken(user.getId(), user.getRole(), sessionId);
+        String refresh = jwt.refreshToken(user.getId(), sessionId);
         Instant expires = Instant.now().plusSeconds(refreshTtlSeconds);
-        sessions.save(new RefreshToken(TokenHash.sha256(refresh), user, expires));
+        sessions.save(new RefreshToken(TokenHash.sha256(refresh), sessionId, familyId, user, expires));
         return new TokenPair(access, refresh);
     }
 
     private static String normalize(String email) {
-        return email == null ? "" : email.trim().toLowerCase();
+        return email == null ? "" : email.trim().toLowerCase(java.util.Locale.ROOT);
+    }
+
+    private User lockUser(UUID userId) {
+        return users.lockById(userId).orElseThrow(InvalidSessionException::new);
     }
 
     private String randomToken() {

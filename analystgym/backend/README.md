@@ -9,9 +9,21 @@ docker compose -f ../deploy/docker-compose.yml up --build
 # 3. Открыть: http://localhost:8080 (хаб), /api/health (JSON).
 ```
 
-Первый вход команды: задать `APP_ADMIN_EMAILS` в `deploy/.env`
-(или env при `bootRun`) и зарегистрироваться — станете SUPERADMIN,
-дальше роли раздаются через `PUT /api/admin/users/{id}/role`.
+Первого администратора создаёт отдельная серверная команда: задать
+`APP_DB_URL`, `APP_DB_USER`, `APP_DB_PASSWORD`, `APP_BOOTSTRAP_ADMIN_EMAIL`
+и `APP_BOOTSTRAP_ADMIN_PASSWORD` в окружении и выполнить
+`java -jar app/build/libs/app-0.1.0.jar --bootstrap-admin` после миграций БД.
+Команда не запускает HTTP/воркеры, отказывается повышать существующий аккаунт
+и не работает при наличии SUPERADMIN. После запуска удалить bootstrap-пароль
+из окружения. `APP_ADMIN_EMAILS` больше не используется. Следующие роли
+выдаются через `PUT /api/admin/users/{id}/role`.
+
+Проверки пакета безопасности: `./gradlew build :app:integrationTest`
+(для integrationTest нужен Docker) и
+`node --test ../tasks-mockup/tests/session.test.cjs`.
+При старом Testcontainers и новом Docker можно передать JVM-свойство
+`-Dapi.version=1.44` через `JAVA_TOOL_OPTIONS`; Docker endpoint берётся из
+активного контекста (`DOCKER_HOST` при необходимости).
 
 Локальная разработка без Docker: `./gradlew bootRun` (нужны JDK 21
 и запущенный postgres; redis коду не нужен — лимиты в памяти).

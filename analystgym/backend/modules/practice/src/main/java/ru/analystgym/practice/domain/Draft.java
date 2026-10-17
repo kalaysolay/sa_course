@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.Objects;
@@ -38,6 +39,14 @@ public class Draft {
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
+
+    @Version
+    private Long version;
+
+    /** Версия изменяется Hibernate при каждом успешном сохранении. */
+    public Long getVersion() {
+        return version;
+    }
 
     public Draft() {
     }

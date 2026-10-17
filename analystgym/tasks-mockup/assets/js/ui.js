@@ -200,7 +200,8 @@
         <button class="link-btn" type="button" data-logout>Выйти</button>`;
       const out = target.querySelector('[data-logout]');
       if (out) out.addEventListener('click', async () => {
-        try { await Api.logout(); } catch (error) { /* сессия и так мёртвая */ }
+        try { await Api.logout(); }
+        catch (error) { UI.toast('Не удалось завершить сессию. Повторите выход.', 'bad'); return; }
         window.location.reload();
       });
     };
@@ -208,6 +209,8 @@
     if (window.Api && Api.ready && typeof Api.ready.then === 'function') {
       Api.ready.then(paint).catch(paint);
     }
+    window.addEventListener('ag:auth-changed', paint);
+    window.addEventListener('ag:session-expired', paint);
   }
 
   UI.mountHeader = function (active, product) {
@@ -451,16 +454,22 @@
       document.body.append(backdrop);
       document.body.style.overflow = 'hidden';
 
+      let finished = false;
       const finish = (value) => {
+        if (finished) return;
+        finished = true;
+        document.removeEventListener('keydown', onKey);
         UI.closeModal();
         resolve(value);
       };
+      const dismiss = () => finish(opts.dismissValue === undefined ? false : opts.dismissValue);
+      function onKey(event) {
+        if (event.key === 'Escape') dismiss();
+      }
       backdrop.querySelector('[data-role="confirm"]').addEventListener('click', () => finish(true));
       backdrop.querySelector('[data-role="cancel"]').addEventListener('click', () => finish(false));
-      backdrop.addEventListener('click', (event) => { if (event.target === backdrop) finish(false); });
-      document.addEventListener('keydown', function onKey(event) {
-        if (event.key === 'Escape') { document.removeEventListener('keydown', onKey); finish(false); }
-      });
+      backdrop.addEventListener('click', (event) => { if (event.target === backdrop) dismiss(); });
+      document.addEventListener('keydown', onKey);
       setTimeout(() => backdrop.querySelector('[data-role="confirm"]').focus(), 40);
     });
   };

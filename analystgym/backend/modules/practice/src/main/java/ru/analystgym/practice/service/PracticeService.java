@@ -91,14 +91,17 @@ public class PracticeService {
     }
 
     @Transactional
-    public Instant saveDraft(UUID userId, String taskId, List<TabDto> tabs) {
+    public Draft saveDraft(UUID userId, String taskId, List<TabDto> tabs, Long expectedVersion) {
         publishedOrThrow(taskId);
         validateTabs(tabs);
         Draft draft = drafts.findById(new Draft.DraftId(userId, taskId)).orElseGet(Draft::new);
+        if (!java.util.Objects.equals(draft.getVersion(), expectedVersion)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "draft_conflict");
+        }
         draft.setUserId(userId);
         draft.setTaskId(taskId);
         draft.setTabs(mapper.valueToTree(tabs == null ? List.of() : tabs));
-        return drafts.save(draft).getUpdatedAt();
+        return drafts.saveAndFlush(draft);
     }
 
     @Transactional(readOnly = true)

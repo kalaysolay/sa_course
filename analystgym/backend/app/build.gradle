@@ -51,10 +51,35 @@ dependencies {
 tasks.register('syncMockup', Copy) {
     description = 'Копирует tasks-mockup в статику приложения.'
     from("${rootDir}/../tasks-mockup") {
-        exclude 'server.py', 'check-mockup.py', 'scripts/**'
+        exclude 'server.py', 'check-mockup.py', 'scripts/**', 'tests/**'
     }
     into 'src/main/resources/static'
 }
 
 // Статика всегда свежая: сначала синхронизация, потом упаковка ресурсов.
 processResources.dependsOn syncMockup
+
+// Полные сценарии безопасности проверяются на отдельной PostgreSQL в Docker.
+sourceSets {
+    integrationTest {
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += sourceSets.main.output
+    }
+}
+configurations {
+    integrationTestImplementation.extendsFrom testImplementation
+    integrationTestRuntimeOnly.extendsFrom testRuntimeOnly
+}
+dependencies {
+    integrationTestImplementation 'org.testcontainers:junit-jupiter:1.20.4'
+    integrationTestImplementation 'org.testcontainers:postgresql:1.20.4'
+}
+tasks.register('integrationTest', Test) {
+    description = 'Сценарии сессий и черновиков с реальной PostgreSQL (нужен Docker).'
+    group = 'verification'
+    testClassesDirs = sourceSets.integrationTest.output.classesDirs
+    classpath = sourceSets.integrationTest.runtimeClasspath
+    // Docker 29 отклоняет старый API по умолчанию у закреплённого Testcontainers 1.20.
+    systemProperty 'api.version', System.getProperty('api.version', '1.44')
+    shouldRunAfter test
+}

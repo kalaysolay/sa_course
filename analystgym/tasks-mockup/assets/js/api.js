@@ -20,10 +20,35 @@
     return null;
   }
 
+  let refreshPromise = null;
+  let accountChanged = false;
+
+  function changeUser(user, announce) {
+    const oldId = window.Store ? Store.owner() : (Api.user && Api.user.id);
+    const nextId = user ? String(user.id) : null;
+    if (oldId !== nextId) {
+      window.dispatchEvent(new Event('ag:before-account-change'));
+      if (window.Store) Store.setUser(nextId);
+    } else if (window.Store && !Api.initialized) {
+      Store.setUser(nextId);
+    }
+    Api.user = user;
+    Api.initialized = true;
+    if (announce) {
+      try { localStorage.setItem('analystgym:auth-owner', nextId || 'guest'); } catch (error) { /* память */ }
+    }
+    window.dispatchEvent(new Event('ag:auth-changed'));
+  }
+
+  function accountError() {
+    const error = new Error('Аккаунт изменился. Обновите страницу перед продолжением.');
+    error.status = 409;
+    error.body = { error: 'account_changed' };
+    return error;
+  }
+
   async function getJson(path) {
-    const response = await fetch(path, { credentials: 'same-origin' });
-    if (!response.ok) throw new Error('GET ' + path + ' -> ' + response.status);
-    return response.json();
+    return requestJson('GET', path);
   }
 
   async function postJson(path, body, extraHeaders) {
@@ -35,21 +60,35 @@
   }
 
   async function sendJson(method, path, body, extraHeaders) {
-    // CSRF: сервер пишет readable-куку XSRF-TOKEN только когда токен материализован
-    // (GET /api/auth/csrf ниже), на обычных GET куки нет — токен ленивый.
-    // Каждый не-GET обязан вернуть значение куки заголовком X-XSRF-TOKEN.
-    await ensureCsrf();
-    const headers = Object.assign({}, JSON_HEADERS, extraHeaders || {});
-    // Заголовок — маскированный токен из тела /api/auth/csrf (см. ensureCsrf),
-    // запасной вариант — сырая кука (с XOR-хендлером не сработает, но и не навредит).
-    const token = csrfToken || cookie('XSRF-TOKEN');
-    if (token) headers['X-XSRF-TOKEN'] = token;
+    return requestJson(method, path, body, extraHeaders);
+  }
+
+  // Повторяем только запрос, отклонённый с 401: транспортные ошибки мутаций не ретраим.
+  async function requestJson(method, path, body, extraHeaders, recover = true, expectedUser) {
+    if (accountChanged) throw accountError();
+    const authPath = path.startsWith('/api/auth/');
+    const owner = expectedUser === undefined ? (Api.user && String(Api.user.id)) : expectedUser;
+    if (method !== 'GET') await ensureCsrf();
+    const headers = Object.assign({}, method === 'GET' ? {} : JSON_HEADERS, extraHeaders || {});
+    if (owner && (!authPath || path === '/api/auth/profile' || path === '/api/auth/password/change')) {
+      headers['X-Account-ID'] = owner;
+    }
+    if (method !== 'GET') {
+      const token = csrfToken || cookie('XSRF-TOKEN');
+      if (token) headers['X-XSRF-TOKEN'] = token;
+    }
     const response = await fetch(path, {
-      method,
-      credentials: 'same-origin',
-      headers,
-      body: JSON.stringify(body || {})
+      method, credentials: 'same-origin', headers,
+      ...(method === 'GET' ? {} : { body: JSON.stringify(body || {}) }),
+      signal: AbortSignal.timeout(15000)
     });
+    const canRefresh = !authPath || path === '/api/auth/me' || path === '/api/auth/profile'
+      || path === '/api/auth/password/change';
+    if (response.status === 401 && recover && canRefresh) {
+      await refreshSession();
+      if (owner && (!Api.user || owner !== String(Api.user.id))) throw accountError();
+      return requestJson(method, path, body, extraHeaders, false, owner);
+    }
     if (!response.ok) {
       const error = new Error(method + ' ' + path + ' -> ' + response.status);
       error.status = response.status;
@@ -70,6 +109,65 @@
       return {};
     }
   }
+
+  async function refreshSession() {
+    if (refreshPromise) return refreshPromise;
+    const refresh = async () => {
+      // Другая вкладка могла уже обновить общие куки, пока мы ждали Web Lock.
+      let probe = await fetch('/api/auth/me', { credentials: 'same-origin', signal: AbortSignal.timeout(15000) });
+      let user;
+      if (probe.ok) user = await probe.json();
+      else {
+        try { user = await requestJson('POST', '/api/auth/refresh', {}, null, false); }
+        catch (error) {
+          if (error.status !== 401) throw error;
+          // Запасной путь для браузеров без Web Locks: сначала проверяем результат соседней вкладки.
+          probe = await fetch('/api/auth/me', { credentials: 'same-origin', signal: AbortSignal.timeout(15000) });
+          if (!probe.ok) {
+            Api.user = null;
+            window.dispatchEvent(new Event('ag:session-expired'));
+            throw error;
+          }
+          user = await probe.json();
+        }
+      }
+      const owner = window.Store ? Store.owner() : (Api.user && String(Api.user.id));
+      if (owner && owner !== String(user.id)) {
+        accountChanged = true;
+        window.dispatchEvent(new Event('ag:before-account-change'));
+        window.location.reload();
+        throw accountError();
+      }
+      changeUser(user, true);
+      return user;
+    };
+    refreshPromise = (window.navigator && navigator.locks
+      ? navigator.locks.request('analystgym:refresh', refresh) : refresh())
+      .finally(() => { refreshPromise = null; });
+    return refreshPromise;
+  }
+
+  async function offerGuestDrafts() {
+    if (!Api.user || !window.Store || !Store.guestDraftCount() || Store.all().guestImportOffered) return;
+    if (document.readyState === 'loading') await new Promise(resolve => document.addEventListener('DOMContentLoaded', resolve, { once: true }));
+    if (!window.AppUI) return;
+    Store.dismissGuestImport();
+    const accept = await AppUI.confirm({
+      title: 'Перенести гостевые черновики?',
+      text: 'Найдено черновиков: ' + Store.guestDraftCount() + '. Совпадающие черновики аккаунта сохранятся; гостевые останутся отдельно.',
+      confirmText: 'Перенести', cancelText: 'Оставить отдельно'
+    });
+    if (accept) Store.importGuestDrafts();
+  }
+
+  window.addEventListener('storage', event => {
+    if (event.key !== 'analystgym:auth-owner' || !Api.initialized) return;
+    const current = Api.user ? String(Api.user.id) : 'guest';
+    if (event.newValue === current) return;
+    accountChanged = true;
+    window.dispatchEvent(new Event('ag:before-account-change'));
+    window.location.reload();
+  });
 
   /* Прайминг CSRF перед КАЖДЫМ POST: сервер при некоторых условиях чистит куку
      XSRF-TOKEN на промежутке между запросами (session-стратегия + stateless-JWT),
@@ -134,7 +232,16 @@
     window.SA_DATA.collections = serverCollections.map((c) => Object.assign({}, c, { name: c.title }));
   }
 
-  const ready = (async () => {
+  const ready = Promise.resolve().then(async () => {
+    const fileDemo = window.location.protocol === 'file:';
+    Api.mode = fileDemo ? 'embedded' : 'unavailable';
+    if (!fileDemo) {
+      try { await getJson('/api/health'); Api.mode = 'server'; }
+      catch (error) {
+        // Отсутствие API у статического сервера — демо. Сбой доступного API демо не включает.
+        if (error.status === 404) Api.mode = 'embedded';
+      }
+    }
     try {
       const [dict, tasks, collections] = await Promise.all([
         getJson('/api/dictionaries'),
@@ -144,44 +251,49 @@
       replaceDictionaries(dict);
       mergeTasks(tasks);
       replaceCollections(collections);
-      Api.mode = 'server';
     } catch (error) {
-      // Сервера нет рядом — остаёмся на встроенных данных, это штатно для макета.
-      Api.mode = 'embedded';
+      // Ошибка каталога не меняет ранее определённый режим сервера.
     }
     try {
-      Api.user = await Api.me();
+      changeUser(Api.mode === 'server' ? await Api.me() : null, Api.mode === 'server');
     } catch (error) {
-      Api.user = null;
+      changeUser(null, false);
     }
+    await offerGuestDrafts();
     return Api.mode;
-  })();
+  });
 
   const Api = {
-    mode: 'embedded',
+    mode: 'unavailable',
     user: null,
+    initialized: false,
     ready,
 
     get: getJson,
     post: postJson,
 
+    // Bcrypt ограничивает байты UTF-8, а не число символов кириллицы.
+    validPassword(value) {
+      return typeof value === 'string' && value.trim().length > 0 && value.length >= 8
+        && new TextEncoder().encode(value).length <= 72;
+    },
+
     /* ---------- вход (куки ставит сервер, сюда токены не возвращаются) ---------- */
     async register(email, password, name) {
-      Api.user = await postJson('/api/auth/register', { email, password, name });
+      changeUser(await postJson('/api/auth/register', { email, password, name }), true);
+      await offerGuestDrafts();
       return Api.user;
     },
 
     async login(email, password) {
-      Api.user = await postJson('/api/auth/login', { email, password });
+      changeUser(await postJson('/api/auth/login', { email, password }), true);
+      await offerGuestDrafts();
       return Api.user;
     },
 
     async logout() {
-      try {
-        await postJson('/api/auth/logout', {});
-      } finally {
-        Api.user = null;
-      }
+      await postJson('/api/auth/logout', {});
+      changeUser(null, true);
     },
 
     async me() {
@@ -195,8 +307,8 @@
       return Api.mode === 'server' && !!Api.user;
     },
 
-    async saveDraft(taskId, tabs) {
-      return putJson('/api/tasks/' + encodeURIComponent(taskId) + '/draft', { tabs: tabs || [] });
+    async saveDraft(taskId, tabs, version) {
+      return putJson('/api/tasks/' + encodeURIComponent(taskId) + '/draft', { tabs: tabs || [], version: version ?? null });
     },
 
     async getDraft(taskId) {
@@ -313,7 +425,10 @@
     },
 
     async changePassword(currentPassword, newPassword) {
-      return postJson('/api/auth/password/change', { currentPassword, newPassword });
+      const result = await postJson('/api/auth/password/change', { currentPassword, newPassword });
+      Api.user = null;
+      window.dispatchEvent(new Event('ag:session-expired'));
+      return result;
     },
 
     async myAttempts(limit) {

@@ -32,3 +32,10 @@ jobs:
 
       - name: Build
         run: ./gradlew build --no-daemon
+
+      - name: Session integration tests (PostgreSQL)
+        run: ./gradlew :app:integrationTest --no-daemon
+
+      - name: Browser session logic
+        working-directory: analystgym/tasks-mockup
+        run: node --test tests/session.test.cjs

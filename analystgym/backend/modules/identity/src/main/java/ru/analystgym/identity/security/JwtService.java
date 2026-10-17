@@ -38,10 +38,13 @@ public class JwtService {
     }
 
     /** Короткоживущий токен для API (15 минут по умолчанию). */
-    public String accessToken(UUID userId, String role) {
+    public String accessToken(UUID userId, String role, UUID sessionId) {
         Instant now = Instant.now();
         return Jwts.builder()
                 .subject(userId.toString())
+                .id(UUID.randomUUID().toString())
+                .claim("type", "access")
+                .claim("sid", sessionId.toString())
                 .claim("role", role)
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(now.plusSeconds(accessTtlSeconds)))
@@ -50,10 +53,13 @@ public class JwtService {
     }
 
     /** Долгоживущий токен для httpOnly-cookie (30 дней); в БД храним его SHA-256. */
-    public String refreshToken(UUID userId) {
+    public String refreshToken(UUID userId, UUID sessionId) {
         Instant now = Instant.now();
         return Jwts.builder()
                 .subject(userId.toString())
+                .id(UUID.randomUUID().toString())
+                .claim("type", "refresh")
+                .claim("sid", sessionId.toString())
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(now.plusSeconds(refreshTtlSeconds)))
                 .signWith(key)
@@ -64,14 +70,29 @@ public class JwtService {
         return refreshTtlSeconds;
     }
 
-    /** Проверяет подпись и срок; любую проблему — в Optional.empty (401 решает фильтр). */
-    public Optional<Claims> parse(String token) {
+    /** Принимает только access: refresh и старые токены без назначения запрещены. */
+    public Optional<Claims> parseAccess(String token) {
+        return parse(token, "access");
+    }
+
+    /** Принимает только refresh с корректными идентификаторами пользователя и сессии. */
+    public Optional<Claims> parseRefresh(String token) {
+        return parse(token, "refresh");
+    }
+
+    private Optional<Claims> parse(String token, String type) {
         try {
             Claims claims = Jwts.parser()
                     .verifyWith(key)
                     .build()
                     .parseSignedClaims(token)
                     .getPayload();
+            if (!type.equals(claims.get("type")) || claims.getId() == null
+                    || claims.getSubject() == null || claims.get("sid") == null) {
+                return Optional.empty();
+            }
+            UUID.fromString(claims.getSubject());
+            UUID.fromString(claims.get("sid", String.class));
             return Optional.of(claims);
         } catch (JwtException | IllegalArgumentException e) {
             return Optional.empty();

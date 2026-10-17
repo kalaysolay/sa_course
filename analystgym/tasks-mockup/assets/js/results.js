@@ -9,7 +9,8 @@
   let filterCompetency = 'all';
   let showOnlyWrong = false;
 
-  document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('DOMContentLoaded', async () => {
+    if (window.Api) await Api.ready;
     AppUI.mountHeader('assessment');
     AppUI.mountFooter();
 

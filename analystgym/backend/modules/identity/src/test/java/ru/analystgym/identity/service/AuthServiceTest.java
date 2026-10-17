@@ -45,12 +45,7 @@ class AuthServiceTest {
     JwtService jwt = new JwtService("test-secret-0123456789abcdef-test", 900, 2592000);
 
     AuthService auth() {
-        return new AuthService(users, sessions, resets, passwords, jwt, 2592000, "",
-                mock(ru.analystgym.notify.service.NotificationService.class));
-    }
-
-    AuthService authWithAdmins(String csv) {
-        return new AuthService(users, sessions, resets, passwords, jwt, 2592000, csv,
+        return new AuthService(users, sessions, resets, passwords, jwt, 2592000,
                 mock(ru.analystgym.notify.service.NotificationService.class));
     }
 
@@ -81,19 +76,22 @@ class AuthServiceTest {
     void входВыдаётПаруТокенов() {
         User user = User.of("user@example.com", passwords.encode("password123"), "Тест");
         giveId(user);
-        when(users.findByEmail("user@example.com")).thenReturn(Optional.of(user));
+        when(users.findIdByEmail("user@example.com")).thenReturn(Optional.of(user.getId()));
+        when(users.lockById(user.getId())).thenReturn(Optional.of(user));
 
         AuthService.TokenPair pair = auth().login("user@example.com", "password123");
 
         assertThat(pair.access()).isNotBlank();
         assertThat(pair.refresh()).isNotBlank();
-        assertThat(jwt.parse(pair.access())).isPresent();
+        assertThat(jwt.parseAccess(pair.access())).isPresent();
     }
 
     @Test
     void неверныйПарольНеУточняетЧтоИменноНеТак() {
         User user = User.of("user@example.com", passwords.encode("password123"), "Тест");
-        when(users.findByEmail("user@example.com")).thenReturn(Optional.of(user));
+        giveId(user);
+        when(users.findIdByEmail("user@example.com")).thenReturn(Optional.of(user.getId()));
+        when(users.lockById(user.getId())).thenReturn(Optional.of(user));
 
         assertThatThrownBy(() -> auth().login("user@example.com", "wrong-pass"))
                 .isInstanceOf(AuthService.InvalidCredentialsException.class);
@@ -101,7 +99,7 @@ class AuthServiceTest {
 
     @Test
     void несуществующийEmailДаётТоЖеИсключениеЧтоИНеверныйПароль() {
-        when(users.findByEmail("ghost@example.com")).thenReturn(Optional.empty());
+        when(users.findIdByEmail("ghost@example.com")).thenReturn(Optional.empty());
 
         // Одинаковый ответ на обе ситуации — не раскрываем, какие email зарегистрированы.
         assertThatThrownBy(() -> auth().login("ghost@example.com", "whatever"))
@@ -109,14 +107,15 @@ class AuthServiceTest {
     }
 
     @Test
-    void bootstrapEmailСразуСуперадмин() {
+    void публичнаяРегистрацияНикогдаНеВыдаётСуперадмина() {
+        // Знание адреса владельца не должно давать административные права.
         when(users.findByEmail("boss@example.com")).thenReturn(Optional.empty());
         when(users.save(any(User.class))).thenAnswer(call -> call.getArgument(0));
 
-        User saved = authWithAdmins("boss@example.com, other@example.com")
+        User saved = auth()
                 .register("Boss@Example.com", "password123", "Босс");
 
-        assertThat(saved.getRole()).isEqualTo("SUPERADMIN");
+        assertThat(saved.getRole()).isEqualTo("STUDENT");
     }
 
     @Test
@@ -124,7 +123,7 @@ class AuthServiceTest {
         when(users.findByEmail("user@example.com")).thenReturn(Optional.empty());
         when(users.save(any(User.class))).thenAnswer(call -> call.getArgument(0));
 
-        User saved = authWithAdmins("boss@example.com").register("user@example.com", "password123", "Тест");
+        User saved = auth().register("user@example.com", "password123", "Тест");
 
         assertThat(saved.getRole()).isEqualTo("STUDENT");
     }
@@ -152,6 +151,7 @@ class AuthServiceTest {
         User existing = User.of("g@example.com", passwords.encode("password123"), "Старожил");
         giveId(existing);
         when(users.findByEmail("g@example.com")).thenReturn(Optional.of(existing));
+        when(users.lockById(existing.getId())).thenReturn(Optional.of(existing));
 
         AuthService.OAuthLogin login = auth().oauthLogin("g@example.com", "Другое имя");
 

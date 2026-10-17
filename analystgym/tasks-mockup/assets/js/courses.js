@@ -27,7 +27,8 @@
     return course.price ? 'Перейти' : 'Начать бесплатно';
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('DOMContentLoaded', async () => {
+    if (window.Api) await Api.ready;
     AppUI.mountHeader('courses', 'course');
     AppUI.mountFooter('course');
 

@@ -38,6 +38,10 @@ public class RateLimitInterceptor implements HandlerInterceptor {
         String bucket = null;
         if ("/api/auth/login".equals(path)) {
             bucket = "login";
+        } else if ("/api/auth/register".equals(path)) {
+            bucket = "register";
+        } else if (path.startsWith("/api/auth/password/")) {
+            bucket = "reset";
         } else if ("/api/attempts".equals(path)) {
             bucket = "submit";
         } else if ("/api/assessment/submissions".equals(path)) {
@@ -66,9 +70,8 @@ public class RateLimitInterceptor implements HandlerInterceptor {
         if (auth != null && auth.getPrincipal() instanceof UUID userId) {
             return "u:" + userId;
         }
-        String forwarded = request.getHeader("X-Forwarded-For");
-        String ip = forwarded != null && !forwarded.isBlank()
-                ? forwarded.split(",")[0].trim() : request.getRemoteAddr();
+        // Прокси-заголовки разбирает контейнер с проверкой доверенных прокси, не клиентский ввод.
+        String ip = request.getRemoteAddr();
         return "ip:" + ip;
     }
 }

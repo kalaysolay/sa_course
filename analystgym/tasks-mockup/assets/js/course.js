@@ -17,7 +17,8 @@
   let lessonView = 'lecture';
   let mode = 'lesson';
 
-  document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('DOMContentLoaded', async () => {
+    if (window.Api) await Api.ready;
     AppUI.mountHeader('courses', 'course');
     AppUI.mountFooter('course');
 

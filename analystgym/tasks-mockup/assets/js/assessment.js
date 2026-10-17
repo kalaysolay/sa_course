@@ -16,7 +16,8 @@
 
   const el = {};
 
-  document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('DOMContentLoaded', async () => {
+    if (window.Api) await Api.ready;
     AppUI.mountHeader('assessment');
     AppUI.mountFooter();
 

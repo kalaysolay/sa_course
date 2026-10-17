@@ -16,7 +16,7 @@ class RateLimiterTest {
 
     /** Лимит 3/мин, часы двигаем вручную. */
     private RateLimiter limiterAt(AtomicReference<Instant> now) {
-        return new RateLimiter(new TickClock(now), 3, 3, 3, 3);
+        return new RateLimiter(new TickClock(now), 3, 3, 3, 3, 2, 1);
     }
 
     @Test
@@ -55,6 +55,19 @@ class RateLimiterTest {
 
         assertThat(limiter.allow("submit", "u2")).isTrue();
         assertThat(limiter.allow("login", "u1")).isTrue();
+    }
+
+    @Test
+    void регистрацияИСбросИмеютОтдельныеЛимиты() {
+        // Спам ссылками сброса не должен съедать окно обычного входа.
+        var now = new AtomicReference<>(Instant.parse("2026-10-10T10:00:00Z"));
+        RateLimiter limiter = limiterAt(now);
+        assertThat(limiter.allow("reset", "ip1")).isTrue();
+        assertThat(limiter.allow("reset", "ip1")).isFalse();
+        assertThat(limiter.allow("register", "ip1")).isTrue();
+        assertThat(limiter.allow("register", "ip1")).isTrue();
+        assertThat(limiter.allow("register", "ip1")).isFalse();
+        assertThat(limiter.allow("login", "ip1")).isTrue();
     }
 
     /** Часы поверх атомарного instante (fixed даёт одно значение навсегда). */

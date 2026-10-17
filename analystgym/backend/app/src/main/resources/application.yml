@@ -1,13 +1,11 @@
 server:
   port: 8080
+  forward-headers-strategy: native
 
 # Версия сборки для /api/health. Значение по умолчанию — чтобы приложение
 # стартовало и без подстановки из Gradle (локальный запуск из IDE).
 app:
   version: 0.1.0-dev
-  # Bootstrap суперадминов (UC-A01): email через запятую; совпавший при
-  # регистрации сразу получает SUPERADMIN. Прод — только через env.
-  admin-emails: ${APP_ADMIN_EMAILS:}
   # Вход через Google (OAuth2 code flow): выключен без ключей.
   google:
     enabled: ${APP_GOOGLE_ENABLED:false}
@@ -57,6 +55,8 @@ review:
     max-tokens: 8000
 # Лимиты API (прод — через env при абузе).
 ratelimit:
+  register-per-min: ${RATELIMIT_REGISTER_PER_MIN:5}
+  reset-per-min: ${RATELIMIT_RESET_PER_MIN:5}
   login-per-min: ${RATELIMIT_LOGIN_PER_MIN:20}
   submit-per-min: ${RATELIMIT_SUBMIT_PER_MIN:10}
   assessment-per-min: ${RATELIMIT_ASSESSMENT_PER_MIN:5}

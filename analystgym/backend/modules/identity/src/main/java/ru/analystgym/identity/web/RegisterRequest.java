@@ -7,6 +7,6 @@ import jakarta.validation.constraints.Size;
 /** Заявка на регистрацию. Пароль сырой только здесь — дальше только bcrypt. */
 public record RegisterRequest(
         @Email @NotBlank String email,
-        @Size(min = 8, max = 100) String password,
-        @Size(min = 1, max = 100) String name) {
+        @NotBlank @Size(min = 8, max = 72) String password,
+        @NotBlank @Size(min = 1, max = 100) String name) {
 }

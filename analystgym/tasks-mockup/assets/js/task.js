@@ -25,6 +25,7 @@
   /* ==================== инициализация ==================== */
 
   document.addEventListener('DOMContentLoaded', async () => {
+    if (window.Api) await Api.ready;
     AppUI.mountHeader('catalog');
     AppUI.mountFooter();
 
@@ -46,8 +47,7 @@
 
     document.title = `${task.title} — AnalystGym`;
     solution = loadSolution();
-    // Серверный черновик подтягиваем до отрисовки — но только когда
-    // локального нет: локальные правки всегда важнее серверной копии.
+    // Версии согласуем до отрисовки, конфликт явно разрешает пользователь.
     await pullServerDraft();
     activeAttempt = Store.lastAttempt(task.id);
 
@@ -61,13 +61,28 @@
     const last = Store.lastAttempt(task.id);
     if (last && last.status === 'in_review') {
       /* ревью не завершилось (обновление страницы) — перезапускаем на сохранённом снимке */
-      if (last.server && window.Api && Api.serverPractice()) startServerPoll(last, { resume: true });
-      else startReview(last, { resume: true });
+      if (last.server) {
+        if (window.Api && Api.serverPractice()) startServerPoll(last, { resume: true });
+      } else if (!window.Api || Api.mode === 'embedded') startReview(last, { resume: true });
     } else if (last && last.status === 'reviewed') {
       showReview(last);
     }
 
     renderAttempts();
+  });
+
+  // Перед сменой аккаунта сохраняем редактор ещё в его прежнее пространство и гасим таймеры.
+  window.addEventListener('ag:before-account-change', () => {
+    clearTimeout(saveTimer);
+    clearTimeout(serverDraftTimer);
+    if (task && solution) Store.saveSolution(task.id, solution);
+    solution = null;
+    task = null;
+  });
+
+  window.addEventListener('ag:session-expired', () => {
+    clearTimeout(serverDraftTimer);
+    if (task && solution) Store.saveSolution(task.id, solution);
   });
 
   function loadSolution() {
@@ -86,7 +101,8 @@
   }
 
   function persist() {
-    Store.saveSolution(task.id, solution);
+    if (!task || !solution) return;
+    solution = Store.saveSolution(task.id, solution);
     paintSaved();
     scheduleServerDraft();
   }
@@ -95,27 +111,74 @@
      сервер нужен для другого устройства. Ошибки глотаем молча, иначе
      каждое движение курсора без сети давало бы тосты. */
   let serverDraftTimer = null;
+  let serverDraftLoaded = false;
+  let serverDraftVersion = null;
+  let serverDraftChain = Promise.resolve();
   function scheduleServerDraft() {
-    if (!window.Api || !Api.serverPractice()) return;
+    if (!task || !solution || !window.Api || !Api.serverPractice() || !serverDraftLoaded) return;
     clearTimeout(serverDraftTimer);
     serverDraftTimer = setTimeout(() => {
-      Api.saveDraft(task.id, solution.tabs).catch(() => {});
+      if (!task || !solution) return;
+      const id = task.id;
+      const owner = Store.owner();
+      const tabs = JSON.parse(JSON.stringify(solution.tabs));
+      serverDraftChain = serverDraftChain.then(async () => {
+        if (!task || !solution || Store.owner() !== owner || !serverDraftLoaded) return;
+        try {
+          const saved = await Api.saveDraft(id, tabs, serverDraftVersion);
+          if (!task || !solution || Store.owner() !== owner) return;
+          serverDraftVersion = saved.version;
+          solution.serverVersion = saved.version;
+          solution.serverUpdatedAt = saved.updatedAt;
+          Store.saveSolution(id, solution, false);
+        } catch (error) {
+          if (error.status === 409) {
+            serverDraftLoaded = false;
+            AppUI.toast('Черновик изменён в другой вкладке. Локальная копия сохранена; обновите страницу для выбора версии.', 'warn');
+          } else {
+            AppUI.toast('Черновик сохранён в браузере. Синхронизация с сервером пока не удалась.', 'warn');
+          }
+        }
+      });
     }, 1500);
   }
 
-  /* Серверный черновик забираем только когда локального нет вообще. */
+  /* Конфликт не решаем временем часов разных устройств: сравниваем серверные версии и спрашиваем. */
   async function pullServerDraft() {
     try {
       if (!window.Api) return;
       await Api.ready;
       if (!Api.serverPractice()) return;
-      if (Store.solution(task.id)) return;
       const draft = await Api.getDraft(task.id);
+      if (!draft || !task || !solution) return;
+      serverDraftVersion = draft.version ?? null;
+      serverDraftLoaded = true;
       const tabs = draft && Array.isArray(draft.tabs) ? draft.tabs.filter((t) => t && t.type) : [];
       if (!tabs.length) return;
+      const local = Store.solution(task.id);
+      if (local && JSON.stringify(local.tabs) !== JSON.stringify(tabs)) {
+        if (local.serverVersion === draft.version) return;
+        const keepLocal = await AppUI.confirm({
+          title: 'Найдены разные версии черновика',
+          text: 'В браузере: ' + (local.updatedAt ? new Date(local.updatedAt).toLocaleString('ru-RU') : 'дата неизвестна')
+            + '. На сервере: ' + (draft.updatedAt ? new Date(draft.updatedAt).toLocaleString('ru-RU') : 'дата неизвестна')
+            + '. Выберите, какую версию продолжить редактировать.',
+          confirmText: 'Продолжить локальную', cancelText: 'Загрузить серверную', dismissValue: null
+        });
+        if (keepLocal === null) {
+          serverDraftLoaded = false;
+          return; // Закрытие диалога не является согласием заменить локальную работу.
+        }
+        if (keepLocal) {
+          solution.serverVersion = draft.version;
+          return;
+        }
+      }
       const activeOk = tabs.some((t) => t.id && (!solution.activeTabId || t.id === solution.activeTabId));
-      solution = { tabs, activeTabId: activeOk && solution.activeTabId ? solution.activeTabId : tabs[0].id, updatedAt: null };
-      Store.saveSolution(task.id, solution);
+      solution = { tabs, activeTabId: activeOk && solution.activeTabId ? solution.activeTabId : tabs[0].id,
+        updatedAt: draft.updatedAt ? Date.parse(draft.updatedAt) : null,
+        serverVersion: draft.version, serverUpdatedAt: draft.updatedAt };
+      Store.saveSolution(task.id, solution, false);
     } catch (error) {
       /* сервера нет или черновика нет — остаёмся на стартовых вкладках */
     }
@@ -745,10 +808,25 @@
     });
   }
 
+  async function offerLogin() {
+    persist();
+    const next = 'task.html?id=' + encodeURIComponent(task.id);
+    if (await AppUI.confirm({ title: 'Войдите для серверного ревью',
+      text: 'Черновик сохранён в этом браузере. После входа вы вернётесь к этой задаче.',
+      confirmText: 'Войти', cancelText: 'Продолжить писать' })) {
+      window.location.href = 'login.html?next=' + encodeURIComponent(next);
+    }
+  }
+
   function submit() {
     // Вошли и сервер рядом — решение считает бэк (Фаза 2), иначе как раньше локально.
     if (window.Api && Api.serverPractice()) {
       serverSubmit();
+      return;
+    }
+    if (window.Api && Api.mode !== 'embedded') {
+      if (Api.mode === 'server') offerLogin();
+      else AppUI.toast('Сервер недоступен. Черновик сохранён; отправьте его после восстановления связи.', 'warn');
       return;
     }
     const attempt = {
@@ -774,10 +852,9 @@
     try {
       res = await Api.submitAttempt(task.id, tabs, key);
     } catch (error) {
-      // Сессия протухла посреди работы — не теряем решение, считаем локально.
+      // Восстановление уже попробовал api.js; повторный отказ не подменяем демо-оценкой.
       if (error && error.status === 401) {
-        AppUI.toast('Сессия истекла — посчитаем ревью локально', 'warn');
-        submitLocalFallback(tabs);
+        offerLogin();
         return;
       }
       // Квота Free исчерпана — вместо paywall предлагаем предзапись на Pro.
@@ -802,21 +879,6 @@
     activeAttempt = attempt;
     renderAttempts();
     startServerPoll(attempt, {});
-  }
-
-  function submitLocalFallback(tabs) {
-    const attempt = {
-      id: 'att_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
-      taskId: task.id,
-      submittedAt: new Date().toISOString(),
-      status: 'in_review',
-      tabs,
-      review: null
-    };
-    Store.addAttempt(task.id, attempt);
-    activeAttempt = attempt;
-    renderAttempts();
-    startReview(attempt, {});
   }
 
   const SERVER_STAGE_LABELS = { system: 'Подготовка', sa: 'Системный аналитик', arch: 'Архитектор', grading: 'Вердикт', done: 'Готово' };

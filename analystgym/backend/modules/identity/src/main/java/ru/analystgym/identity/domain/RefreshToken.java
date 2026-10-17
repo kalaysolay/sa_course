@@ -24,6 +24,12 @@ public class RefreshToken {
     @Column(name = "token_hash")
     private String tokenHash;
 
+    @Column(name = "session_id", nullable = false, unique = true)
+    private UUID sessionId;
+
+    @Column(name = "family_id", nullable = false)
+    private UUID familyId;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id")
     private User user;
@@ -40,8 +46,10 @@ public class RefreshToken {
     protected RefreshToken() {
     }
 
-    public RefreshToken(String tokenHash, User user, Instant expiresAt) {
+    public RefreshToken(String tokenHash, UUID sessionId, UUID familyId, User user, Instant expiresAt) {
         this.tokenHash = tokenHash;
+        this.sessionId = sessionId;
+        this.familyId = familyId;
         this.user = user;
         this.expiresAt = expiresAt;
     }
@@ -62,6 +70,16 @@ public class RefreshToken {
 
     public String getTokenHash() {
         return tokenHash;
+    }
+
+    /** Идентификатор пары токенов; её отзыв немедленно закрывает и access. */
+    public UUID getSessionId() {
+        return sessionId;
+    }
+
+    /** Цепочка ротаций одного входа; выход закрывает и уже обновлённые токены этого входа. */
+    public UUID getFamilyId() {
+        return familyId;
     }
 
     public User getUser() {

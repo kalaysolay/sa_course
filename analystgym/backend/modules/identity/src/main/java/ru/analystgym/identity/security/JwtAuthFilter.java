@@ -8,6 +8,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
+import java.time.Instant;
+import ru.analystgym.identity.repo.RefreshTokenRepository;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -26,9 +28,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     public static final String ACCESS_COOKIE = "ag_access";
 
     private final JwtService jwtService;
+    private final RefreshTokenRepository sessions;
 
-    public JwtAuthFilter(JwtService jwtService) {
+    public JwtAuthFilter(JwtService jwtService, RefreshTokenRepository sessions) {
         this.jwtService = jwtService;
+        this.sessions = sessions;
     }
 
     @Override
@@ -36,16 +40,30 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
         String token = readCookie(request, ACCESS_COOKIE);
         if (token != null) {
-            jwtService.parse(token).ifPresent(claims -> {
+            jwtService.parseAccess(token).ifPresent(claims -> {
                 // subject — UUID пользователя, role — строка вида STUDENT.
                 // Доверяем подписи, а не клиенту: роль перепроверяется по БД
                 // только в чувствительных местах (Фаза 3+, админка).
                 UUID userId = UUID.fromString(claims.getSubject());
+                UUID sessionId = UUID.fromString(claims.get("sid", String.class));
+                if (!sessions.existsBySessionIdAndUserIdAndRevokedFalseAndExpiresAtAfter(
+                        sessionId, userId, Instant.now())) {
+                    return;
+                }
                 String role = String.valueOf(claims.getOrDefault("role", "STUDENT"));
                 UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
                         userId, null, List.of(new SimpleGrantedAuthority("ROLE_" + role)));
                 SecurityContextHolder.getContext().setAuthentication(auth);
             });
+        }
+        String expectedUser = request.getHeader("X-Account-ID");
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (expectedUser != null && authentication != null
+                && !expectedUser.equals(String.valueOf(authentication.getPrincipal()))) {
+            response.setStatus(409);
+            response.setContentType("application/json");
+            response.getWriter().write("{\"error\":\"account_changed\"}");
+            return;
         }
         chain.doFilter(request, response);
     }

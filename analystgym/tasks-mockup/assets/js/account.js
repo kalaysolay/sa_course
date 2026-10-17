@@ -106,7 +106,8 @@
     });
 
     document.getElementById('logoutBtn').addEventListener('click', async () => {
-      try { await Api.logout(); } catch (e) { /* всё равно уходим */ }
+      try { await Api.logout(); }
+      catch (error) { AppUI.toast('Не удалось завершить сессию. Повторите выход.', 'bad'); return; }
       window.location.href = 'index.html';
     });
 
@@ -163,14 +164,14 @@
         <input id="pwNew2" type="password" autocomplete="new-password">
       </div>
       <button class="btn btn-outline btn-sm mt-16" type="button" id="pwBtn">Сменить пароль</button>
-      <p class="muted mt-16" style="font-size:12px">После смены другие сессии завершатся автоматически.</p>`;
+      <p class="muted mt-16" style="font-size:12px">После смены все сессии завершатся. Потребуется войти с новым паролем.</p>`;
 
     document.getElementById('pwBtn').addEventListener('click', async () => {
       const current = document.getElementById('pwCurrent').value;
       const next = document.getElementById('pwNew').value;
       const next2 = document.getElementById('pwNew2').value;
-      if (!current || next.length < 8) {
-        AppUI.toast('Новый пароль — минимум 8 символов', 'warn');
+      if (!current || !Api.validPassword(next)) {
+        AppUI.toast('Пароль — минимум 8 символов и максимум 72 байта UTF-8', 'warn');
         return;
       }
       if (next !== next2) {
@@ -179,10 +180,11 @@
       }
       try {
         await Api.changePassword(current, next);
-        AppUI.toast('Пароль сменён, другие сессии завершены', 'ok');
+        AppUI.toast('Пароль сменён. Войдите с новым паролем.', 'ok');
         document.getElementById('pwCurrent').value = '';
         document.getElementById('pwNew').value = '';
         document.getElementById('pwNew2').value = '';
+        window.location.href = 'login.html?next=account.html';
       } catch (error) {
         const code = error && error.status;
         AppUI.toast(code === 401 ? 'Текущий пароль неверный' : 'Не удалось сменить пароль', 'bad');

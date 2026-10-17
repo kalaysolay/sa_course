@@ -20,13 +20,13 @@ public final class PracticeDto {
     public record SubmitRequest(String taskId, List<TabDto> tabs) {
     }
 
-    public record DraftRequest(List<TabDto> tabs) {
+    public record DraftRequest(List<TabDto> tabs, Long version) {
     }
 
     public record SubmitResponse(UUID attemptId, String taskId, String status) {
     }
 
-    public record DraftResponse(String taskId, JsonNode tabs, String updatedAt) {
+    public record DraftResponse(String taskId, JsonNode tabs, String updatedAt, Long version) {
     }
 
     /** Состояние попытки для polling (GET /api/attempts/{id}). */

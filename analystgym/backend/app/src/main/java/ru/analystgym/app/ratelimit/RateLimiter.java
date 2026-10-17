@@ -23,6 +23,8 @@ public class RateLimiter {
     private final int submitPerMin;
     private final int assessmentPerMin;
     private final int complaintsPerMin;
+    private final int registerPerMin;
+    private final int resetPerMin;
     private final Map<String, ArrayDeque<Instant>> hits = new ConcurrentHashMap<>();
 
     @org.springframework.beans.factory.annotation.Autowired
@@ -30,18 +32,23 @@ public class RateLimiter {
             @Value("${ratelimit.login-per-min:20}") int loginPerMin,
             @Value("${ratelimit.submit-per-min:10}") int submitPerMin,
             @Value("${ratelimit.assessment-per-min:5}") int assessmentPerMin,
-            @Value("${ratelimit.complaints-per-min:10}") int complaintsPerMin) {
-        this(Clock.systemUTC(), loginPerMin, submitPerMin, assessmentPerMin, complaintsPerMin);
+            @Value("${ratelimit.complaints-per-min:10}") int complaintsPerMin,
+            @Value("${ratelimit.register-per-min:5}") int registerPerMin,
+            @Value("${ratelimit.reset-per-min:5}") int resetPerMin) {
+        this(Clock.systemUTC(), loginPerMin, submitPerMin, assessmentPerMin, complaintsPerMin,
+                registerPerMin, resetPerMin);
     }
 
     /** Часы инжектим ради тестов (фиксированное время вместо sleep). */
     RateLimiter(Clock clock, int loginPerMin, int submitPerMin,
-                int assessmentPerMin, int complaintsPerMin) {
+                int assessmentPerMin, int complaintsPerMin, int registerPerMin, int resetPerMin) {
         this.clock = clock;
         this.loginPerMin = loginPerMin;
         this.submitPerMin = submitPerMin;
         this.assessmentPerMin = assessmentPerMin;
         this.complaintsPerMin = complaintsPerMin;
+        this.registerPerMin = registerPerMin;
+        this.resetPerMin = resetPerMin;
     }
 
     /** Разрешить ли вызов: не больше max в последнюю минуту. Потокобезопасно. */
@@ -51,6 +58,8 @@ public class RateLimiter {
             case "submit" -> submitPerMin;
             case "assessment" -> assessmentPerMin;
             case "complaints" -> complaintsPerMin;
+            case "register" -> registerPerMin;
+            case "reset" -> resetPerMin;
             default -> 60;
         };
         Instant now = clock.instant();

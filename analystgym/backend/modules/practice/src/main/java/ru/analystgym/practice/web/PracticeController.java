@@ -52,10 +52,17 @@ public class PracticeController {
             @RequestBody DraftRequest body,
             Authentication authentication) {
         UUID userId = currentUser(authentication);
-        var updatedAt = practice.saveDraft(userId, id, body == null ? null : body.tabs());
-        Draft draft = practice.draftOf(userId, id);
+        Draft draft;
+        try {
+            draft = practice.saveDraft(userId, id, body == null ? null : body.tabs(),
+                    body == null ? null : body.version());
+        } catch (org.springframework.dao.OptimisticLockingFailureException
+                | org.springframework.dao.DataIntegrityViolationException conflict) {
+            // Обрабатываем гонку только черновиков: другие ошибки API не маскируем этим кодом.
+            throw new org.springframework.web.server.ResponseStatusException(HttpStatus.CONFLICT, "draft_conflict");
+        }
         return new DraftResponse(id, draft == null ? emptyTabs() : draft.getTabs(),
-                updatedAt == null ? null : updatedAt.toString());
+                draft.getUpdatedAt() == null ? null : draft.getUpdatedAt().toString(), draft.getVersion());
     }
 
     @GetMapping("/tasks/{id}/draft")
@@ -63,10 +70,10 @@ public class PracticeController {
         UUID userId = currentUser(authentication);
         Draft draft = practice.draftOf(userId, id);
         if (draft == null) {
-            return new DraftResponse(id, emptyTabs(), null);
+            return new DraftResponse(id, emptyTabs(), null, null);
         }
         return new DraftResponse(id, draft.getTabs(),
-                draft.getUpdatedAt() == null ? null : draft.getUpdatedAt().toString());
+                draft.getUpdatedAt() == null ? null : draft.getUpdatedAt().toString(), draft.getVersion());
     }
 
     @PostMapping("/attempts")

@@ -108,8 +108,8 @@
         showError('Похоже, в email опечатка.');
         return;
       }
-      if (password.length < 8) {
-        showError('Пароль — минимум 8 символов.');
+      if (!Api.validPassword(password)) {
+        showError('Пароль — минимум 8 символов, максимум 72 байта UTF-8. Слишком длинный пароль сократите.');
         return;
       }
       const btn = document.getElementById('regBtn');
@@ -152,8 +152,8 @@
       event.preventDefault();
       hideError();
       const password = document.getElementById('resetNew').value;
-      if (password.length < 8) {
-        showError('Пароль — минимум 8 символов.');
+      if (!Api.validPassword(password)) {
+        showError('Пароль — минимум 8 символов, максимум 72 байта UTF-8. Слишком длинный пароль сократите.');
         return;
       }
       const btn = document.getElementById('resetConfirmBtn');
@@ -162,7 +162,8 @@
         await Api.confirmPasswordReset(resetToken, password);
         window.location.href = 'login.html';
       } catch (error) {
-        showError('Ссылка устарела или уже использована — запросите новую.');
+        showError(error.status === 401 ? 'Ссылка устарела или уже использована — запросите новую.'
+          : 'Не удалось изменить пароль. Проверьте пароль и повторите запрос.');
       } finally {
         btn.disabled = false;
       }

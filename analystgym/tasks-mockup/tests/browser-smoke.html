@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="ru">
+<meta charset="utf-8">
+<title>Проверка браузерного состояния AnalystGym</title>
+<pre id="result">RUNNING</pre>
+<script>
+// Запускать через локальный server.py на отдельном тестовом origin; тест меняет только тестовые ключи.
+(async () => {
+  const result = document.getElementById('result');
+  const checks = [];
+  const check = (value, name) => { if (!value) throw new Error(name); checks.push(name); };
+  try {
+    for (const page of ['task.html?id=int-idempotency', 'assessment.html', 'course.html?id=sa-middle', 'login.html']) {
+      const frame = document.createElement('iframe');
+      frame.src = '../' + page;
+      await new Promise((resolve, reject) => {
+        frame.onload = resolve; frame.onerror = reject; document.body.append(frame);
+      });
+      const w = frame.contentWindow;
+      await w.Api.ready;
+      check(w.Api.mode === 'embedded', page + ': static demo');
+      check(w.Store.owner() === null, page + ': guest storage');
+      if (page.startsWith('task')) {
+        await new Promise((resolve, reject) => {
+          const host = w.document.getElementById('taskHost');
+          if (host.textContent.trim().length > 100) { resolve(); return; }
+          const timer = setTimeout(() => { observer.disconnect(); reject(new Error('Task render timeout')); }, 5000);
+          const observer = new MutationObserver(() => {
+            if (host.textContent.trim().length > 100) { clearTimeout(timer); observer.disconnect(); resolve(); }
+          });
+          observer.observe(host, { childList: true, subtree: true });
+        });
+        check(w.document.getElementById('taskHost').textContent.trim().length > 100, 'Task rendered');
+        w.Store.setUser('browser-a');
+        w.Store.saveSolution('private', { tabs: [{ content: 'Private A' }] });
+        w.Store.setUser('browser-b');
+        check(w.Store.solution('private') === null, 'Account B isolated');
+        w.Store.setUser(null);
+        check(w.Store.solution('private') === null, 'Guest isolated');
+        w.Store.setUser('browser-a');
+        check(w.Store.solution('private').tabs[0].content === 'Private A', 'Account A restored');
+        const dismissed = w.AppUI.confirm({ title: 'Проверка конфликта', dismissValue: null });
+        w.document.dispatchEvent(new w.KeyboardEvent('keydown', { key: 'Escape' }));
+        check(await dismissed === null, 'Dismiss keeps draft choice unresolved');
+        const chosen = w.AppUI.confirm({ title: 'Проверка выбора' });
+        w.document.querySelector('[data-role="cancel"]').click();
+        check(await chosen === false, 'Explicit alternate choice');
+      }
+      frame.remove();
+    }
+    result.textContent = 'PASS ' + checks.length + '\n' + checks.join('\n');
+  } catch (error) { result.textContent = 'FAIL ' + error.stack; }
+})();
+</script>
+</html>
