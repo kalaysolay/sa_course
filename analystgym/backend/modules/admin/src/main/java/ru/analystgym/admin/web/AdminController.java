@@ -46,7 +46,7 @@ import ru.analystgym.identity.security.Roles;
 import ru.analystgym.review.ReviewResult;
 
 /**
- * Админка контента (UC-M01–M09 без UI: демо Фазы 3 — правки через API).
+ * Серверная админка контента, связанная с формами admin-server.js/admin-tasks.js.
  * Контент — METHODIST/SUPERADMIN, пользователи и журнал — только SUPERADMIN.
  */
 @RestController
@@ -98,7 +98,7 @@ public class AdminController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "title required");
         }
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(tasks.createTask(user.getId(), body.title()));
+                .body(tasks.createWithContent(user.getId(), body.title(), body.content()));
     }
 
     @PutMapping("/tasks/{id}")
@@ -111,7 +111,7 @@ public class AdminController {
         }
         return tasks.updateTask(user.getId(), id, body.title(), body.level(), body.tags(),
                 body.timeMin(), body.status(), body.statement(), body.starterTabs(),
-                body.rubric(), body.hints(), body.interviewQuestions(), body.authorSolution());
+                body.rubric(), body.hints(), body.interviewQuestions(), body.authorSolution(), body.version());
     }
 
     @GetMapping("/tasks/{id}/revisions")
@@ -171,9 +171,9 @@ public class AdminController {
 
     @DeleteMapping("/collections/{id}")
     public ResponseEntity<Void> deleteCollection(
-            @PathVariable String id, Authentication authentication) {
+            @PathVariable String id, @RequestParam Long version, Authentication authentication) {
         User user = methodist(authentication);
-        refs.deleteCollection(user.getId(), id);
+        refs.deleteCollection(user.getId(), id, version);
         return ResponseEntity.noContent().build();
     }
 
@@ -194,9 +194,9 @@ public class AdminController {
 
     @DeleteMapping("/tags/{id}")
     public ResponseEntity<Void> deleteTag(
-            @PathVariable String id, Authentication authentication) {
+            @PathVariable String id, @RequestParam Long version, Authentication authentication) {
         User user = methodist(authentication);
-        refs.deleteTag(user.getId(), id);
+        refs.deleteTag(user.getId(), id, version);
         return ResponseEntity.noContent().build();
     }
 
@@ -205,6 +205,46 @@ public class AdminController {
             @PathVariable String id, @RequestBody LevelDto body, Authentication authentication) {
         User user = methodist(authentication);
         return refs.updateLevel(user.getId(), id, body);
+    }
+
+    @GetMapping("/levels")
+    public List<ru.analystgym.catalog.domain.Level> levels(Authentication authentication) {
+        methodist(authentication);
+        return refs.listLevels();
+    }
+
+    /** Устаревшая форма и одновременные записи возвращают одинаковый конфликт. */
+    @org.springframework.web.bind.annotation.ExceptionHandler(org.springframework.dao.OptimisticLockingFailureException.class)
+    public ResponseEntity<java.util.Map<String, String>> editConflict() {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(java.util.Map.of("error", "edit_conflict"));
+    }
+
+    /** Именованные ошибки формы доступны клиенту без включения подробных ошибок всего приложения. */
+    @org.springframework.web.bind.annotation.ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<java.util.Map<String, String>> validationError(ResponseStatusException error) {
+        String reason = error.getReason() == null ? "request_rejected" : error.getReason();
+        String message = switch (reason) {
+            case "publication_requires_brief_goal_deliverables_rubric_reference" ->
+                    "Для публикации заполните условие, цель, ожидаемый результат, рубрику и эталон.";
+            case "publication_requires_starter_tabs" -> "Для публикации добавьте стартовую вкладку решения.";
+            case "bad status transition" -> "Недопустимый переход: черновик → на ревью → опубликована → архив.";
+            case "bad criterion keywords" -> "У каждого критерия нужны 1–20 ключевых маркеров.";
+            case "bad criterion weight" -> "Вес критерия должен быть от 1 до 10.";
+            case "duplicate or invalid criterion id" -> "ID критериев должны быть уникальны и не длиннее 100 символов.";
+            case "create_new_version_for_live_prompt" -> "Создайте новую редакцию рабочего промпта.";
+            case "traffic_must_total_100" -> "Сумма трафика должна быть 100%. Сначала назначьте активную редакцию.";
+            case "bad traffic" -> "Трафик должен быть 0–100%; новая редакция создаётся с 0%.";
+            case "tag exists" -> "Метка с таким ID уже существует.";
+            case "unknown task" -> "В подборке указан неизвестный ID задачи.";
+            default -> reason;
+        };
+        return ResponseEntity.status(error.getStatusCode()).body(java.util.Map.of("error", reason, "message", message));
+    }
+
+    /** Коллизия новых ID или зависимая запись, изменённая соседней транзакцией. */
+    @org.springframework.web.bind.annotation.ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
+    public ResponseEntity<java.util.Map<String, String>> writeConflict() {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(java.util.Map.of("error", "write_conflict"));
     }
 
     /* ---------- банк вопросов ---------- */
@@ -244,7 +284,7 @@ public class AdminController {
         if (body == null || body.role() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "role required");
         }
-        return usersAdmin.setRole(caller.getId(), id, body.role());
+        return usersAdmin.setRole(caller.getId(), id, body.role(), body.expectedRole());
     }
 
     @GetMapping("/audit")
@@ -298,6 +338,12 @@ public class AdminController {
         return llm.listVersions(key);
     }
 
+    @GetMapping("/llm/prompts")
+    public List<ru.analystgym.review.domain.Prompt> prompts(Authentication authentication) {
+        llmAdmin(authentication);
+        return llm.listPrompts();
+    }
+
     @PostMapping("/llm/prompts/{key}/versions")
     public ResponseEntity<PromptVersionDto> createVersion(
             @PathVariable String key, @RequestBody VersionCreateRequest body,
@@ -324,9 +370,9 @@ public class AdminController {
     }
 
     @PostMapping("/llm/versions/{id}/promote")
-    public PromptVersionDto promote(@PathVariable UUID id, Authentication authentication) {
+    public PromptVersionDto promote(@PathVariable UUID id, @RequestBody TrafficRequest body, Authentication authentication) {
         User user = llmAdmin(authentication);
-        return llm.promote(user.getId(), id);
+        return llm.promote(user.getId(), id, body.version());
     }
 
     /* ---------- доступ ---------- */

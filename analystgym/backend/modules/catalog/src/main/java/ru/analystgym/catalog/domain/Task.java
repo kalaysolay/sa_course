@@ -21,6 +21,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 @Table(name = "tasks")
 public class Task {
 
+    @jakarta.persistence.Version
+    private Long version;
+
+    public Long getVersion() { return version; }
+
     @Id
     private String id;
 

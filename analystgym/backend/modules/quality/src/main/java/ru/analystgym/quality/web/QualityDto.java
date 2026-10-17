@@ -28,10 +28,10 @@ public final class QualityDto {
             String promptVersion,
             String status,
             String resolution,
-            String createdAt) {
+            String createdAt, Long version) {
     }
 
-    public record ResolveRequest(String status, String resolution) {
+    public record ResolveRequest(String status, String resolution, Long version) {
     }
 
     public record Dashboard(

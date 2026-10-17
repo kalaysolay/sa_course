@@ -16,6 +16,11 @@ import org.hibernate.type.SqlTypes;
 @Table(name = "tags")
 public class Tag {
 
+    @jakarta.persistence.Version
+    private Long version;
+
+    public Long getVersion() { return version; }
+
     @Id
     private String id;
 

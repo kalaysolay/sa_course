@@ -66,8 +66,9 @@ public class CatalogController {
 
     @GetMapping("/collections")
     public List<CollectionCard> collections() {
+        var published = tasks.publishedIds();
         return collections.findByActiveTrue().stream()
-                .map(CatalogController::toCard)
+                .map(c -> toCard(c, published))
                 .toList();
     }
 
@@ -76,7 +77,7 @@ public class CatalogController {
         TaskCollection collection = collections.findById(id)
                 .filter(TaskCollection::isActive)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        return toCard(collection);
+        return toCard(collection, tasks.publishedIds());
     }
 
     @GetMapping("/dictionaries")
@@ -104,7 +105,7 @@ public class CatalogController {
                 task.getSolvedRate());
     }
 
-    private static CollectionCard toCard(TaskCollection collection) {
+    private static CollectionCard toCard(TaskCollection collection, java.util.Set<String> published) {
         return new CollectionCard(
                 collection.getId(),
                 collection.getTitle(),
@@ -112,7 +113,9 @@ public class CatalogController {
                 collection.getDescription(),
                 collection.getIcon(),
                 collection.getAudience(),
-                collection.getTaskIds() == null ? List.of() : Arrays.asList(collection.getTaskIds()));
+                collection.getTaskIds() == null ? List.of() : Arrays.stream(collection.getTaskIds())
+                        .filter(published::contains)
+                        .toList());
     }
 
     private static String blankToNull(String value) {

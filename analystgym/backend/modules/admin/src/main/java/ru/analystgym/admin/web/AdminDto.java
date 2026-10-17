@@ -6,14 +6,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 /**
  * Контракты админки. Формы повторяют admin-tasks.js (collectForm/blankTask)
- * и разделы admin-ops.js, чтобы будущая привязка UI шла 1-в-1.
+ * и серверные разделы admin-server.js. Существующие записи изменяются с версией формы.
  */
 public final class AdminDto {
 
     private AdminDto() {
     }
 
-    public record TaskCreateRequest(String title) {
+    public record TaskCreateRequest(String title, TaskUpdateRequest content) {
     }
 
     /** PUT: присланные поля заменяют, отсутствующие остаются как были. */
@@ -28,7 +28,7 @@ public final class AdminDto {
             List<CriterionDto> rubric,
             List<String> hints,
             List<String> interviewQuestions,
-            JsonNode authorSolution) {
+            JsonNode authorSolution, Long version) {
     }
 
     /** Критерий рубрики как в форме (collectRubric): вес — числом 1–10. */
@@ -51,7 +51,7 @@ public final class AdminDto {
             int timeMin,
             int solvedRate,
             int criteriaCount,
-            String updatedAt) {
+            String updatedAt, Long version) {
     }
 
     public record TaskFull(
@@ -68,7 +68,7 @@ public final class AdminDto {
             JsonNode hints,
             JsonNode interviewQuestions,
             JsonNode authorSolution,
-            String updatedAt) {
+            String updatedAt, Long version) {
     }
 
     public record RevisionView(int rev, UUID authorId, String createdAt, JsonNode snapshot) {
@@ -88,7 +88,7 @@ public final class AdminDto {
             String icon,
             String audience,
             List<String> taskIds,
-            Boolean active) {
+            Boolean active, Long version) {
     }
 
     public record TagDto(
@@ -96,10 +96,10 @@ public final class AdminDto {
             String name,
             String category,
             List<String> synonyms,
-            Boolean active) {
+            Boolean active, Long version) {
     }
 
-    public record LevelDto(String name, String description, String profile, String timeHint) {
+    public record LevelDto(String name, String description, String profile, String timeHint, Long version) {
     }
 
     public record QuestionDto(
@@ -113,7 +113,7 @@ public final class AdminDto {
             Boolean active) {
     }
 
-    public record RoleRequest(String role) {
+    public record RoleRequest(String role, String expectedRole) {
     }
 
     public record ProviderDto(
@@ -124,7 +124,7 @@ public final class AdminDto {
             String keyEnv,
             Boolean keyPresent,
             Integer timeoutSec,
-            Boolean enabled) {
+            Boolean enabled, Long version) {
     }
 
     public record AgentDto(
@@ -135,7 +135,7 @@ public final class AdminDto {
             List<String> checks,
             String model,
             Boolean enabled,
-            String promptKey) {
+            String promptKey, Long version) {
     }
 
     public record PromptVersionDto(
@@ -147,17 +147,17 @@ public final class AdminDto {
             String model,
             String changelog,
             String text,
-            String updatedAt) {
+            String updatedAt, Long version) {
     }
 
-    public record TrafficRequest(Integer traffic) {
+    public record TrafficRequest(Integer traffic, Long version) {
     }
 
     public record VersionCreateRequest(
             String text,
             String changelog,
             String model,
-            Integer traffic) {
+            Integer traffic, Long version) {
     }
 
     public record UserRow(UUID id, String name, String email, String role, String createdAt) {

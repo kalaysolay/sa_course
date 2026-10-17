@@ -17,7 +17,7 @@ public final class PracticeDto {
     public record TabDto(String id, String type, String title, String content) {
     }
 
-    public record SubmitRequest(String taskId, List<TabDto> tabs) {
+    public record SubmitRequest(String taskId, List<TabDto> tabs, Long taskVersion) {
     }
 
     public record DraftRequest(List<TabDto> tabs, Long version) {
@@ -88,6 +88,6 @@ public final class PracticeDto {
             JsonNode starterTabs,
             JsonNode rubric,
             JsonNode hints,
-            JsonNode interviewQuestions) {
+            JsonNode interviewQuestions, Long version) {
     }
 }

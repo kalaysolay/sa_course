@@ -117,9 +117,12 @@ public class QualityService {
      * Решённые/отклонённые терминальны; resolved требует итог разбора.
      */
     @Transactional
-    public Complaint resolve(UUID complaintId, String status, String resolution) {
+    public Complaint resolve(UUID complaintId, String status, String resolution, Long version) {
         Complaint complaint = complaints.findById(complaintId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        if (version == null || !version.equals(complaint.getVersion())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "edit_conflict");
+        }
         if (!List.of("review", "resolved", "rejected").contains(status)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "bad status");
         }
@@ -134,7 +137,7 @@ public class QualityService {
         }
         complaint.setStatus(status);
         complaint.setResolution(resolution == null || resolution.isBlank() ? null : resolution.trim());
-        complaints.save(complaint);
+        complaints.saveAndFlush(complaint);
         notify.complaintResolved(complaint.getUserId(), complaint.getId(), status);
         return complaint;
     }
@@ -322,7 +325,7 @@ public class QualityService {
                     nameOf(complaint.getUserId()), complaint.getScore(), complaint.getReason(),
                     complaint.getExcerpt(), complaint.getPromptVersion(), complaint.getStatus(),
                     complaint.getResolution(),
-                    complaint.getCreatedAt() == null ? null : complaint.getCreatedAt().toString()));
+                    complaint.getCreatedAt() == null ? null : complaint.getCreatedAt().toString(), complaint.getVersion()));
         }
         return result;
     }

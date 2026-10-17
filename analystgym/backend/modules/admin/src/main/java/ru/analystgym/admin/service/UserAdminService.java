@@ -46,15 +46,18 @@ public class UserAdminService {
     }
 
     @Transactional
-    public UserRow setRole(UUID callerId, UUID targetId, String role) {
+    public UserRow setRole(UUID callerId, UUID targetId, String role, String expectedRole) {
         if (!KNOWN_ROLES.contains(role)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "unknown role");
         }
         if (callerId.equals(targetId)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "cannot change own role");
         }
-        User user = users.findById(targetId)
+        User user = users.lockById(targetId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        if (!user.getRole().equals(expectedRole)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "edit_conflict");
+        }
         user.setRole(role);
         users.save(user);
         audit.log(callerId, "user.role", "user:" + targetId + "=" + role);

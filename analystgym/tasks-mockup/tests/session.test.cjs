@@ -28,6 +28,64 @@ const response = (data, status = 200) => new Response(JSON.stringify(data), {
   status, headers: { 'Content-Type': 'application/json' }
 });
 
+test('Серверный каталог полностью заменяет встроенные задачи и игнорирует локальные правки', async () => {
+  const c = browser(server(async url => url === '/api/auth/me' ? response({ id: 'a' }) : response({}, 404)));
+  c.SA_DATA.tasks = [{ id: 'removed', title: 'Архив' }, { id: 'live', title: 'Старый текст' }];
+  c.Store.saveTaskEdit('live', { title: 'Локальная подмена' });
+  const fetch = c.fetch;
+  c.fetch = (url, options) => url === '/api/tasks' ? response([{ id: 'live', title: 'С сервера' }]) : fetch(url, options);
+  c.load('api.js'); await c.Api.ready;
+  assert.equal(c.Store.tasks().length, 1);
+  assert.equal(c.Store.task('removed'), null);
+  assert.equal(c.Store.task('live').title, 'С сервера');
+});
+
+test('Пустые серверные справочники и каталог не восстанавливаются из демо', async () => {
+  const c = browser(server(async url => url === '/api/auth/me' ? response({ id: 'a' }) : response({}, 404)));
+  c.SA_DATA.tasks = [{ id: 'demo' }]; c.SA_DATA.tags = [{ id: 'demo-tag' }];
+  c.SA_DATA.collections = [{ id: 'demo-set' }];
+  c.load('api.js'); await c.Api.ready;
+  assert.equal(c.Store.tasks().length, 0);
+  assert.equal(c.Store.dictionaries().tags.length, 0);
+  assert.equal(c.Store.dictionaries().collections.length, 0);
+});
+
+test('Ошибка обновления каталога сохраняет режим сервера и не показывает встроенные задачи', async () => {
+  const c = browser(server(async url => url === '/api/auth/me' ? response({ id: 'a' }) : response({}, 404)));
+  c.SA_DATA.tasks = [{ id: 'demo' }];
+  const fetch = c.fetch;
+  c.fetch = (url, options) => url === '/api/tasks' ? response({}, 503) : fetch(url, options);
+  c.load('api.js'); await c.Api.ready;
+  assert.equal(c.Api.mode, 'server');
+  assert.ok(c.Api.catalogError);
+  assert.equal(c.Store.tasks().length, 0);
+});
+
+test('Детали задачи читаются отдельным запросом, эталон не подменяется встроенным', async () => {
+  const c = browser(server(async url => {
+    if (url === '/api/auth/me') return response({ id: 'a' });
+    if (url.endsWith('/detail')) return response({ id: 'live', statement: { brief: 'Новое' }, version: 12 });
+    return response({ error: 'reference_locked' }, 403);
+  }));
+  c.load('api.js'); await c.Api.ready;
+  const detail = await c.Api.getTask('live');
+  assert.equal(detail.statement.brief, 'Новое');
+  assert.equal(detail.version, 12);
+  assert.equal(detail.authorSolution, undefined);
+  await assert.rejects(c.Api.getReference('live'), e => e.status === 403);
+});
+
+test('Отправка решения передаёт именно открытую версию задачи', async () => {
+  let submitted;
+  const c = browser(server(async (url, options) => {
+    if (url === '/api/auth/me') return response({ id: 'a' });
+    submitted = JSON.parse(options.body); return response({ attemptId: 'one' });
+  }));
+  c.load('api.js'); await c.Api.ready;
+  await c.Api.submitAttempt('live', [], 'same-key', 42);
+  assert.equal(submitted.taskVersion, 42);
+});
+
 function server(handler) {
   return async (url, options = {}) => {
     if (url === '/api/health') return response({ status: 'UP' });

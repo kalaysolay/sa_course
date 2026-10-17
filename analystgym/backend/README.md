@@ -16,7 +16,17 @@ docker compose -f ../deploy/docker-compose.yml up --build
 Команда не запускает HTTP/воркеры, отказывается повышать существующий аккаунт
 и не работает при наличии SUPERADMIN. После запуска удалить bootstrap-пароль
 из окружения. `APP_ADMIN_EMAILS` больше не используется. Следующие роли
-выдаются через `PUT /api/admin/users/{id}/role`.
+выдаются через `PUT /api/admin/users/{id}/role` (поля `role`, `expectedRole`).
+
+Серверная админка доступна на `/admin.html`; роль проверяется API, локальные
+правки макета на данные БД не влияют. Контент защищён версиями (V13):
+изменение требует `version` из последнего GET, конфликт возвращает 409.
+`GET /api/tasks/{id}/detail` возвращает версию задачи, `POST /api/attempts`
+принимает её в `taskVersion`. Эталоны загружаются только через защищённый
+`/reference`; файлы `data-tasks-*.js` в JAR не включаются. Публикация требует
+заполненного условия, результата, рубрики, эталона и стартовых вкладок.
+Полный контракт и роли: `../tasks-mockup/docs/product-spec.md`, руководство:
+`../tasks-mockup/docs/admin-guide.md`.
 
 Проверки пакета безопасности: `./gradlew build :app:integrationTest`
 (для integrationTest нужен Docker) и

@@ -115,7 +115,7 @@ public class PracticeService {
      * ту же попытку (202), новую задачу в очередь не ставит.
      */
     @Transactional
-    public UUID submit(UUID userId, String taskId, List<TabDto> tabs, String idempotencyKey) {
+    public UUID submit(UUID userId, String taskId, List<TabDto> tabs, String idempotencyKey, Long taskVersion) {
         String key = idempotencyKey == null || idempotencyKey.isBlank() ? null : idempotencyKey.trim();
         if (key != null && key.length() > MAX_IDEMPOTENCY_KEY) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "idempotency key too long");
@@ -126,7 +126,14 @@ public class PracticeService {
                 return existing.get().getId();
             }
         }
-        Task task = publishedOrThrow(taskId);
+        Task task = tasks.lockById(taskId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        if (!"published".equals(task.getStatus())) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+        if (!java.util.Objects.equals(task.getVersion(), taskVersion)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "task_changed");
+        }
         validateTabs(tabs);
         // Тариф Free: полное ревью не более чем по N задачам; повторная
         // отправка по уже разобранной задаче квоту не ест (доработка).
@@ -260,7 +267,7 @@ public class PracticeService {
                 task.getTags() == null ? List.of() : List.of(task.getTags()),
                 task.getTimeMin(), task.getSolvedRate(), task.getStatus(),
                 task.getStatement(), task.getStarterTabs(), task.getRubric(),
-                task.getHints(), task.getInterviewQuestions());
+                task.getHints(), task.getInterviewQuestions(), task.getVersion());
     }
 
     /** Эталон: только если у пользователя есть reviewed-попытка (иначе 403). */

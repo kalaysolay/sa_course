@@ -77,7 +77,7 @@ public class QualityController {
         if (body == null || body.status() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "status required");
         }
-        var saved = quality.resolve(id, body.status(), body.resolution());
+        var saved = quality.resolve(id, body.status(), body.resolution(), body.version());
         return quality.complaintQueue("all").stream()
                 .filter(c -> c.id().equals(saved.getId())).findFirst()
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.CONFLICT));
@@ -121,6 +121,13 @@ public class QualityController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
         }
         return userId;
+    }
+
+    /** Две одновременно открытые формы не перезаписывают решение по жалобе. */
+    @org.springframework.web.bind.annotation.ExceptionHandler(org.springframework.dao.OptimisticLockingFailureException.class)
+    public org.springframework.http.ResponseEntity<java.util.Map<String, String>> editConflict() {
+        return org.springframework.http.ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(java.util.Map.of("error", "edit_conflict"));
     }
 
     /** Персонал контура качества; 403 — чужой, 401 — аноним (цепочка раньше). */

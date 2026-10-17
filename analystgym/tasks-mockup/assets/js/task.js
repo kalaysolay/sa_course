@@ -22,6 +22,8 @@
 
   const el = {};
 
+  const contentHtml = value => AppUI.safeHtml(value);
+
   /* ==================== инициализация ==================== */
 
   document.addEventListener('DOMContentLoaded', async () => {
@@ -33,13 +35,17 @@
       .forEach((id) => { el[id] = document.getElementById(id); });
 
     const id = AppUI.qs('id');
-    task = id ? Store.task(id) : null;
+    let loadError = null;
+    try {
+      task = id ? (Api.mode === 'server' ? await Api.getTask(id) : Store.task(id)) : null;
+    } catch (error) { loadError = error; }
 
     if (!task) {
       el.taskHost.innerHTML = `
         <div class="empty-state">
-          <h3>Задача не найдена</h3>
-          <p class="muted" style="margin-bottom:16px">Возможно, ссылка устарела. Выберите задачу из каталога.</p>
+          <h3>${loadError && loadError.status !== 404 ? 'Не удалось загрузить задачу' : 'Задача не найдена'}</h3>
+          <p class="muted" style="margin-bottom:16px">${loadError && loadError.status !== 404 ? 'Повторите загрузку страницы. Сохранённый черновик остаётся в этом браузере.' : 'Возможно, задача снята с публикации. Выберите задачу из каталога.'}</p>
+          <button class="btn btn-ghost" onclick="location.reload()">Обновить</button>
           <a class="btn btn-primary" href="catalog.html">В каталог</a>
         </div>`;
       return;
@@ -257,8 +263,7 @@
               <div class="row mt-8" style="gap:8px;flex-wrap:wrap">
                 ${AppUI.levelPill(task.level)}
                 <span class="badge">${task.timeMin} мин</span>
-                <span class="badge">решили ${task.solvedRate}%</span>
-                <span class="badge badge-info">${task.attempts} ${AppUI.plural(task.attempts, ['попытка', 'попытки', 'попыток'])}</span>
+                ${Api.mode === 'embedded' ? `<span class="badge">решили ${task.solvedRate}%</span><span class="badge badge-info">${task.attempts} ${AppUI.plural(task.attempts, ['попытка', 'попытки', 'попыток'])}</span>` : ''}
                 ${collections.map((c) => `<span class="badge">${AppUI.esc(c.icon || '')} ${AppUI.esc(c.name)}</span>`).join('')}
               </div>
             </div>
@@ -267,7 +272,7 @@
             <div class="statement">
               <div class="info-box" style="margin-top:0">
                 <div class="ib-title">Коротко</div>
-                <p style="margin:0">${task.statement.brief}</p>
+                <p style="margin:0">${contentHtml(task.statement.brief)}</p>
               </div>
               ${renderStatement()}
               ${renderRubric()}
@@ -315,20 +320,20 @@
     const s = task.statement;
     const list = (items, ordered) => {
       const tag = ordered ? 'ol' : 'ul';
-      return `<${tag}>${items.map((i) => `<li>${i}</li>`).join('')}</${tag}>`;
+      return `<${tag}>${items.map((i) => `<li>${contentHtml(i)}</li>`).join('')}</${tag}>`;
     };
     return `
       <h2>Контекст</h2>
-      ${s.context.map((p) => `<p>${p}</p>`).join('')}
+      ${s.context.map((p) => `<p>${contentHtml(p)}</p>`).join('')}
       <h2>Что нужно сделать</h2>
-      <p><strong>${s.goal}</strong></p>
+      <p><strong>${contentHtml(s.goal)}</strong></p>
       <h2>Входные данные</h2>
       ${list(s.inputs)}
       <h2>Что должно быть в решении</h2>
       ${list(s.deliverables, true)}
       <h2>Ограничения</h2>
       ${list(s.constraints)}
-      <blockquote><strong>Как это звучит на собеседовании.</strong><br>${s.interview}</blockquote>
+      <blockquote><strong>Как это звучит на собеседовании.</strong><br>${contentHtml(s.interview)}</blockquote>
     `;
   }
 
@@ -344,7 +349,7 @@
             и ищут подтверждения в вашем тексте.
           </p>
           <ul class="rubric-list">
-            ${items.map((c) => `<li><span class="w ${c.weight === 'high' ? 'high' : c.weight === 'mid' ? 'mid' : ''}">${weightLabel[c.weight] || ''}</span><span>${AppUI.esc(c.title)}</span></li>`).join('')}
+            ${items.map((c) => `<li><span class="w ${c.weight === 'high' ? 'high' : c.weight === 'mid' ? 'mid' : ''}">${c.weightValue ? AppUI.esc(String(c.weightValue)) + '/10' : weightLabel[c.weight] || ''}</span><span>${AppUI.esc(c.title)}</span></li>`).join('')}
           </ul>
         </div>
       </details>`;
@@ -368,7 +373,7 @@
   function renderAuthorSolution() {
     const author = task.authorSolution || {};
     const hasContent = author.doc || author.plantuml || author.mermaid;
-    if (!hasContent) return '';
+    if (!hasContent && Api.mode === 'embedded') return '';
     return `
       <details class="fold" id="authorFold">
         <summary>Эталонное решение автора</summary>
@@ -381,13 +386,26 @@
       </details>`;
   }
 
-  function mountAuthorSolution() {
+  async function mountAuthorSolution() {
     const body = document.getElementById('authorBody');
-    if (!body || body.dataset.mounted === 'true') return;
+    if (!body || body.dataset.mounted === 'true' || body.dataset.loading === 'true') return;
+    if (Api.mode !== 'embedded') {
+      body.dataset.loading = 'true';
+      const taskId = task.id;
+      try {
+        const author = await Api.getReference(taskId);
+        if (!task || task.id !== taskId) return;
+        task.authorSolution = author;
+      } catch (error) {
+        body.innerHTML = `<p>${error.status === 403 || error.status === 401
+          ? 'Эталон откроется после собственного серверного ревью.' : 'Не удалось загрузить эталон. Закройте и откройте блок для повтора.'}</p>`;
+        return;
+      } finally { delete body.dataset.loading; }
+    }
     body.dataset.mounted = 'true';
     const author = task.authorSolution || {};
     const parts = [];
-    if (author.doc) parts.push(author.doc);
+    if (author.doc) parts.push(contentHtml(author.doc));
     if (author.plantuml) parts.push(`<h3 style="font-size:14px;margin:18px 0 6px">Схема (PlantUML)</h3>${AppUI.embedDiagram('plantuml', author.plantuml)}`);
     if (author.mermaid) parts.push(`<h3 style="font-size:14px;margin:18px 0 6px">Схема (Mermaid)</h3>${AppUI.embedDiagram('mermaid', author.mermaid)}`);
     body.insertAdjacentHTML('beforeend', `<div class="statement" style="padding:0">${parts.join('')}</div>`);
@@ -609,7 +627,7 @@
         <span class="hint">простой WYSIWYG · автосохранение</span>
       </div>
       <div class="wysiwyg" id="docEditor" contenteditable="true" spellcheck="true"
-           data-placeholder="Опишите решение: контекст, ваше предложение, альтернативы, цифры. Структурируйте заголовками — ревью читает и её.">${tab.content || ''}</div>`;
+           data-placeholder="Опишите решение: контекст, ваше предложение, альтернативы, цифры. Структурируйте заголовками — ревью читает и её.">${contentHtml(tab.content)}</div>`;
 
     const editor = document.getElementById('docEditor');
 
@@ -850,7 +868,7 @@
     const key = 'web_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
     let res = null;
     try {
-      res = await Api.submitAttempt(task.id, tabs, key);
+      res = await Api.submitAttempt(task.id, tabs, key, task.version);
     } catch (error) {
       // Восстановление уже попробовал api.js; повторный отказ не подменяем демо-оценкой.
       if (error && error.status === 401) {
@@ -863,7 +881,8 @@
         else AppUI.toast('Бесплатный лимит ревью исчерпан — оставьте заявку на предзапись Pro', 'warn');
         return;
       }
-      AppUI.toast('Не удалось отправить решение: ' + (error && error.message ? error.message : error), 'bad');
+      AppUI.toast(error.status === 409 ? 'Задача изменилась. Черновик сохранён; обновите страницу и проверьте новое условие перед отправкой.'
+        : 'Не удалось отправить решение: ' + error.message, 'bad');
       return;
     }
     const attempt = {

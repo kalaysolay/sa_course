@@ -113,8 +113,7 @@
     return date.toLocaleString('ru-RU', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
   };
 
-  UI.levelBadge = function (levelId) {
-    const level = window.Store.level(levelId);
+  UI.levelBadge = function (levelId, level = window.Store.level(levelId)) {
     return `<span class="level ${UI.esc(level.cssClass || '')}">${UI.esc(level.name)}</span>`;
   };
 
@@ -257,6 +256,14 @@
       UI.themeMenu(toggle);
     });
     paintAuthSlot(mount);
+    if (window.Api && Api.catalogError && !document.getElementById('catalogError')) {
+      const banner = document.createElement('div');
+      banner.id = 'catalogError';
+      banner.className = 'wrap info-box';
+      banner.setAttribute('role', 'alert');
+      banner.innerHTML = '<p>Не удалось загрузить каталог. Обновите страницу для повтора.</p><button class="btn btn-ghost" onclick="location.reload()">Повторить</button>';
+      mount.insertAdjacentElement('afterend', banner);
+    }
     const burger = mount.querySelector('#burgerBtn');
     const navEl = mount.querySelector('.main-nav');
     if (burger && navEl) {
@@ -349,6 +356,7 @@
     const mount = document.getElementById('siteFooter');
     if (!mount) return;
     const isCourse = product === 'course';    const columns = FOOTERS[isCourse ? 'course' : 'practice'];
+    const demo = !window.Api || Api.mode === 'embedded';
     const about = isCourse
       ? 'Курсы для системных и бизнес-аналитиков: короткие уроки без воды, практика на тренажёре, прогресс по курсу.'
       : 'Тренажёр собеседований для системных и бизнес-аналитиков: задачи с реальных проектов, ревью двумя ИИ-агентами и диагностика уровня.';
@@ -362,21 +370,21 @@
               <span>AnalystGym</span>
             </a>
             <p class="footer-note">${about}</p>
-            <p class="footer-note mono" style="margin-top:14px;font-size:12px">Кликабельный макет · данные хранятся в браузере</p>
+            <p class="footer-note mono" style="margin-top:14px;font-size:12px">${demo ? 'Кликабельный макет · данные хранятся в браузере' : 'Каталог и ревью хранятся на сервере · черновик сохраняется и в браузере'}</p>
           </div>
           ${columns.map((col) => `
             <div class="footer-col">
               <h4>${UI.esc(col.title)}</h4>
               ${col.links.map(([href, label]) => `<a href="${href}">${UI.esc(label)}</a>`).join('')}
             </div>`).join('')}
-          <div class="footer-col">
+          ${demo ? `<div class="footer-col">
             <h4>Демо</h4>
             <a href="#" data-action="reset-demo">Сбросить демо-данные</a>
-          </div>
+          </div>` : ''}
         </div>
         <div class="footer-bottom">
-          <span>© 2026 AnalystGym · макет UX</span>
-          <span id="storageMode">хранилище: ${window.Store.backend}</span>
+          <span>© 2026 AnalystGym${demo ? ' · макет UX' : ''}</span>
+          <span id="storageMode">${demo ? 'хранилище: ' + window.Store.backend : 'черновик: ' + window.Store.backend}</span>
         </div>
       </div>`;
 
@@ -622,6 +630,33 @@
       { id: 'component', label: 'component', code: '@startuml\ncomponent "API Gateway" as GW\ncomponent "Сервис A" as A\ndatabase "БД" as DB\nGW --> A\nA --> DB\n@enduml\n' },
       { id: 'class', label: 'class', code: '@startuml\nclass Order {\n  +id\n  +status\n  +create()\n}\nclass OrderItem\nOrder "1" *-- "many" OrderItem\n@enduml\n' }
     ]
+  };
+
+  /** Форматированный текст из API/черновика: без событий, скриптов и сторонних встраиваний. */
+  UI.safeHtml = function (value) {
+    const template = document.createElement('template');
+    template.innerHTML = String(value || '');
+    const allowed = new Set('P BR STRONG B EM I U S UL OL LI BLOCKQUOTE PRE CODE H1 H2 H3 H4 H5 H6 TABLE THEAD TBODY TR TD TH HR DIV SPAN A'.split(' '));
+    const paint = node => {
+      if (node.nodeType === Node.TEXT_NODE) return UI.esc(node.textContent);
+      if (node.nodeType !== Node.ELEMENT_NODE || ['SCRIPT', 'STYLE', 'IFRAME', 'OBJECT', 'SVG', 'MATH', 'TEMPLATE'].includes(node.tagName)) return '';
+      if (node.classList.contains('diagram-embed') && ['plantuml', 'mermaid'].includes(node.dataset.type)) {
+        try { return UI.embedDiagram(node.dataset.type, decodeURIComponent(node.dataset.source || '')); }
+        catch (error) { return ''; }
+      }
+      const children = Array.from(node.childNodes).map(paint).join('');
+      if (!allowed.has(node.tagName)) return children;
+      const tag = node.tagName.toLowerCase();
+      let attr = '';
+      if (tag === 'a' && node.hasAttribute('href')) {
+        try {
+          const url = new URL(node.getAttribute('href'), location.href);
+          if (['http:', 'https:', 'mailto:'].includes(url.protocol)) attr = ` href="${UI.esc(url.href)}" rel="noopener noreferrer"`;
+        } catch (error) { /* Некорректную ссылку оставляем текстом. */ }
+      }
+      return `<${tag}${attr}>${children}</${tag}>`;
+    };
+    return Array.from(template.content.childNodes).map(paint).join('');
   };
 
   window.AppUI = UI;

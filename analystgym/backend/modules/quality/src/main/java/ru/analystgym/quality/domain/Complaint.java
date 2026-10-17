@@ -18,6 +18,11 @@ import org.hibernate.annotations.UpdateTimestamp;
 @Table(name = "complaints")
 public class Complaint {
 
+    @jakarta.persistence.Version
+    private Long version;
+
+    public Long getVersion() { return version; }
+
     @Id
     private UUID id;
 

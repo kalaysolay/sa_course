@@ -10,7 +10,7 @@
   const checks = [];
   const check = (value, name) => { if (!value) throw new Error(name); checks.push(name); };
   try {
-    for (const page of ['task.html?id=int-idempotency', 'assessment.html', 'course.html?id=sa-middle', 'login.html']) {
+    for (const page of ['task.html?id=int-idempotency', 'assessment.html', 'course.html?id=sa-middle', 'login.html', 'catalog.html', 'collections.html', 'admin.html']) {
       const frame = document.createElement('iframe');
       frame.src = '../' + page;
       await new Promise((resolve, reject) => {
@@ -31,6 +31,9 @@
           observer.observe(host, { childList: true, subtree: true });
         });
         check(w.document.getElementById('taskHost').textContent.trim().length > 100, 'Task rendered');
+        const safe = w.AppUI.safeHtml('<p onclick="alert(1)">Текст<strong>пример</strong></p><img src="x" onerror="alert(1)"><a href="javascript:alert(1)">ссылка</a><iframe src="https://example.invalid"></iframe>' + '<scr' + 'ipt>bad</scr' + 'ipt>');
+        check(!/onclick|onerror|javascript:|<iframe|<script|<img|bad/.test(safe), 'HTML из API не исполняет скрипты и обработчики');
+        check(safe.includes('<strong>пример</strong>'), 'Безопасное форматирование HTML сохраняется');
         w.Store.setUser('browser-a');
         w.Store.saveSolution('private', { tabs: [{ content: 'Private A' }] });
         w.Store.setUser('browser-b');
@@ -45,6 +48,31 @@
         const chosen = w.AppUI.confirm({ title: 'Проверка выбора' });
         w.document.querySelector('[data-role="cancel"]').click();
         check(await chosen === false, 'Explicit alternate choice');
+      }
+      if (page === 'catalog.html') {
+        check(w.document.querySelector('#sortSelect option[value="popular"]'), 'Демокаталог сохраняет сортировку по популярности');
+        check(w.document.querySelectorAll('#taskRows a').length > 0, 'Каталог отрисован после определения режима');
+      }
+      if (page === 'collections.html') {
+        check(w.document.querySelectorAll('.collection-card').length > 0, 'Демоподборки отрисованы');
+      }
+      if (page === 'admin.html') {
+        // Числовой вес, стабильный ID и диаграммы переживают обычное сохранение формы.
+        const id = 'int-idempotency';
+        const source = w.Store.task(id);
+        const rubric = JSON.parse(JSON.stringify(source.rubric));
+        rubric[0].weightValue = 7;
+        w.Store.saveTaskEdit(id, { rubric, authorSolution: { plantuml: '@startuml\nA->B\n@enduml', mermaid: 'flowchart LR\nA-->B' } });
+        const before = w.Store.task(id);
+        w.document.querySelector('[data-open-task="' + id + '"]').click();
+        check(w.document.querySelector('[data-rf="weight"]').value === '7', 'Редактор показывает числовой вес из weightValue');
+        w.document.querySelector('[data-f="title"]').value = 'Проверка сохранения рубрики';
+        w.document.querySelector('#saveTaskBtn').click();
+        const after = w.Store.task(id);
+        check(after.rubric[0].id === before.rubric[0].id, 'ID критерия сохраняется после правки текста');
+        check(after.rubric[0].weightValue === 7, 'Вес критерия сохраняется');
+        check(after.authorSolution.plantuml === before.authorSolution.plantuml && after.authorSolution.mermaid === before.authorSolution.mermaid, 'Диаграммы эталона не теряются при сохранении');
+        w.Store.resetTaskEdit(id);
       }
       frame.remove();
     }

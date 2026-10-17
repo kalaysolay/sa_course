@@ -17,6 +17,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 @Table(name = "agents")
 public class AgentConfig {
 
+    @jakarta.persistence.Version
+    private Long version;
+
+    public Long getVersion() { return version; }
+
     @Id
     private String id;
 

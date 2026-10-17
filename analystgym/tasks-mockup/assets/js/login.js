@@ -48,6 +48,7 @@
   }
 
   document.addEventListener('DOMContentLoaded', async () => {
+    if (window.Api) await Api.ready;
     AppUI.mountHeader('');
     AppUI.mountFooter();
 

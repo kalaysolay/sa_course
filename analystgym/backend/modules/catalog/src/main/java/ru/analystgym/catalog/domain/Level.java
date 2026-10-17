@@ -14,6 +14,11 @@ import jakarta.persistence.Table;
 @Table(name = "levels")
 public class Level {
 
+    @jakarta.persistence.Version
+    private Long version;
+
+    public Long getVersion() { return version; }
+
     @Id
     private String id;
 

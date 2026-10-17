@@ -48,16 +48,24 @@ dependencies {
 
 // Копирует макет в статику приложения (tasks-mockup -> resources/static).
 // Исключаем около-сборочный мусор; docs/ оставляем (на них ссылается админка).
-tasks.register('syncMockup', Copy) {
+tasks.register('syncMockup', Sync) {
     description = 'Копирует tasks-mockup в статику приложения.'
     from("${rootDir}/../tasks-mockup") {
-        exclude 'server.py', 'check-mockup.py', 'scripts/**', 'tests/**'
+        exclude 'server.py', 'check-mockup.py', 'scripts/**', 'tests/**', 'assets/js/data-tasks-*.js'
     }
     into 'src/main/resources/static'
 }
 
 // Статика всегда свежая: сначала синхронизация, потом упаковка ресурсов.
 processResources.dependsOn syncMockup
+processResources {
+    // Удаляем и старую копию из инкрементальной сборки: исключения Copy её не очищают.
+    doFirst {
+        delete fileTree("${layout.buildDirectory.get()}/resources/main/static/assets/js") {
+            include 'data-tasks-*.js'
+        }
+    }
+}
 
 // Полные сценарии безопасности проверяются на отдельной PostgreSQL в Docker.
 sourceSets {

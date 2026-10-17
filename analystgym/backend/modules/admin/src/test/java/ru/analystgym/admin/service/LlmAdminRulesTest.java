@@ -21,10 +21,12 @@ import static org.mockito.Mockito.when;
 class LlmAdminRulesTest {
 
     private LlmAdminService serviceOf(ru.analystgym.review.repo.PromptVersionRepository versions) {
+        var prompts = mock(ru.analystgym.review.repo.PromptRepository.class);
+        when(prompts.lockForVersion(any())).thenReturn(Optional.of(new ru.analystgym.review.domain.Prompt()));
         return new LlmAdminService(
                 mock(ru.analystgym.review.repo.ProviderRepository.class),
                 mock(ru.analystgym.review.repo.AgentRepository.class),
-                mock(ru.analystgym.review.repo.PromptRepository.class),
+                prompts,
                 versions,
                 new com.fasterxml.jackson.databind.ObjectMapper(),
                 mock(AdminAudit.class));
@@ -40,6 +42,7 @@ class LlmAdminRulesTest {
         version.setModel("");
         version.setChangelog("c");
         version.setText("t");
+        org.springframework.test.util.ReflectionTestUtils.setField(version, "version", 0L);
         return version;
     }
 
@@ -48,15 +51,18 @@ class LlmAdminRulesTest {
         // given: canary-версия;
         var versions = mock(ru.analystgym.review.repo.PromptVersionRepository.class);
         PromptVersion v = version(UUID.randomUUID(), 4, "canary", 20);
+        PromptVersion active = version(UUID.randomUUID(), 3, "active", 80);
+        when(versions.findByPromptKeyOrderByVDesc("sa-reviewer")).thenReturn(List.of(v, active));
         when(versions.findById(v.getId())).thenReturn(Optional.of(v));
         when(versions.save(any())).thenAnswer(call -> call.getArgument(0));
 
         // when: гасим трафик;
-        var saved = serviceOf(versions).setTraffic(UUID.randomUUID(), v.getId(), new TrafficRequest(0));
+        var saved = serviceOf(versions).setTraffic(UUID.randomUUID(), v.getId(), new TrafficRequest(0, 0L));
 
         // then: статус архив, иначе канарейка без трафика ввела бы в заблуждение.
         assertThat(saved.traffic()).isEqualTo(0);
         assertThat(saved.status()).isEqualTo("archived");
+        assertThat(active.getTraffic()).isEqualTo(100);
     }
 
     @Test
@@ -70,7 +76,7 @@ class LlmAdminRulesTest {
         when(versions.save(any())).thenAnswer(call -> call.getArgument(0));
 
         // when: продвигаем канарейку;
-        var saved = serviceOf(versions).promote(UUID.randomUUID(), v4.getId());
+        var saved = serviceOf(versions).promote(UUID.randomUUID(), v4.getId(), 0L);
 
         // then: у неё 100/active, у старой 0/archived.
         assertThat(saved.traffic()).isEqualTo(100);
@@ -84,7 +90,7 @@ class LlmAdminRulesTest {
         var versions = mock(ru.analystgym.review.repo.PromptVersionRepository.class);
         when(versions.findByPromptKeyOrderByVDesc("sa-reviewer")).thenReturn(List.of());
         var prompts = mock(ru.analystgym.review.repo.PromptRepository.class);
-        when(prompts.findById("sa-reviewer"))
+        when(prompts.lockByKey("sa-reviewer"))
                 .thenReturn(Optional.of(new ru.analystgym.review.domain.Prompt()));
         LlmAdminService service = new LlmAdminService(
                 mock(ru.analystgym.review.repo.ProviderRepository.class),
@@ -94,7 +100,7 @@ class LlmAdminRulesTest {
                 mock(AdminAudit.class));
 
         assertThatThrownBy(() -> service.createVersion(UUID.randomUUID(), "sa-reviewer",
-                new VersionCreateRequest("text", "  ", "", 0)))
+                new VersionCreateRequest("text", "  ", "", 0, null)))
                 .isInstanceOf(org.springframework.web.server.ResponseStatusException.class);
     }
 }

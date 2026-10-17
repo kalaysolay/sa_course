@@ -55,7 +55,7 @@ public class ReferenceAdminService {
                     collection.getTagline(), collection.getDescription(), collection.getIcon(),
                     collection.getAudience(),
                     collection.getTaskIds() == null ? List.of() : List.of(collection.getTaskIds()),
-                    collection.isActive()));
+                    collection.isActive(), collection.getVersion()));
         }
         return result;
     }
@@ -91,6 +91,7 @@ public class ReferenceAdminService {
         } else {
             collection = collections.findById(body.id())
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+            EditVersion.require(collection.getVersion(), body.version());
             created = false;
         }
         collection.setTitle(body.title().trim());
@@ -100,18 +101,19 @@ public class ReferenceAdminService {
         collection.setAudience(str(body.audience(), 500));
         collection.setTaskIds(taskIds.toArray(new String[0]));
         collection.setActive(body.active() == null || body.active());
-        collections.save(collection);
+        collection = collections.saveAndFlush(collection);
         audit.log(authorId, created ? "collection.create" : "collection.update",
                 "collection:" + collection.getId());
         return new CollectionDto(collection.getId(), collection.getTitle(),
                 collection.getTagline(), collection.getDescription(), collection.getIcon(),
-                collection.getAudience(), List.of(collection.getTaskIds()), collection.isActive());
+                collection.getAudience(), List.of(collection.getTaskIds()), collection.isActive(), collection.getVersion());
     }
 
     @Transactional
-    public void deleteCollection(UUID authorId, String id) {
+    public void deleteCollection(UUID authorId, String id, Long version) {
         TaskCollection collection = collections.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        EditVersion.require(collection.getVersion(), version);
         collections.delete(collection);
         audit.log(authorId, "collection.delete", "collection:" + id);
     }
@@ -124,7 +126,7 @@ public class ReferenceAdminService {
         for (Tag tag : tags.findAll()) {
             result.add(new TagDto(tag.getId(), tag.getName(), tag.getCategory(),
                     tag.getSynonyms() == null ? List.of() : List.of(tag.getSynonyms()),
-                    tag.isActive()));
+                    tag.isActive(), tag.getVersion()));
         }
         return result;
     }
@@ -151,6 +153,7 @@ public class ReferenceAdminService {
         } else {
             tag = tags.findById(body.id())
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+            EditVersion.require(tag.getVersion(), body.version());
             created = false;
         }
         tag.setName(body.name().trim());
@@ -159,10 +162,10 @@ public class ReferenceAdminService {
                 .filter(s -> s != null && !s.isBlank()).map(String::trim).toList();
         tag.setSynonyms(synonyms.toArray(new String[0]));
         tag.setActive(body.active() == null || body.active());
-        tags.save(tag);
+        tag = tags.saveAndFlush(tag);
         audit.log(authorId, created ? "tag.create" : "tag.update", "tag:" + tag.getId());
         return new TagDto(tag.getId(), tag.getName(), tag.getCategory(),
-                List.of(tag.getSynonyms()), tag.isActive());
+                List.of(tag.getSynonyms()), tag.isActive(), tag.getVersion());
     }
 
     /**
@@ -170,9 +173,10 @@ public class ReferenceAdminService {
      * молча рвать фильтры и рубрики чужих задач нельзя.
      */
     @Transactional
-    public void deleteTag(UUID authorId, String id) {
+    public void deleteTag(UUID authorId, String id, Long version) {
         Tag tag = tags.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        EditVersion.require(tag.getVersion(), version);
         for (Task task : tasks.findAll()) {
             if (task.getTags() != null && List.of(task.getTags()).contains(id)) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "tag in use, hide instead");
@@ -197,6 +201,7 @@ public class ReferenceAdminService {
         if (body == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "empty body");
         }
+        EditVersion.require(level.getVersion(), body.version());
         if (body.name() != null) {
             if (body.name().trim().length() < 2 || body.name().trim().length() > 100) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "bad name");
@@ -212,7 +217,7 @@ public class ReferenceAdminService {
         if (body.timeHint() != null) {
             level.setTimeHint(str(body.timeHint(), 500));
         }
-        levels.save(level);
+        levels.saveAndFlush(level);
         audit.log(authorId, "level.update", "level:" + id);
         return level;
     }

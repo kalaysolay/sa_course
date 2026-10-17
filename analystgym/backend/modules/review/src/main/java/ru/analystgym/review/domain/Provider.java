@@ -16,6 +16,11 @@ import org.hibernate.annotations.UpdateTimestamp;
 @Table(name = "providers")
 public class Provider {
 
+    @jakarta.persistence.Version
+    private Long version;
+
+    public Long getVersion() { return version; }
+
     @Id
     private String id;
 

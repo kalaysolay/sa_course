@@ -1,11 +1,8 @@
 /* ============================================================
-   api.js — мост фронта к backend API (Фазы 1–3).
-   Пытается забрать каталог/словари с того же origin (/api/*);
-   если сервера нет (file:// или макет открыт как статика) —
-   молча остаётся на встроенных SA_DATA. ready всегда резолвится,
-   никогда не реджектится: страница обязана отрисоваться в любом случае.
-   Фазы 2–3: черновики/попытки/диагностика/жалобы идут через сервер,
-   когда он есть и пользователь вошёл; иначе task.js работает локально.
+   api.js — каталог, сессии и мутации через API того же origin.
+   Встроенные задачи загружаются только в отдельном embedded-макете.
+   Ошибка сервера не включает демо. ready завершается и при ошибке:
+   страница показывает catalogError и возможность повторить загрузку.
    ============================================================ */
 
 (function () {
@@ -103,11 +100,7 @@
     }
     // refresh/logout могут вернуть пустое тело — читаем как текст с запасом.
     const text = await response.text();
-    try {
-      return text ? JSON.parse(text) : {};
-    } catch (e) {
-      return {};
-    }
+    return text ? JSON.parse(text) : {};
   }
 
   async function refreshSession() {
@@ -189,47 +182,32 @@
     }
   }
 
-  /* Подмешиваем серверные сводки в SA_DATA: по совпадающим id побеждает
-     сервер (заголовок/уровень/метки правит методист), полные тела задач
-     остаются из встроенных данных до Фазы 2. Новых id с сервера добавляем. */
-  function mergeTasks(serverTasks) {
-    if (!Array.isArray(serverTasks) || !window.SA_DATA) return;
-    const embedded = window.SA_DATA.tasks || [];
-    const byId = new Map(embedded.map((task) => [task.id, task]));
-    const extra = [];
-    serverTasks.forEach((card) => {
-      const local = byId.get(card.id);
-      if (local) {
-        local.title = card.title;
-        local.level = card.level;
-        local.tags = card.tags || [];
-        local.timeMin = card.timeMin;
-        local.solvedRate = card.solvedRate;
-      } else {
-        extra.push({
-          id: card.id,
-          title: card.title,
-          level: card.level,
-          tags: card.tags || [],
-          timeMin: card.timeMin,
-          solvedRate: card.solvedRate,
-          status: 'published'
-        });
-      }
-    });
-    window.SA_DATA.tasks = embedded.concat(extra);
+  // Серверный каталог заменяет предыдущий снимок целиком, включая пустые массивы.
+  async function loadCatalog() {
+    const [dict, tasks, collections] = await Promise.all([
+      getJson('/api/dictionaries'), getJson('/api/tasks'), getJson('/api/collections')
+    ]);
+    if (!Array.isArray(tasks) || !Array.isArray(collections) || !dict || typeof dict !== 'object') {
+      throw new Error('Некорректный ответ каталога');
+    }
+    Api.catalog = { tasks: tasks.map(t => ({ ...t, status: 'published' })), dictionaries: {
+      levels: dict.levels || [], tags: dict.tags || [],
+      collections: collections.map(c => ({ ...c, name: c.title }))
+    } };
+    Api.catalogError = null;
   }
 
-  function replaceDictionaries(dict) {
-    if (!dict || !window.SA_DATA) return;
-    if (Array.isArray(dict.levels) && dict.levels.length) window.SA_DATA.levels = dict.levels;
-    if (Array.isArray(dict.tags) && dict.tags.length) window.SA_DATA.tags = dict.tags;
-  }
-
-  function replaceCollections(serverCollections) {
-    if (!Array.isArray(serverCollections) || !window.SA_DATA) return;
-    // Сервер отдаёт title, встроенные карточки местами читают name — кладём оба.
-    window.SA_DATA.collections = serverCollections.map((c) => Object.assign({}, c, { name: c.title }));
+  // Эталоны встроены только в отдельный макет. В серверной сборке этих файлов нет.
+  async function loadDemo() {
+    for (const name of ['data-tasks-1.js', 'data-tasks-2.js']) {
+      await new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = './assets/js/' + name;
+        script.onload = resolve;
+        script.onerror = () => reject(new Error('Не удалось загрузить данные демо'));
+        document.head.appendChild(script);
+      });
+    }
   }
 
   const ready = Promise.resolve().then(async () => {
@@ -243,17 +221,10 @@
       }
     }
     try {
-      const [dict, tasks, collections] = await Promise.all([
-        getJson('/api/dictionaries'),
-        getJson('/api/tasks'),
-        getJson('/api/collections')
-      ]);
-      replaceDictionaries(dict);
-      mergeTasks(tasks);
-      replaceCollections(collections);
-    } catch (error) {
-      // Ошибка каталога не меняет ранее определённый режим сервера.
-    }
+      if (Api.mode === 'server') await loadCatalog();
+      else if (Api.mode === 'embedded') await loadDemo();
+      else throw new Error('Сервер недоступен');
+    } catch (error) { Api.catalogError = error; }
     try {
       changeUser(Api.mode === 'server' ? await Api.me() : null, Api.mode === 'server');
     } catch (error) {
@@ -268,9 +239,19 @@
     user: null,
     initialized: false,
     ready,
+    catalog: { tasks: [], dictionaries: { levels: [], tags: [], collections: [] } },
+    catalogError: null,
+    loadCatalog,
 
     get: getJson,
     post: postJson,
+    put: putJson,
+    patch: (path, body) => sendJson('PATCH', path, body),
+    delete: path => sendJson('DELETE', path),
+
+    async getTask(id) {
+      return getJson('/api/tasks/' + encodeURIComponent(id) + '/detail');
+    },
 
     // Bcrypt ограничивает байты UTF-8, а не число символов кириллицы.
     validPassword(value) {
@@ -319,9 +300,9 @@
       }
     },
 
-    async submitAttempt(taskId, tabs, idempotencyKey) {
+    async submitAttempt(taskId, tabs, idempotencyKey, taskVersion) {
       const extra = idempotencyKey ? { 'Idempotency-Key': idempotencyKey } : null;
-      return postJson('/api/attempts', { taskId, tabs: tabs || [] }, extra);
+      return postJson('/api/attempts', { taskId, tabs: tabs || [], taskVersion }, extra);
     },
 
     async getAttempt(attemptId) {
@@ -337,12 +318,7 @@
     },
 
     async getReference(taskId) {
-      // 403 (эталон закрыт) и 404 глотаем: значит, показывать нечего.
-      try {
-        return await getJson('/api/tasks/' + encodeURIComponent(taskId) + '/reference');
-      } catch (error) {
-        return null;
-      }
+      return getJson('/api/tasks/' + encodeURIComponent(taskId) + '/reference');
     },
 
     /* ---------- диагностика (Фаза 3): сервер, если есть и вошли ---------- */

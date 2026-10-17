@@ -74,7 +74,7 @@
           <span class="level level-medium">средних ${levels[1]}</span>
           <span class="level level-hard">сложных ${levels[2]}</span>
           <span>≈ <b>${Math.round(totalTime / 60 * 10) / 10}</b> ч</span>
-          <span>решили в среднем <b>${avgSolved}%</b></span>
+          ${Api.mode === 'embedded' ? `<span>решили в среднем <b>${avgSolved}%</b></span>` : ''}
           <span>для: <b>${AppUI.esc(collection.audience || '—')}</b></span>
         </div>
 
@@ -102,7 +102,7 @@
 
   function render() {
     const dict = Store.dictionaries();
-    const collections = dict.collections.filter((c) => c.active !== false);
+    const collections = dict.collections.filter((c) => c.active !== false && collectionTasks(c).length > 0);
     const host = document.getElementById('collectionsHost');
 
     const allItems = new Set();
@@ -117,7 +117,8 @@
       <a class="badge" href="catalog.html" style="cursor:pointer">весь каталог →</a>
     `;
 
-    host.innerHTML = `<div class="collections-grid">${collections.map(renderCollection).join('')}</div>`;
+    host.innerHTML = collections.length ? `<div class="collections-grid">${collections.map(renderCollection).join('')}</div>`
+      : '<div class="empty-state"><h3>Пока нет подборок с опубликованными задачами</h3><a href="catalog.html">Открыть каталог</a></div>';
 
     /* подсветка подборки из хэша ссылки */
     const hash = window.location.hash.slice(1);
@@ -132,10 +133,11 @@
     }
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('DOMContentLoaded', async () => {
+    if (window.Api) await Api.ready;
     AppUI.mountHeader('collections');
     AppUI.mountFooter();
     // Первый рендер ждёт Api: если рядом поднят backend, подборки приедут из Postgres.
-    (window.Api ? window.Api.ready : Promise.resolve()).then(render);
+    render();
   });
 })();

@@ -85,7 +85,7 @@ public class PracticeController {
         if (body == null || body.taskId() == null || body.taskId().isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "taskId required");
         }
-        UUID attemptId = practice.submit(userId, body.taskId(), body.tabs(), idempotencyKey);
+        UUID attemptId = practice.submit(userId, body.taskId(), body.tabs(), idempotencyKey, body.taskVersion());
         // 202 и для новой, и для повторной (идемпотентной) отправки:
         // работа уже принята, результат — polling.
         return ResponseEntity.status(HttpStatus.ACCEPTED)

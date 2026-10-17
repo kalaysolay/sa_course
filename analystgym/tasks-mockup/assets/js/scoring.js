@@ -159,7 +159,8 @@ window.Scoring = (function () {
     const levelRank = { easy: 1, medium: 2, hard: 3 };
     const targetRank = levelRank[targetLevel] || 2;
 
-    const tasks = (window.SA_DATA.tasks || []).map((task) => {
+    const catalog = window.Store ? Store.tasks() : (window.SA_DATA.tasks || []);
+    const tasks = catalog.filter(task => !task.status || task.status === 'published').map((task) => {
       const overlap = (task.tags || []).filter((t) => targetTags.includes(t)).length;
       const done = window.Store && window.Store.status(task.id) === 'reviewed';
       const levelDistance = Math.abs((levelRank[task.level] || 2) - targetRank);

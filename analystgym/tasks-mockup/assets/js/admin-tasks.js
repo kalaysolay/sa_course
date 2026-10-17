@@ -1,11 +1,14 @@
 /* ============================================================
    admin-tasks.js — раздел «Задачи»: список, карточка задачи,
    редактор рубрики (веса 1–10), симулятор скоринга.
-   Правки живут в Store.taskEdits и сразу влияют на движок
-   ревью (в макете сохранение = публикация ревизии).
+   Серверный адаптер передаёт API и снимок данных из admin-server.js.
+   В отдельном демомакете правки живут в Store.taskEdits.
    ============================================================ */
 
 window.AdminTasks = (function () {
+
+  let Store = window.Store;
+  let cardLoad = 0;
 
   const state = {
     q: '',
@@ -42,6 +45,7 @@ window.AdminTasks = (function () {
   }
 
   function attemptsStats(taskId) {
+    if (api && api.server) return { count: '—', avg: null };
     const list = Store.attempts(taskId);
     const scores = list
       .filter((a) => a.review && a.review.grade)
@@ -85,6 +89,7 @@ window.AdminTasks = (function () {
 
   function render(host, adminApi) {
     api = adminApi;
+    Store = api.store || window.Store;
     if (state.openTaskId) renderCard(host);
     else renderList(host);
   }
@@ -110,7 +115,7 @@ window.AdminTasks = (function () {
     const statuses = Store.taskStatuses();
     const published = all.filter((t) => Store.taskStatus(t.id) === 'published').length;
     const inWork = all.filter((t) => ['draft', 'review'].includes(Store.taskStatus(t.id))).length;
-    const attemptsTotal = all.reduce((sum, t) => sum + Store.attempts(t.id).length, 0);
+    const attemptsTotal = api.server ? api.attemptsTotal : all.reduce((sum, t) => sum + Store.attempts(t.id).length, 0);
     const list = filteredTasks();
 
     host.innerHTML = `
@@ -155,14 +160,14 @@ window.AdminTasks = (function () {
               ${list.length ? list.map((task) => {
                 const st = attemptsStats(task.id);
                 const edited = isEdited(task.id);
-                const updated = ((Store.all().taskEdits || {})[task.id] || {}).updatedAt;
+                const updated = api.server ? task.updatedAt : ((Store.all().taskEdits || {})[task.id] || {}).updatedAt;
                 return `
                   <tr>
                     <td>
                       <div style="color:var(--text);font-weight:550">${AppUI.esc(task.title || '(без названия)')}</div>
                       <div class="mono dim" style="font-size:11px">${AppUI.esc(task.id)}${edited ? ' · <span style="color:var(--warn)">есть правки</span>' : ''}</div>
                     </td>
-                    <td>${AppUI.levelBadge(task.level)}</td>
+                    <td>${AppUI.levelBadge(task.level, Store.level(task.level))}</td>
                     <td>
                       <select class="select" data-status-task="${AppUI.esc(task.id)}" style="padding:6px 8px;font-size:12px">
                         ${statuses.map((s) => `<option value="${s.id}" ${Store.taskStatus(task.id) === s.id ? 'selected' : ''}>${s.name}</option>`).join('')}
@@ -170,7 +175,7 @@ window.AdminTasks = (function () {
                     </td>
                     <td style="text-align:right" class="mono">${st.count}</td>
                     <td style="text-align:right" class="mono">${st.avg === null ? '—' : st.avg}</td>
-                    <td class="dim" style="font-size:12px">${updated ? AppUI.dateTime(updated) : pseudoCreated(task.id)}</td>
+                    <td class="dim" style="font-size:12px">${updated ? AppUI.dateTime(updated) : api.server ? '—' : pseudoCreated(task.id)}</td>
                     <td>
                       <div class="cell-actions">
                         <a class="icon-btn" href="task.html?id=${AppUI.esc(task.id)}" title="Открыть глазами студента">↗</a>
@@ -186,7 +191,7 @@ window.AdminTasks = (function () {
         <div class="solution-foot">
           <span>Показано ${list.length} из ${all.length}</span>
           <div class="grow"></div>
-          <span class="dim">Сохранение в карточке сразу влияет на движок ревью (в макете сохранение = публикация)</span>
+          <span class="dim">${api.server ? 'Студентам доступны только опубликованные задачи. Статистика решений — в разделе «Решения».' : 'Сохранение в карточке сразу влияет на движок ревью (демо)'}</span>
         </div>
       </div>
 
@@ -194,8 +199,7 @@ window.AdminTasks = (function () {
         <div class="ib-title">Внутренний workflow</div>
         <p style="margin:0;font-size:13.5px;color:var(--text-2)">
           Черновик → На ревью → Опубликована → Архив. Студентам видна только опубликованная задача.
-          Правка опубликованной считается новой ревизией рубрики/эталона: в продукте здесь будет
-          журнал версий и связка «попытка → версия рубрики», чтобы тюнить промпты не вслепую.
+          Каждое сохранение создаёт ревизию. Для публикации заполните условие, цель, ожидаемый результат, рубрику и эталон.
         </p>
       </div>`;
 
@@ -212,7 +216,14 @@ window.AdminTasks = (function () {
     host.querySelector('#taskStatusFilter').addEventListener('change', (e) => { state.status = e.target.value; renderList(host); });
     host.querySelector('#newTaskBtn').addEventListener('click', () => { state.openTaskId = '__new__'; renderCard(host); });
     host.querySelectorAll('[data-status-task]').forEach((select) => {
-      select.addEventListener('change', () => {
+      select.addEventListener('change', async () => {
+        if (api.server) {
+          const row = Store.task(select.dataset.statusTask);
+          try {
+            await api.run(select, () => api.saveStatus(row.id, select.value, row.version));
+          } finally { select.value = Store.task(row.id).status; }
+          return;
+        }
         Store.setTaskStatus(select.dataset.statusTask, select.value);
         AppUI.toast(`Статус: ${statusName(select.value)}`, 'ok');
         api.refresh();
@@ -247,7 +258,7 @@ window.AdminTasks = (function () {
     const wrap = document.getElementById('tagCloudWrap');
     if (!wrap) return;
     const checked = new Set([...wrap.querySelectorAll('input:checked')].map((i) => i.value));
-    const tags = Store.dictionaries().tags.filter((t) => t.active !== false);
+    const tags = Store.dictionaries().tags.filter((t) => t.active !== false || checked.has(t.id));
     const q = tagQuery.trim().toLowerCase();
     const sel = tags.filter((t) => checked.has(t.id));
     const rest = tags.filter((t) => !checked.has(t.id) && (!q || t.name.toLowerCase().includes(q) || t.id.includes(q)));
@@ -258,8 +269,8 @@ window.AdminTasks = (function () {
   }
 
   function tagCheckboxes(task) {
-    const tags = Store.dictionaries().tags.filter((t) => t.active !== false);
     const selected = new Set(task.tags || []);
+    const tags = Store.dictionaries().tags.filter((t) => t.active !== false || selected.has(t.id));
     return `
       <div class="search mb-16" style="flex:none;max-width:320px">
         <span class="ico">⌕</span>
@@ -289,7 +300,17 @@ window.AdminTasks = (function () {
     return `<div class="field"><label>${label}</label>${inner}</div>`;
   }
 
-  function renderCard(host) {
+  async function renderCard(host) {
+    const load = ++cardLoad;
+    if (api.server && state.openTaskId !== '__new__') {
+      host.innerHTML = '<p role="status">Загрузка задачи…</p>';
+      try { await api.loadTask(state.openTaskId); }
+      catch (error) {
+        if (load === cardLoad && host.dataset.section === 'tasks') api.showError(error);
+        return;
+      }
+      if (load !== cardLoad || host.dataset.section !== 'tasks') return;
+    }
     const task = currentTask();
     if (!task) {
       state.openTaskId = null;
@@ -309,8 +330,9 @@ window.AdminTasks = (function () {
         ${statusBadge(Store.taskStatus(task.id))}
         ${edited ? '<span class="badge badge-warn">есть правки из админки</span>' : ''}
         <a class="btn btn-ghost btn-sm" href="task.html?id=${AppUI.esc(task.id)}" ${isNew ? 'style="display:none"' : ''}>Глазами студента ↗</a>
-        ${!isNew ? `<button class="btn btn-ghost btn-sm" type="button" id="resetTaskBtn">Сбросить правки</button>` : ''}
-        <button class="btn btn-primary btn-sm" type="button" id="saveTaskBtn">Сохранить и опубликовать</button>
+        ${!isNew && !api.server ? `<button class="btn btn-ghost btn-sm" type="button" id="resetTaskBtn">Сбросить правки</button>` : ''}
+        ${!isNew && api.server ? '<button class="btn btn-ghost btn-sm" id="taskHistoryBtn">Ревизии и экспорт</button>' : ''}
+        <button class="btn btn-primary btn-sm" type="button" id="saveTaskBtn">${api.server ? 'Сохранить' : 'Сохранить и опубликовать'}</button>
       </div>
 
       <div class="panel acc mb-16" data-acc="open">
@@ -321,17 +343,18 @@ window.AdminTasks = (function () {
           ${field('Название', `<input type="text" data-f="title" value="${AppUI.esc(task.title || '')}" maxlength="120" placeholder="Например: Идемпотентное списание в платёжном API">`)}
           ${isNew
             ? '<p class="mono dim" style="font-size:11.5px;margin:-6px 0 14px">ID сгенерируется из названия при сохранении (латиница, например: idempotent-payment)</p>'
-            : `<p class="mono dim" style="font-size:11.5px;margin:-6px 0 14px">ID: ${AppUI.esc(task.id)} · создана: ${pseudoCreated(task.id)}${edited ? ` · изменена: ${AppUI.dateTime(((Store.all().taskEdits || {})[task.id] || {}).updatedAt)}` : ''}</p>`}
+            : `<p class="mono dim" style="font-size:11.5px;margin:-6px 0 14px">ID: ${AppUI.esc(task.id)} · ${api.server ? 'версия ' + task.version + ' · обновлена: ' + AppUI.dateTime(task.updatedAt) : 'создана: ' + pseudoCreated(task.id)}</p>`}
           ${field('Уровень', `<select data-f="level">${levels.map((l) => `<option value="${l.id}" ${task.level === l.id ? 'selected' : ''}>${AppUI.esc(l.name)}</option>`).join('')}</select>`)}
           ${field('Статус', `<select data-f="status">${statuses.map((s) => `<option value="${s.id}" ${Store.taskStatus(task.id) === s.id ? 'selected' : ''}>${s.name}</option>`).join('')}</select>`)}
           <div class="field">
             <label>Метки <span class="mono dim" id="tagCount" style="font-size:10.5px"></span></label>
             ${tagCheckboxes(task)}
           </div>
-          ${field('Подборки', `<div class="filter-list">${collectionCheckboxes(task)}</div>`)}
+          ${api.server ? '<p><a href="#collections">Состав подборок редактируется в разделе «Подборки»</a></p>' : field('Подборки', `<div class="filter-list">${collectionCheckboxes(task)}</div>`)}
+          ${field('Время на решение, минут', `<input type="number" data-f="timeMin" data-kind="number" min="5" max="480" value="${task.timeMin || 30}">`)}
           <div class="info-box" style="margin-top:6px">
-            <div class="ib-title">Как это работает в макете</div>
-            <p style="margin:0;font-size:13px">Сохранение сразу меняет задачу везде: каталог, страница задачи и движок ревью. Отдельной кнопки «публиковать» нет — в продукте здесь будет ревизия + changelog.</p>
+            <div class="ib-title">${api.server ? 'Публикация' : 'Деморежим'}</div>
+            <p style="margin:0;font-size:13px">${api.server ? 'Новая задача сохраняется черновиком. После заполнения переведите её на ревью, затем опубликуйте. При конфликте версии ваши поля останутся в форме: скопируйте их перед перезагрузкой.' : 'Правки сохраняются в этом браузере.'}</p>
           </div>
         </div>
       </div>
@@ -358,8 +381,7 @@ window.AdminTasks = (function () {
           <p class="muted" style="font-size:13px;margin-bottom:14px">
             Каждый критерий: сколько баллов даёт (1–10), чья зона проверки, ключевые маркеры для поиска
             в тексте решения и объяснение «почему без этого не работает» (показываем студенту при miss).
-            Флаг <strong>critical</strong> — зарезервирован под будущие штрафы (см. TODO.md): miss по такому
-            критерию не даст подняться выше 3/5.
+            Флаг <strong>critical</strong> сохраняется как методическая пометка. Текущий детерминированный движок не применяет отдельный штраф по этому флагу; фактический балл проверяйте в симуляторе.
           </p>
           <div id="rubricRows" class="stack" style="gap:10px"></div>
           <button class="btn btn-ghost btn-sm mt-16" type="button" id="addCriterionBtn">+ Добавить критерий</button>
@@ -372,7 +394,9 @@ window.AdminTasks = (function () {
           ${field('Подсказки (по одной на строку)', `<textarea data-f="hints" data-kind="lines" rows="4" placeholder="Например: Разделите повтор клиента и молчание эквайринга — это разные механизмы">${AppUI.esc(lines(task.hints))}</textarea>`)}
           ${field('Вопросы интервьюера (по одному на строку)', `<textarea data-f="interviewQuestions" data-kind="lines" rows="4" placeholder="Например: Где храните ключ и какой у него TTL?">${AppUI.esc(lines(task.interviewQuestions))}</textarea>`)}
           ${field('Эталонное решение (HTML)', `<textarea data-f="authorSolution.doc" rows="9" style="font-size:12px" placeholder="Например: <h3>1. Контракт</h3><p>Ключ генерирует клиент…</p>">${AppUI.esc((task.authorSolution || {}).doc || '')}</textarea>`)}
-          <p class="mono dim" style="font-size:11px">Диаграммы эталона (plantuml/mermaid) пока только для чтения — редактируются в данных.</p>
+          ${field('Эталон PlantUML', `<textarea data-f="authorSolution.plantuml" rows="5">${AppUI.esc((task.authorSolution || {}).plantuml || '')}</textarea>`)}
+          ${field('Эталон Mermaid', `<textarea data-f="authorSolution.mermaid" rows="5">${AppUI.esc((task.authorSolution || {}).mermaid || '')}</textarea>`)}
+          ${api.server ? field('Стартовые вкладки (JSON: type, title, content)', `<textarea id="starterTabsJson" rows="7">${AppUI.esc(JSON.stringify(task.starterTabs || [], null, 2))}</textarea>`) : ''}
         </div>
       </div>
 
@@ -398,14 +422,14 @@ window.AdminTasks = (function () {
   function paintRubric(criteria) {
     const host = document.getElementById('rubricRows');
     host.innerHTML = criteria.map((criterion, index) => `
-      <div class="card" style="padding:14px" data-criterion="${index}">
+      <div class="card" style="padding:14px" data-criterion="${index}" data-criterion-id="${AppUI.esc(criterion.id || '')}">
         <div class="grid-2" style="gap:10px">
           <div class="field" style="margin:0"><label>Критерий</label>
             <input type="text" data-rf="title" value="${AppUI.esc(criterion.title || '')}" placeholder="Например: Ключ идемпотентности генерирует клиент">
           </div>
           <div class="row" style="gap:10px;align-items:flex-end">
             <div class="field" style="margin:0;flex:0 0 76px"><label>Вес 1–10</label>
-              <input type="number" data-rf="weight" value="${criterion.weight === undefined ? 5 : criterion.weight}" min="1" max="10" step="1">
+              <input type="number" data-rf="weight" value="${criterion.weightValue ?? (typeof criterion.weight === 'number' ? criterion.weight : 5)}" min="1" max="10" step="1">
             </div>
             <div class="field" style="margin:0;flex:1"><label>Зона</label>
               <select data-rf="focus">
@@ -449,7 +473,7 @@ window.AdminTasks = (function () {
       };
       const weight = Math.max(1, Math.min(10, Number(get('weight')) || 5));
       return {
-        id: `c_${Math.random().toString(36).slice(2, 8)}`,
+        id: row.dataset.criterionId || (row.dataset.criterionId = `c_${Math.random().toString(36).slice(2, 8)}`),
         title: get('title'),
         weight: 'high',
         weightValue: weight,
@@ -511,7 +535,7 @@ window.AdminTasks = (function () {
     patch.rubric = collectRubric();
 
     const authorDoc = host.querySelector('[data-f="authorSolution.doc"]');
-    if (authorDoc) patch.authorSolution = { doc: authorDoc.value };
+    if (authorDoc) patch.authorSolution = { ...task.authorSolution, ...patch.authorSolution, doc: authorDoc.value };
 
     if (!patch.title && !isNew) patch.title = task.title;
     if (isNew && !patch.title) {
@@ -544,7 +568,7 @@ window.AdminTasks = (function () {
     return (div.textContent || '').replace(/\s+\n/g, '\n').trim();
   }
 
-  function runSimulator(host, task) {
+  async function runSimulator(host, task) {
     const text = host.querySelector('#simText').value.trim();
     const result = host.querySelector('#simResult');
     if (!text) {
@@ -557,7 +581,9 @@ window.AdminTasks = (function () {
       : task;
     let review;
     try {
-      review = ReviewEngine.buildReview(effective, [{ type: 'doc', title: 'Проверка', content: text }]);
+      if (api.server && !task.id) throw new Error('Сначала сохраните черновик задачи');
+      review = api.server ? await Api.post('/api/admin/tasks/' + encodeURIComponent(task.id) + '/simulate', { text, rubric: effective.rubric })
+        : ReviewEngine.buildReview(effective, [{ type: 'doc', title: 'Проверка', content: text }]);
     } catch (error) {
       result.innerHTML = `<div class="preview-error">Не удалось посчитать: ${AppUI.esc(error.message)}</div>`;
       return;
@@ -587,6 +613,11 @@ window.AdminTasks = (function () {
   }
 
   function bindCard(host, task, isNew) {
+    if (api.server && isNew) {
+      const status = host.querySelector('[data-f="status"]');
+      status.value = 'draft';
+      status.disabled = true;
+    }
     host.querySelectorAll('.acc > .panel-head').forEach((head) => {
       head.addEventListener('click', () => {
         const panel = head.closest('.acc');
@@ -644,9 +675,19 @@ window.AdminTasks = (function () {
       });
     }
 
-    host.querySelector('#saveTaskBtn').addEventListener('click', () => {
+    host.querySelector('#saveTaskBtn').addEventListener('click', async event => {
       const patch = collectForm(task, isNew);
       if (!patch) return;
+      if (api.server) {
+        await api.run(event.currentTarget, async () => {
+          patch.starterTabs = JSON.parse(host.querySelector('#starterTabsJson').value);
+          const saved = await api.saveTask(task, patch, isNew);
+          state.openTaskId = saved.id;
+          AppUI.toast('Задача сохранена на сервере', 'ok');
+          await api.refresh();
+        });
+        return;
+      }
       const id = isNew ? patch.id : task.id;
       Store.saveTaskEdit(id, patch);
       syncCollections(id);
@@ -658,6 +699,9 @@ window.AdminTasks = (function () {
         api.refresh();
       }
     });
+
+    const history = host.querySelector('#taskHistoryBtn');
+    if (history) history.addEventListener('click', () => api.run(history, () => api.history(task.id)));
 
     host.querySelector('#simRunBtn').addEventListener('click', () => runSimulator(host, Store.task(isNew ? null : task.id) || task));
     host.querySelector('#simFillBtn').addEventListener('click', () => {

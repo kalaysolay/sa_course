@@ -117,7 +117,7 @@ public class TaskAdminService {
         task.setHints(JsonNodeFactory.instance.arrayNode());
         task.setInterviewQuestions(JsonNodeFactory.instance.arrayNode());
         task.setAuthorSolution(blankAuthorSolution());
-        tasks.save(task);
+        task = tasks.saveAndFlush(task);
         writeRevision(id, authorId, task);
         audit.log(authorId, "task.create", "task:" + id);
         return fullOf(task);
@@ -125,12 +125,24 @@ public class TaskAdminService {
 
     /** Правка: присланные поля заменяют целиком (массивы — не мерж, как в Store). */
     @Transactional
+    public TaskFull createWithContent(UUID authorId, String title, ru.analystgym.admin.web.AdminDto.TaskUpdateRequest body) {
+        TaskFull created = createTask(authorId, title);
+        if (body == null) return created;
+        return updateTask(authorId, created.id(), title, body.level(), body.tags(), body.timeMin(), "draft",
+                body.statement(), body.starterTabs(), body.rubric(), body.hints(), body.interviewQuestions(),
+                body.authorSolution(), created.version());
+    }
+
+    /** Правка одной версии с записью ревизии в той же транзакции. */
+    @Transactional
     public TaskFull updateTask(UUID authorId, String id, String title, String level,
                                List<String> tagIds, Integer timeMin, String status,
                                JsonNode statement, JsonNode starterTabs,
                                List<CriterionDto> rubric, List<String> hints,
-                               List<String> interviewQuestions, JsonNode authorSolution) {
-        Task task = taskOrThrow(id);
+                               List<String> interviewQuestions, JsonNode authorSolution, Long version) {
+        Task task = tasks.lockById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        EditVersion.require(task.getVersion(), version);
         if (title != null) {
             String clean = title.trim();
             if (clean.length() < 3 || clean.length() > 200) {
@@ -160,9 +172,7 @@ public class TaskAdminService {
             task.setStatus(status);
         }
         if (statement != null) {
-            if (!statement.isObject()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "bad statement");
-            }
+            validateStatement(statement);
             task.setStatement(statement);
         }
         if (starterTabs != null) {
@@ -181,12 +191,11 @@ public class TaskAdminService {
             task.setInterviewQuestions(mapper.valueToTree(interviewQuestions));
         }
         if (authorSolution != null) {
-            if (!authorSolution.isObject()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "bad authorSolution");
-            }
+            validateAuthor(authorSolution);
             task.setAuthorSolution(authorSolution);
         }
-        tasks.save(task);
+        validatePublication(task);
+        tasks.saveAndFlush(task);
         writeRevision(id, authorId, task);
         audit.log(authorId, "task.update", "task:" + id);
         return fullOf(task);
@@ -293,7 +302,12 @@ public class TaskAdminService {
                 ? node.get("interviewQuestions") : JsonNodeFactory.instance.arrayNode());
         task.setAuthorSolution(node.has("authorSolution") && node.get("authorSolution").isObject()
                 ? node.get("authorSolution") : blankAuthorSolution());
-        tasks.save(task);
+        validateStatement(task.getStatement());
+        validateAuthor(task.getAuthorSolution());
+        validateStrings(strings(task.getHints()), 50, 2000, "bad hints");
+        validateStrings(strings(task.getInterviewQuestions()), 20, 1000, "bad interviewQuestions");
+        validatePublication(task);
+        task = tasks.saveAndFlush(task);
         writeRevision(id, authorId, task);
         audit.log(authorId, "task.import", "task:" + id);
         return fullOf(task);
@@ -332,6 +346,7 @@ public class TaskAdminService {
         if (rubric.size() > 30) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "too many criteria");
         }
+        java.util.Set<String> ids = new java.util.HashSet<>();
         for (CriterionDto criterion : rubric) {
             if (criterion == null) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "bad criterion");
@@ -371,6 +386,9 @@ public class TaskAdminService {
             String cid = criterion.id() == null || criterion.id().isBlank()
                     ? "c_" + UUID.randomUUID().toString().replace("-", "").substring(0, 6)
                     : criterion.id().trim();
+            if (cid.length() > 100 || !ids.add(cid)) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "duplicate or invalid criterion id");
+            }
             node.put("id", cid);
             node.put("title", title);
             // Legacy-вес — заглушка как в макете, реальный вес — weightValue.
@@ -425,6 +443,11 @@ public class TaskAdminService {
             if (!List.of("doc", "plantuml", "mermaid").contains(type)) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "bad tab type");
             }
+            if (!tab.path("title").isTextual() || tab.path("title").asText().isBlank()
+                    || tab.path("title").asText().length() > 120
+                    || !tab.path("content").isTextual() || tab.path("content").asText().length() > 200_000) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "bad tab title or content");
+            }
         }
     }
 
@@ -433,8 +456,41 @@ public class TaskAdminService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, error);
         }
         for (String value : values) {
-            if (value != null && value.length() > maxLen) {
+            if (value == null || value.length() > maxLen) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, error);
+            }
+        }
+    }
+
+    private static void validateStatement(JsonNode statement) {
+        if (statement == null || !statement.isObject()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "bad statement");
+        }
+        for (String key : List.of("brief", "goal", "interview")) {
+            if (!statement.path(key).isTextual() || statement.path(key).asText().length() > 10_000) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "bad statement " + key);
+            }
+        }
+        for (String key : List.of("context", "inputs", "deliverables", "constraints")) {
+            JsonNode values = statement.path(key);
+            if (!values.isArray() || values.size() > 50) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "bad statement " + key);
+            }
+            for (JsonNode value : values) {
+                if (!value.isTextual() || value.asText().length() > 10_000) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "bad statement " + key);
+                }
+            }
+        }
+    }
+
+    private static void validateAuthor(JsonNode author) {
+        if (author == null || !author.isObject()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "bad authorSolution");
+        }
+        for (String key : List.of("doc", "plantuml", "mermaid")) {
+            if (author.has(key) && (!author.get(key).isTextual() || author.get(key).asText().length() > 200_000)) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "bad authorSolution " + key);
             }
         }
     }
@@ -466,6 +522,7 @@ public class TaskAdminService {
     private JsonNode snapshotOf(Task task) {
         ObjectNode snap = JsonNodeFactory.instance.objectNode();
         snap.put("id", task.getId());
+        snap.put("version", task.getVersion());
         snap.put("title", task.getTitle());
         snap.put("level", task.getLevelId());
         snap.set("tags", mapper.valueToTree(
@@ -494,7 +551,7 @@ public class TaskAdminService {
         return new TaskRow(task.getId(), task.getTitle(), task.getLevelId(), task.getStatus(),
                 task.getTags() == null ? List.of() : List.of(task.getTags()),
                 task.getTimeMin(), task.getSolvedRate(), criteria,
-                task.getUpdatedAt() == null ? "" : task.getUpdatedAt().toString());
+                task.getUpdatedAt() == null ? "" : task.getUpdatedAt().toString(), task.getVersion());
     }
 
     private TaskFull fullOf(Task task) {
@@ -503,7 +560,32 @@ public class TaskAdminService {
                 task.getTimeMin(), task.getSolvedRate(), task.getStatement(),
                 task.getStarterTabs(), task.getRubric(), task.getHints(),
                 task.getInterviewQuestions(), task.getAuthorSolution(),
-                task.getUpdatedAt() == null ? "" : task.getUpdatedAt().toString());
+                task.getUpdatedAt() == null ? "" : task.getUpdatedAt().toString(), task.getVersion());
+    }
+
+    /** Публиковать можно только задачу с условием, результатом, рубрикой и эталоном. */
+    private static void validatePublication(Task task) {
+        if (!"published".equals(task.getStatus())) return;
+        JsonNode statement = task.getStatement();
+        if (statement == null || !hasText(statement.path("brief"))
+                || !hasText(statement.path("goal"))
+                || !statement.path("deliverables").isArray() || statement.path("deliverables").isEmpty()
+                || java.util.stream.StreamSupport.stream(statement.path("deliverables").spliterator(), false)
+                        .anyMatch(v -> !v.isTextual() || !hasText(v))
+                || task.getRubric() == null || task.getRubric().isEmpty()
+                || task.getAuthorSolution() == null || !hasText(task.getAuthorSolution().path("doc"))) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "publication_requires_brief_goal_deliverables_rubric_reference");
+        }
+        rubricJson(task.getRubric());
+        validateTabs(task.getStarterTabs());
+        if (task.getStarterTabs().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "publication_requires_starter_tabs");
+        }
+    }
+
+    private static boolean hasText(JsonNode value) {
+        return !value.asText("").replaceAll("<[^>]*>", "").replace("&nbsp;", " ").replace('\u00a0', ' ').isBlank();
     }
 
     private static ObjectNode blankStatement() {

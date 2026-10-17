@@ -40,6 +40,7 @@ class QualityRulesTest {
         complaint.setAttemptId(UUID.randomUUID());
         complaint.setTaskId("int-timeouts");
         complaint.setStatus(status);
+        org.springframework.test.util.ReflectionTestUtils.setField(complaint, "version", 0L);
         return complaint;
     }
 
@@ -47,7 +48,7 @@ class QualityRulesTest {
     void новаяБерётсяВРаботу() {
         Complaint complaint = complaintOf("new");
 
-        Complaint saved = qualityWith(complaint).resolve(complaint.getId(), "review", null);
+        Complaint saved = qualityWith(complaint).resolve(complaint.getId(), "review", null, 0L);
 
         assertThat(saved.getStatus()).isEqualTo("review");
     }
@@ -57,7 +58,7 @@ class QualityRulesTest {
         Complaint complaint = complaintOf("review");
         QualityService quality = qualityWith(complaint);
 
-        assertThatThrownBy(() -> quality.resolve(complaint.getId(), "resolved", "  "))
+        assertThatThrownBy(() -> quality.resolve(complaint.getId(), "resolved", "  ", 0L))
                 .isInstanceOf(ResponseStatusException.class)
                 .matches(e -> ((ResponseStatusException) e).getStatusCode() == HttpStatus.BAD_REQUEST);
     }
@@ -67,7 +68,7 @@ class QualityRulesTest {
         Complaint complaint = complaintOf("resolved");
         QualityService quality = qualityWith(complaint);
 
-        assertThatThrownBy(() -> quality.resolve(complaint.getId(), "review", null))
+        assertThatThrownBy(() -> quality.resolve(complaint.getId(), "review", null, 0L))
                 .isInstanceOf(ResponseStatusException.class);
     }
 

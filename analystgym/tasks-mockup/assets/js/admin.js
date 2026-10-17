@@ -29,6 +29,10 @@
     if (window.Api) await Api.ready;
     AppUI.mountHeader('admin');
     AppUI.mountFooter();
+    if (window.Api && Api.mode !== 'embedded') {
+      await AdminServer.start();
+      return;
+    }
     dict = Store.dictionaries();
 
     const hash = window.location.hash.slice(1);

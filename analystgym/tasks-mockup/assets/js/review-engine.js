@@ -457,7 +457,8 @@
   /* ---------- рекомендации «что потренировать» ---------- */
 
   function buildRecommendations(task) {
-    const all = (window.SA_DATA.tasks || []).filter((t) => t.id !== task.id);
+    const catalog = window.Store ? Store.tasks() : (window.SA_DATA.tasks || []);
+    const all = catalog.filter(t => t.id !== task.id && (!t.status || t.status === 'published'));
     const taskTags = new Set(task.tags || []);
     const scored = all.map((candidate) => {
       const overlap = (candidate.tags || []).filter((tag) => taskTags.has(tag)).length;

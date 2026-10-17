@@ -135,6 +135,9 @@
 
     /* ---------- справочники с учётом правок админки ---------- */
     dictionaries() {
+      if (window.Api && Api.mode !== 'embedded') {
+        return Object.assign({ tagCategories: window.SA_DATA.tagCategories || [] }, Api.catalog.dictionaries);
+      }
       const base = {
         levels: (window.SA_DATA.levels || []).slice(),
         tags: (window.SA_DATA.tags || []).slice(),
@@ -169,6 +172,7 @@
 
     /* ---------- задачи (+ правки из админки) ---------- */
     tasks() {
+      if (window.Api && Api.mode !== 'embedded') return Api.catalog.tasks.slice();
       const base = (window.SA_DATA.tasks || []).slice();
       const custom = Object.values(state.taskEdits || {})
         .filter((entry) => entry && entry.__created)
@@ -177,6 +181,7 @@
     },
 
     task(id) {
+      if (window.Api && Api.mode !== 'embedded') return Api.catalog.tasks.find(t => t.id === id) || null;
       const base = (window.SA_DATA.tasks || []).find((task) => task.id === id) || null;
       const patch = (state.taskEdits || {})[id];
       if (base) {

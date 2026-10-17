@@ -123,7 +123,7 @@
           const la = LEVEL_ORDER[a.level] || 9;
           const lb = LEVEL_ORDER[b.level] || 9;
           if (la !== lb) return la - lb;
-          return (b.solvedRate || 0) - (a.solvedRate || 0);
+          return Api.mode === 'embedded' ? (b.solvedRate || 0) - (a.solvedRate || 0) : a.title.localeCompare(b.title, 'ru');
         });
       }
     }
@@ -332,7 +332,7 @@
             </div>
           </div>
           <div class="task-tags">${AppUI.tagChips(task.tags, 3)}${(task.tags || []).length > 3 ? `<span class="chip">+${task.tags.length - 3}</span>` : ''}</div>
-          <div class="task-rate">${task.solvedRate}%</div>
+          <div class="task-rate">${Api.mode === 'embedded' ? task.solvedRate + '%' : '—'}</div>
           <div class="task-time">${task.timeMin} мин</div>
         </a>`;
     }).join('');
@@ -378,7 +378,8 @@
     update();
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('DOMContentLoaded', async () => {
+    if (window.Api) await Api.ready;
     AppUI.mountHeader('catalog');
     AppUI.mountFooter();
     readUrl();
@@ -391,6 +392,10 @@
     }, 220));
 
     const sort = document.getElementById('sortSelect');
+    if (Api.mode !== 'embedded') {
+      sort.querySelectorAll('[value="popular"], [value="solved"]').forEach(option => option.remove());
+      if (['popular', 'solved'].includes(state.sort)) state.sort = 'recommended';
+    }
     sort.value = state.sort;
     sort.addEventListener('change', () => {
       state.sort = sort.value;
@@ -404,6 +409,6 @@
     });
 
     // Первый рендер ждёт Api: если рядом поднят backend, каталог приедет из Postgres.
-    (window.Api ? window.Api.ready : Promise.resolve()).then(update);
+    update();
   });
 })();

@@ -58,14 +58,14 @@ class PracticeQuotaTest {
     void третьяНоваяЗадачаДаёт402() {
         // given: две разобранные задачи, пользователь без Pro;
         var tasks = mock(ru.analystgym.catalog.repo.TaskRepository.class);
-        when(tasks.findById("t3")).thenReturn(Optional.of(published("t3")));
+        when(tasks.lockById("t3")).thenReturn(Optional.of(published("t3")));
         var attempts = mock(ru.analystgym.practice.repo.AttemptRepository.class);
         when(attempts.reviewedTaskIds(any())).thenReturn(Set.of("t1", "t2"));
         PracticeService service = serviceOf(tasks, attempts, freeBilling());
         List<TabDto> tabs = List.of(new TabDto("x", "doc", "D", "text"));
 
         // when/then: новая задача сверх квоты — 402.
-        assertThatThrownBy(() -> service.submit(UUID.randomUUID(), "t3", tabs, null))
+        assertThatThrownBy(() -> service.submit(UUID.randomUUID(), "t3", tabs, null, null))
                 .isInstanceOf(QuotaExceededException.class);
     }
 
@@ -73,7 +73,7 @@ class PracticeQuotaTest {
     void доработкаСвоейЗадачиКвотуНеЕст() {
         // given: задача уже разобрана;
         var tasks = mock(ru.analystgym.catalog.repo.TaskRepository.class);
-        when(tasks.findById("t1")).thenReturn(Optional.of(published("t1")));
+        when(tasks.lockById("t1")).thenReturn(Optional.of(published("t1")));
         var attempts = mock(ru.analystgym.practice.repo.AttemptRepository.class);
         when(attempts.reviewedTaskIds(any())).thenReturn(Set.of("t1", "t2"));
         when(attempts.saveAndFlush(any())).thenAnswer(call -> call.getArgument(0));
@@ -81,14 +81,14 @@ class PracticeQuotaTest {
         List<TabDto> tabs = List.of(new TabDto("x", "doc", "D", "text"));
 
         // when/then: повторная отправка идёт в очередь.
-        assertThat(service.submit(UUID.randomUUID(), "t1", tabs, null)).isNotNull();
+        assertThat(service.submit(UUID.randomUUID(), "t1", tabs, null, null)).isNotNull();
     }
 
     @Test
     void проМимоКвоты() {
         // given: Pro-подписка при тех же двух разобранных;
         var tasks = mock(ru.analystgym.catalog.repo.TaskRepository.class);
-        when(tasks.findById("t3")).thenReturn(Optional.of(published("t3")));
+        when(tasks.lockById("t3")).thenReturn(Optional.of(published("t3")));
         var attempts = mock(ru.analystgym.practice.repo.AttemptRepository.class);
         when(attempts.reviewedTaskIds(any())).thenReturn(Set.of("t1", "t2"));
         when(attempts.saveAndFlush(any())).thenAnswer(call -> call.getArgument(0));
@@ -100,6 +100,6 @@ class PracticeQuotaTest {
         List<TabDto> tabs = List.of(new TabDto("x", "doc", "D", "text"));
 
         // when/then: третья задача уходит без 402.
-        assertThat(service.submit(UUID.randomUUID(), "t3", tabs, null)).isNotNull();
+        assertThat(service.submit(UUID.randomUUID(), "t3", tabs, null, null)).isNotNull();
     }
 }
