@@ -7,10 +7,29 @@
 (function () {
 
   const TAB_TYPES = {
-    doc: { label: 'Документ', kind: 'doc', icon: '¶' },
-    plantuml: { label: 'PlantUML', kind: 'puml', icon: '◩' },
-    mermaid: { label: 'Mermaid', kind: 'mmd', icon: '◭' }
+    doc: { label: 'Документ', kind: 'Текст', icon: '¶' },
+    plantuml: { label: 'Схема', kind: 'Схема', icon: '◩' },
+    mermaid: { label: 'Схема', kind: 'Схема', icon: '◭' }
   };
+
+  /* Пользователь выбирает смысл схемы, а не язык разметки. Для каждого вида
+     держим короткий рабочий пример в обоих поддерживаемых форматах.
+     Это заготовки для редактирования, а не ответы на текущую задачу:
+     нейтральные подписи не должны подсказывать критерии её решения.
+     PlantUML — основной формат по продуктовому решению; Mermaid остаётся
+     дополнительным. В хранилище и API по-прежнему передаём настоящий type,
+     чтобы старые черновики, рендер и серверное ревью оставались совместимыми. */
+  const DIAGRAM_TEMPLATES = [
+    { id: 'sequence', label: 'Последовательность',
+      plantuml: '@startuml\nactor "Пользователь" as U\nparticipant "Система" as S\nU -> S: Запрос\nS --> U: Ответ\n@enduml\n',
+      mermaid: 'sequenceDiagram\n  actor U as Пользователь\n  participant S as Система\n  U->>S: Запрос\n  S-->>U: Ответ\n' },
+    { id: 'process', label: 'Процесс',
+      plantuml: '@startuml\nstart\n:Первый шаг;\nif (Условие?) then (Да)\n  :Следующий шаг;\nelse (Нет)\n  :Другой шаг;\nendif\nstop\n@enduml\n',
+      mermaid: 'flowchart TD\n  A[Первый шаг] --> B{Условие?}\n  B -->|Да| C[Следующий шаг]\n  B -->|Нет| D[Другой шаг]\n' },
+    { id: 'states', label: 'Состояния',
+      plantuml: '@startuml\nstate "Новое" as New\nstate "В работе" as Active\nstate "Завершено" as Done\n[*] --> New\nNew --> Active: Начать\nActive --> Done: Завершить\nDone --> [*]\n@enduml\n',
+      mermaid: 'stateDiagram-v2\n  state "Новое" as New\n  state "В работе" as Active\n  state "Завершено" as Done\n  [*] --> New\n  New --> Active: Начать\n  Active --> Done: Завершить\n  Done --> [*]\n' }
+  ];
 
   let task = null;
   let solution = null;          // { tabs, activeTabId, updatedAt }
@@ -444,20 +463,23 @@
       if (addBtn) {
         event.stopPropagation();
         AppUI.menu(addBtn, [
-          { id: 'doc', label: 'Документ (WYSIWYG)', hint: '¶', onSelect: () => addTab('doc') },
-          { id: 'plantuml', label: 'Диаграмма PlantUML', hint: 'puml', onSelect: () => addTab('plantuml') },
-          { id: 'mermaid', label: 'Диаграмма Mermaid', hint: 'mmd', onSelect: () => addTab('mermaid') },
-          { separator: true },
-          { id: 'rename', label: 'Переименовать активную вкладку', onSelect: renameTab },
-          { id: 'duplicate', label: 'Дублировать активную вкладку', onSelect: duplicateTab }
+          { id: 'doc', label: 'Документ', onSelect: () => addTab('doc') },
+          { id: 'diagram', label: 'Схема', onSelect: chooseDiagram }
         ]);
         return;
       }
 
-      const closeBtn = event.target.closest('[data-close-tab]');
-      if (closeBtn) {
+      // Действия относятся к той вкладке, у которой открыто меню, даже если
+      // сейчас редактируется другая. Не переключаем и не теряем её содержимое.
+      const actions = event.target.closest('[data-tab-menu]');
+      if (actions) {
         event.stopPropagation();
-        removeTab(closeBtn.dataset.closeTab);
+        const id = actions.dataset.tabMenu;
+        AppUI.menu(actions, [
+          { id: 'rename', label: 'Переименовать', onSelect: () => renameTab(id) },
+          { id: 'duplicate', label: 'Создать копию', onSelect: () => duplicateTab(id) },
+          ...(solution.tabs.length > 1 ? [{ id: 'remove', label: 'Удалить', onSelect: () => removeTab(id) }] : [])
+        ]);
         return;
       }
 
@@ -470,7 +492,8 @@
     });
 
     bar.addEventListener('dblclick', (event) => {
-      if (event.target.closest('[data-tab-id]')) renameTab();
+      const tab = event.target.closest('[data-tab-id]');
+      if (tab) renameTab(tab.dataset.tabId);
     });
   }
 
@@ -481,22 +504,48 @@
       const type = TAB_TYPES[tab.type] || TAB_TYPES.doc;
       const selected = tab.id === solution.activeTabId;
       return `
+        <div class="tab-group" role="presentation">
         <button type="button" class="tab" role="tab" data-tab-id="${AppUI.esc(tab.id)}" aria-selected="${selected}" title="Двойной клик — переименовать">
           <span class="kind">${type.kind}</span>
           <span>${AppUI.esc(tab.title)}</span>
-          ${solution.tabs.length > 1 ? `<span class="close" data-close-tab="${AppUI.esc(tab.id)}" title="Закрыть вкладку">×</span>` : ''}
-        </button>`;
-    }).join('') + `<button type="button" class="tab-add" id="addTabBtn">+ вкладка</button>`;
+        </button>
+        <button type="button" class="tab-actions" data-tab-menu="${AppUI.esc(tab.id)}" aria-label="Действия вкладки ${AppUI.esc(tab.title)}" aria-haspopup="true">⋯</button>
+        </div>`;
+    }).join('') + `<button type="button" class="tab-add" id="addTabBtn">+ Добавить</button>`;
   }
 
-  function addTab(type) {
-    const count = solution.tabs.filter((t) => t.type === type).length + 1;
-    const title = type === 'doc' ? `Документ ${count}` : `${TAB_TYPES[type].label} ${count}`;
-    const stub = type === 'plantuml'
-      ? '@startuml\n\n@enduml\n'
-      : type === 'mermaid'
-        ? 'flowchart TD\n  A[Начало] --> B[Что дальше?]\n'
-        : '<h3>Раздел решения</h3><p></p>';
+  /* Окно создания ничего не меняет до явного нажатия «Добавить схему».
+     Дополнительный формат выбирается только для новой схемы: переключение
+     не пытается автоматически конвертировать написанный пользователем код. */
+  function chooseDiagram() {
+    const dialog = AppUI.modal({ title: 'Добавить схему', closeText: 'Отмена', html: `
+      <p>Выберите, что хотите описать. Откроется пример, который можно изменить.</p>
+      <form id="newDiagramForm">
+        <div class="field"><label for="diagramKind">Вид схемы</label><select id="diagramKind">${DIAGRAM_TEMPLATES.map(t => `<option value="${t.id}">${t.label}</option>`).join('')}</select></div>
+        <details class="fold mb-16"><summary>Дополнительные настройки</summary><div class="fold-body field">
+          <label for="diagramFormat">Формат исходного текста</label>
+          <select id="diagramFormat"><option value="plantuml">PlantUML — основной</option><option value="mermaid">Mermaid — дополнительный</option></select>
+        </div></details>
+        <button class="btn btn-primary" type="submit">Добавить схему</button>
+      </form>` });
+    dialog.body.querySelector('form').addEventListener('submit', event => {
+      event.preventDefault();
+      const template = DIAGRAM_TEMPLATES.find(t => t.id === dialog.body.querySelector('#diagramKind').value);
+      const format = dialog.body.querySelector('#diagramFormat').value;
+      if (!template || !['plantuml', 'mermaid'].includes(format)) return;
+      // Смена аккаунта гасит открытый редактор. Запоздалое подтверждение
+      // из его окна не должно создать вкладку уже в другом пространстве.
+      if (!solution || !task) { dialog.close(); return; }
+      dialog.close(); addTab(format, template);
+    });
+    dialog.body.querySelector('#diagramKind').focus();
+  }
+
+  /** Создание дополняет весь комплект решения; активность вкладки влияет только на редактор. */
+  function addTab(type, template) {
+    const count = solution.tabs.filter(t => (t.type === 'doc') === (type === 'doc')).length + 1;
+    const title = type === 'doc' ? `Документ ${count}` : `${template.label} ${count}`;
+    const stub = type === 'doc' ? '<p></p>' : template[type];
     const tab = { id: 'tab_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), type, title, content: stub };
     solution.tabs.push(tab);
     solution.activeTabId = tab.id;
@@ -522,8 +571,8 @@
     });
   }
 
-  function renameTab() {
-    const tab = solution.tabs.find((t) => t.id === solution.activeTabId);
+  function renameTab(id = solution.activeTabId) {
+    const tab = solution.tabs.find((t) => t.id === id);
     if (!tab) return;
     const dialog = AppUI.modal({
       title: 'Название вкладки',
@@ -544,10 +593,10 @@
     dialog.root.querySelector('[data-role="close"]').addEventListener('click', apply);
   }
 
-  function duplicateTab() {
-    const tab = solution.tabs.find((t) => t.id === solution.activeTabId);
+  function duplicateTab(id = solution.activeTabId) {
+    const tab = solution.tabs.find((t) => t.id === id);
     if (!tab) return;
-    const copy = Object.assign({}, tab, { id: 'tab_' + Date.now().toString(36), title: tab.title + ' (копия)' });
+    const copy = Object.assign({}, tab, { id: 'tab_' + crypto.randomUUID(), title: tab.title + ' (копия)' });
     solution.tabs.splice(solution.tabs.indexOf(tab) + 1, 0, copy);
     solution.activeTabId = copy.id;
     persist();
@@ -736,13 +785,12 @@
 
   function mountDiagramEditor(panel, tab) {
     const type = tab.type;
-    const snippets = AppUI.diagramSnippets[type] || [];
     panel.innerHTML = `
       <div class="diagram-editor">
         <div class="diagram-toolbar">
-          <span>${type === 'plantuml' ? 'PlantUML · рендер в браузере' : 'Mermaid · рендер в браузере'}</span>
+          <span title="${type === 'plantuml' ? 'PlantUML' : 'Mermaid'}">Схема · исходный текст</span>
           <span class="spacer"></span>
-          ${snippets.map((s) => `<button type="button" class="snippet-btn" data-snippet="${AppUI.esc(s.id)}">${AppUI.esc(s.label)}</button>`).join('')}
+          <button type="button" class="snippet-btn" data-template="choose">Выбрать шаблон</button>
           <button type="button" class="snippet-btn" data-preview="toggle" aria-controls="diagramPreview" aria-expanded="true">Скрыть предпросмотр</button>
           <button type="button" class="snippet-btn" data-render="now"><span aria-hidden="true">↻</span> Обновить</button>
         </div>
@@ -797,14 +845,23 @@
         if (!hidden) AppUI.renderDiagram(preview, type, code.value);
         return;
       }
-      const snippet = snippets.find((s) => s.id === button.dataset.snippet);
-      if (!snippet) return;
-      const isEmpty = !code.value.trim() || /^@(start|end)uml\s*$/i.test(code.value.trim()) || /^flowchart TD\s*A\[.*\]\s*-->.*$/s.test(code.value.trim());
-      if (isEmpty || window.confirm('Заменить текущий код диаграммы шаблоном?')) {
-        code.value = snippet.code;
-        tab.content = snippet.code;
-        persist();
-        AppUI.renderDiagram(preview, type, code.value);
+      if (button.dataset.template) {
+        AppUI.menu(button, DIAGRAM_TEMPLATES.map(template => ({
+          id: template.id, label: template.label, onSelect: async () => {
+            // Шаблон заменяет только текущую схему и сохраняет её формат.
+            // Непустой код защищаем подтверждением: нейтральный пример не
+            // должен незаметно уничтожить собственную работу пользователя.
+            if (code.value.trim() && !await AppUI.confirm({ title: 'Заменить схему шаблоном?',
+              text: 'Текущий исходный текст этой схемы будет заменён примером. Остальные документы и схемы сохранятся.',
+              confirmText: 'Заменить', cancelText: 'Оставить мою схему', danger: true })) return;
+            // Пока открыто подтверждение, можно сменить вкладку или аккаунт.
+            // Отсоединённый редактор не должен сохранять устаревшие данные.
+            if (!code.isConnected || !solution?.tabs.includes(tab)) return;
+            code.value = template[type]; tab.content = code.value;
+            clearTimeout(renderTimer); persist();
+            AppUI.renderDiagram(preview, type, code.value);
+          }
+        })));
       }
     });
 
@@ -842,7 +899,7 @@
       title: 'Отправить решение на ревью?',
       text: empty
         ? 'Похоже, решение почти пустое. Агенты оценят его минимально — но отправить можно: иногда полезно увидеть, что именно не засчитано.'
-        : 'Решение уйдёт двум агентам: системному аналитику и архитектору. Они разберут его по критериям задачи.',
+        : 'Все документы и схемы уйдут обоим проверяющим: системному аналитику и архитектору. Каждый разберёт свою часть критериев по всему решению.',
       checklist: [
         `Вкладок в решении: ${stats.tabs}`,
         `Объём документа: ${stats.words} ${AppUI.plural(stats.words, ['слово', 'слова', 'слов'])}`,
@@ -898,6 +955,10 @@
   async function serverSubmit() {
     if (submitting) return;
     submitting = true;
+    // Отправляем весь комплект, включая неактивные вкладки. Новые названия
+    // «Документ»/«Схема» упрощают UI, но типы doc/plantuml/mermaid и исходный
+    // текст остаются прежними. Визуальная картинка в API не подставляется:
+    // оба агента получают полное содержимое через серверный ReviewPipeline.
     let tabs = JSON.parse(JSON.stringify(solution.tabs));
     let version = task.version;
     const pending = Store.pendingSubmission(task.id);

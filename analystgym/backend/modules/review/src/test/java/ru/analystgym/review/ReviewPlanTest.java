@@ -59,4 +59,34 @@ class ReviewPlanTest {
         assertThatThrownBy(() -> pipeline(new ReviewSettings(20000, 64000, 2000, 2001, 6))
                 .prepare("llm", input(), tabs, List.of())).hasMessageContaining("review_context_over_budget");
     }
+
+    /** Упрощённый UI не разделяет контекст между ролями: каждый агент видит текст и обе схемы. */
+    @Test void обаАгентаПолучаютВсеДокументыИСхемыПриРазныхКритериях() throws Exception {
+        var pipeline = pipeline(new ReviewSettings(20000, 64000, 2000, 160000, 6));
+        var arch = new AgentConfig(); arch.setId("arch"); arch.setName("Архитектор");
+        arch.setPromptKey("arch-reviewer"); arch.setChecks(json.createArrayNode());
+        when(agents.findAll()).thenReturn(List.of(agent, arch));
+        var base = input();
+        var input = new ReviewInput(base.id(), base.title(), base.level(), base.levelName(), base.tags(), true,
+                List.of(base.rubric().get(0), new ReviewInput.CriterionInput("a", "Согласованность схемы", "high", 7, "arch", List.of(), "Проверь переходы")),
+                base.interviewQuestions(), base.statement(), base.taskVersion());
+        var tabs = List.of(
+                new SolutionTab("doc-1", "doc", "Контракт", "<p>DOC_CONTRACT: повтор запроса возвращает прежний результат.</p>"),
+                new SolutionTab("doc-2", "doc", "Ограничения", "<p>DOC_LIMIT: срок хранения ключа — 24 часа.</p>"),
+                new SolutionTab("p", "plantuml", "Последовательность", "@startuml\nClient -> Server: PUML_REQUEST\n@enduml"),
+                new SolutionTab("m", "mermaid", "Состояния", "stateDiagram-v2\nNew --> Done: MMD_TRANSITION"));
+        var plan = pipeline.prepare("llm", input, tabs, List.of());
+        assertThat(plan.agents()).hasSize(2);
+        for (var reviewer : plan.agents()) {
+            var user = json.readTree(reviewer.user());
+            assertThat(user.path("solution").asText()).contains("DOC_CONTRACT", "DOC_LIMIT", "PUML_REQUEST", "MMD_TRANSITION");
+            assertThat(user.path("criteriaToReview")).hasSize(1);
+            assertThat(user.path("criteriaToReview").get(0).path("focus").asText()).isEqualTo(reviewer.id());
+            assertThat(reviewer.system()).contains("Все документы и схемы", "не требуй сразу оба формата", "стартовый шаблон");
+        }
+        // Проверяем записанный в очередь снимок: поздние изменения исходного
+        // решения не должны менять уже выбранные инструкции или контекст.
+        var frozen = json.readValue(json.writeValueAsBytes(plan), ReviewPlan.class);
+        assertThat(frozen.agents()).isEqualTo(plan.agents());
+    }
 }

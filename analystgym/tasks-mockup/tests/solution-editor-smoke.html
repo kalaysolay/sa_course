@@ -1,0 +1,79 @@
+<!doctype html><html lang="ru"><meta charset="utf-8"><title>Проверка добавления текста и схем</title>
+<pre id="result">RUNNING</pre><script>
+// Отдельный тестовый origin server.py. Проверяем реальный интерфейс и рендер,
+// а сетевую отправку подменяем внутри iframe: внешних запросов к LLM нет.
+(async () => {
+  const output = document.getElementById('result'), checks = [];
+  const check = (ok, name) => { if (!ok) throw new Error(name); checks.push(name); };
+  const until = async predicate => { const end = Date.now() + 20000; while (!predicate()) {
+    if (Date.now() > end) throw new Error('Таймаут интерфейса'); await new Promise(r => setTimeout(r, 50));
+  } };
+  let frame;
+  try {
+    frame = document.createElement('iframe'); frame.style.width = '1200px'; frame.style.height = '850px';
+    frame.src = '../task.html?id=int-idempotency';
+    await new Promise(r => { frame.onload = r; document.body.append(frame); });
+    const w = frame.contentWindow, d = w.document; await w.Api.ready;
+    await until(() => d.getElementById('docEditor'));
+    const initialTabs = d.querySelectorAll('[data-tab-id]').length;
+    // Один origin — одна одноразовая сессия теста; собственные решения пользователя не читаем.
+    const menuItem = text => Array.from(d.querySelectorAll('.menu button')).find(b => b.textContent.trim() === text);
+    const addMenu = () => d.getElementById('addTabBtn').click();
+    addMenu();
+    check(Array.from(d.querySelectorAll('.menu button')).map(b => b.textContent.trim()).join('|') === 'Документ|Схема', 'Добавление содержит только Документ и Схема');
+    menuItem('Документ').click();
+    check(d.querySelectorAll('[data-tab-id]').length === initialTabs + 1, 'Документ добавлен без выбора языка');
+    const doc = d.getElementById('docEditor'); doc.innerHTML = '<p>TEXT_FOR_BOTH_REVIEWERS: согласованный контракт.</p>';
+    doc.dispatchEvent(new w.Event('input', { bubbles: true }));
+    const saved = w.Store.solution('int-idempotency');
+    check(saved.tabs.slice(0, initialTabs).every(t => ['doc', 'plantuml', 'mermaid'].includes(t.type)), 'Стартовые вкладки сохраняют исходные форматы');
+    addMenu(); menuItem('Схема').click();
+    d.querySelector('[data-role="close"]').click();
+    check(d.querySelectorAll('[data-tab-id]').length === initialTabs + 1, 'Отмена создания не добавляет вкладку');
+    for (const format of ['plantuml', 'mermaid']) for (const kind of ['sequence', 'process', 'states']) {
+      addMenu(); menuItem('Схема').click();
+      check(d.getElementById('diagramFormat').value === 'plantuml', 'Основной формат новой схемы — PlantUML');
+      check(!d.getElementById('diagramFormat').closest('details').open, 'Выбор дополнительного формата свёрнут');
+      d.getElementById('diagramKind').value = kind;
+      if (format === 'mermaid') {
+        d.getElementById('diagramFormat').closest('details').open = true;
+        d.getElementById('diagramFormat').value = format;
+      }
+      d.querySelector('#newDiagramForm button[type="submit"]').click();
+      await until(() => d.getElementById('diagramCode'));
+      const current = w.Store.solution('int-idempotency');
+      const tab = current.tabs.find(t => t.id === current.activeTabId);
+      check(tab.type === format && tab.content.length > 30, `${format}/${kind}: сохранены формат и рабочий пример`);
+      const preview = d.getElementById('diagramPreview');
+      await w.AppUI.renderDiagram(preview, format, d.getElementById('diagramCode').value);
+      check(!!preview.querySelector('svg') && !preview.dataset.error, `${format}/${kind}: схема построена`);
+    }
+    const code = d.getElementById('diagramCode'), original = code.value;
+    w.AppUI.confirm = async () => false;
+    d.querySelector('[data-template]').click(); menuItem('Процесс').click();
+    await new Promise(r => setTimeout(r, 0));
+    check(code.value === original, 'Отмена замены шаблона сохраняет собственный код');
+    // Меню неактивной вкладки не должно переименовать или скопировать активную схему.
+    const firstId = d.querySelector('[data-tab-id]').dataset.tabId;
+    d.querySelector('[data-tab-menu="' + firstId + '"]').click(); menuItem('Создать копию').click();
+    const copied = w.Store.solution('int-idempotency');
+    check(copied.tabs.find(t => t.id === copied.activeTabId).type === 'doc', 'Копирование относится к выбранной вкладке');
+    check(new Set(copied.tabs.map(t => t.id)).size === copied.tabs.length, 'Копия получает отдельный идентификатор');
+    const expected = JSON.parse(JSON.stringify(copied.tabs));
+    w.Api.mode = 'server'; w.Api.user = { id: 'editor-smoke' }; w.Store.setUser('editor-smoke');
+    const requests = [];
+    w.fetch = async (url, options = {}) => {
+      if (url === '/api/auth/csrf') return new w.Response(JSON.stringify({ token: 'test' }));
+      if (url === '/api/attempts') { requests.push(JSON.parse(options.body)); return new w.Response(JSON.stringify({ attemptId: 'editor-attempt', taskId: 'int-idempotency', status: 'in_review' }), { status: 202 }); }
+      if (url === '/api/attempts/editor-attempt') return new w.Response(JSON.stringify({ status: 'in_review', progress: 0, stage: 'waiting' }));
+      return new w.Response('{}', { status: 404 });
+    };
+    w.AppUI.confirm = async () => true; d.getElementById('submitBtn').click();
+    await until(() => requests.length === 1);
+    check(JSON.stringify(requests[0].tabs) === JSON.stringify(expected), 'На ревью отправлены все вкладки, включая неактивные');
+    check(requests[0].tabs.some(t => t.content.includes('TEXT_FOR_BOTH_REVIEWERS')), 'Текст не потерян после создания схем');
+    check(['plantuml', 'mermaid'].every(type => requests[0].tabs.some(t => t.type === type)), 'Оба формата схем входят в общий комплект');
+    frame.remove(); output.textContent = 'PASS ' + checks.length + '\n' + checks.join('\n');
+  } catch (error) { output.textContent = 'FAIL\n' + error.stack; }
+})();
+</script></html>

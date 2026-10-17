@@ -839,6 +839,12 @@ details.fold .fold-body { padding: 0 16px 16px; color: var(--text-2); font-size:
   background: var(--panel-2); overflow-x: auto; scrollbar-width: none;
 }
 .tabs-bar::-webkit-scrollbar { display: none; }
+.tab-group { display: flex; flex: 0 0 auto; align-items: stretch; }
+.tab-actions {
+  border: 0; background: none; color: var(--muted); cursor: pointer;
+  padding: 0 9px; font-size: 20px;
+}
+.tab-actions:hover { color: var(--text); background: var(--panel-3); }
 .tab {
   display: flex; align-items: center; gap: 8px;
   padding: 11px 14px; border: 0; background: none; cursor: pointer;
@@ -853,12 +859,6 @@ details.fold .fold-body { padding: 0 16px 16px; color: var(--text-2); font-size:
   padding: 1px 5px; border-radius: 4px; border: 1px solid var(--line-strong); color: var(--dim);
 }
 .tab[aria-selected="true"] .kind { border-color: rgba(211, 242, 106, 0.4); color: var(--accent); background: var(--accent-soft); }
-.tab .close {
-  width: 16px; height: 16px; border-radius: 4px; display: grid; place-items: center;
-  color: var(--dim); font-size: 13px; line-height: 1; opacity: 0; transition: all 0.14s var(--ease);
-}
-.tab:hover .close { opacity: 1; }
-.tab .close:hover { background: var(--bad-soft); color: var(--bad); }
 .tab-add {
   display: flex; align-items: center; gap: 6px; padding: 11px 12px;
   background: none; border: 0; cursor: pointer; color: var(--dim);
