@@ -1381,6 +1381,16 @@ html[data-theme="light"] .field textarea:focus { border-color: rgba(77, 124, 15,
   .footer-grid { grid-template-columns: 1fr; gap: 26px; }
   .verdict-top { flex-direction: column; gap: 12px; }
   .pane-head .actions { width: 100%; margin-left: 0; }
+  /* На телефоне все вкладки и добавление видны без скрытой прокрутки вправо.
+     Длинное название переносится внутри кнопки; меню остаётся отдельной
+     областью нажатия и не сжимается вместе с текстом. */
+  .tabs-bar { flex-wrap: wrap; overflow-x: visible; }
+  .tab-group { flex: 0 1 auto; min-width: 0; max-width: 100%; }
+  .tab { flex: 1 1 auto; min-width: 0; min-height: 44px; white-space: normal; text-align: left; }
+  .tab .kind { flex: 0 0 auto; }
+  .tab > span:last-child { min-width: 0; overflow-wrap: anywhere; }
+  .tab-actions { flex: 0 0 36px; min-height: 44px; }
+  .tab-add { min-height: 44px; }
 }
 
 @media (max-width: 560px) {
