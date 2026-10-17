@@ -694,7 +694,6 @@
         ${DOC_TOOLS.map((tool) => tool.sep
           ? '<span class="sep"></span>'
           : `<button type="button" data-cmd="${AppUI.esc(tool.cmd || '')}" data-value="${AppUI.esc(tool.value || '')}" data-action="${AppUI.esc(tool.action || '')}" title="${AppUI.esc(tool.title || '')}" style="${AppUI.esc(tool.style || '')}">${AppUI.esc(tool.label)}</button>`).join('')}
-        <span class="hint">простой WYSIWYG · автосохранение</span>
       </div>
       <div class="wysiwyg" id="docEditor" contenteditable="true" spellcheck="true"
            data-placeholder="Опишите решение: контекст, ваше предложение, альтернативы, цифры. Структурируйте заголовками — ревью читает и её.">${contentHtml(tab.content)}</div>`;
