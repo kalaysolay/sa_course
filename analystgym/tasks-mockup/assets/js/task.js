@@ -743,8 +743,8 @@
           <span>${type === 'plantuml' ? 'PlantUML · рендер в браузере' : 'Mermaid · рендер в браузере'}</span>
           <span class="spacer"></span>
           ${snippets.map((s) => `<button type="button" class="snippet-btn" data-snippet="${AppUI.esc(s.id)}">${AppUI.esc(s.label)}</button>`).join('')}
-          <button type="button" class="snippet-btn" data-layout="toggle" title="Код / превью рядом или друг под другом">⇄ раскладка</button>
-          <button type="button" class="snippet-btn" data-render="now">▶ обновить</button>
+          <button type="button" class="snippet-btn" data-preview="toggle" aria-controls="diagramPreview" aria-expanded="true">Скрыть предпросмотр</button>
+          <button type="button" class="snippet-btn" data-render="now"><span aria-hidden="true">↻</span> Обновить</button>
         </div>
         <div class="diagram-split" id="diagramSplit">
           <textarea class="code-area" id="diagramCode" spellcheck="false" placeholder="${type === 'plantuml' ? '@startuml … @enduml' : 'flowchart TD …'}">${AppUI.esc(tab.content || '')}</textarea>
@@ -788,8 +788,13 @@
         AppUI.renderDiagram(preview, type, code.value);
         return;
       }
-      if (button.dataset.layout) {
-        document.getElementById('diagramSplit').classList.toggle('stacked');
+      if (button.dataset.preview) {
+        const hidden = !preview.hidden;
+        preview.hidden = hidden;
+        document.getElementById('diagramSplit').classList.toggle('preview-hidden', hidden);
+        button.textContent = hidden ? 'Показать предпросмотр' : 'Скрыть предпросмотр';
+        button.setAttribute('aria-expanded', String(!hidden));
+        if (!hidden) AppUI.renderDiagram(preview, type, code.value);
         return;
       }
       const snippet = snippets.find((s) => s.id === button.dataset.snippet);

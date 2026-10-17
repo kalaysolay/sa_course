@@ -747,6 +747,17 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 24px 0; }
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr);
   gap: 16px;
   align-items: stretch;
+  transition: grid-template-columns 240ms var(--ease);
+}
+
+/* Добавляем редактору 10% его исходной ширины; элементы управления не вызывают скачков. */
+@media (min-width: 1081px) {
+  .workspace:has(.pane[aria-label="Ваше решение"]:focus-within) {
+    grid-template-columns: minmax(0, 0.892fr) minmax(0, 1.188fr);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .workspace { transition: none; }
 }
 
 .pane {
@@ -906,7 +917,7 @@ details.fold .fold-body { padding: 0 16px 16px; color: var(--text-2); font-size:
 /* редактор кода диаграмм */
 .diagram-editor { display: grid; grid-template-rows: auto minmax(0, 1fr); flex: 1 1 auto; min-height: 0; }
 .diagram-split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); min-height: 0; }
-.diagram-split.stacked { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(200px, 1fr) minmax(200px, 1fr); }
+.diagram-split.preview-hidden { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); }
 .code-area {
   width: 100%; height: 100%; min-height: 320px; resize: none;
   padding: 16px 18px; border: 0; border-right: 1px solid var(--line-soft);
@@ -914,7 +925,8 @@ details.fold .fold-body { padding: 0 16px 16px; color: var(--text-2); font-size:
   font: 400 12.8px/1.65 var(--font-mono);
   outline: none; tab-size: 2;
 }
-.diagram-split.stacked .code-area { border-right: 0; border-bottom: 1px solid var(--line-soft); }
+.diagram-split.preview-hidden .code-area { border-right: 0; border-bottom: 0; }
+.preview-area[hidden] { display: none; }
 .preview-area {
   overflow: auto; padding: 18px; background:
     linear-gradient(45deg, rgba(255,255,255,0.014) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.014) 75%) 0 0 / 18px 18px,
