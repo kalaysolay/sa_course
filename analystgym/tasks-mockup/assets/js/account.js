@@ -24,7 +24,7 @@
       guestBox.innerHTML = `
         <div class="empty-state">
           <h3>Кабинет доступен после входа</h3>
-          <p class="muted" style="margin-bottom:16px">Войдите, чтобы увидеть профиль, подписку и историю.</p>
+          <p class="muted" style="margin-bottom:16px">Войдите, чтобы увидеть профиль, предзапись и историю.</p>
           <div class="row" style="gap:8px;justify-content:center;flex-wrap:wrap">
             <a class="btn btn-primary" href="login.html">Войти</a>
             <a class="btn btn-ghost" href="login.html?mode=register">Регистрация</a>
@@ -136,96 +136,15 @@
     document.getElementById('backToProfileBtn').addEventListener('click', showMain);
   }
 
-  /* ==================== подписка ==================== */
+  /* ==================== предзапись (вместо подписки) ==================== */
 
   async function loadPro() {
     const host = document.getElementById('proBody');
-    let status = null;
-    let plans = [];
-    try { status = await Api.billingStatus(); } catch (e) { status = null; }
-    try { plans = await Api.plans(); } catch (e) { plans = []; }
-    if (!status) {
-      host.innerHTML = '<p class="muted">Не удалось загрузить подписку.</p>';
+    if (window.Waitlist) {
+      Waitlist.renderInline(host, 'account');
       return;
     }
-
-    const badge = status.pro
-      ? `<span class="badge badge-accent">Pro${status.endsAt ? ' · до ' + AppUI.esc(AppUI.dateTime(status.endsAt)) : ''}</span>`
-      : '<span class="badge">Free</span>';
-    const planRows = (plans || []).map((plan) => `
-      <div class="plan-item" style="margin-bottom:6px">
-        <span class="n">${AppUI.esc(plan.title || plan.id)}</span>
-        <div><div class="t">${plan.price} ₽</div></div>
-        <span class="row" style="gap:8px">
-          ${status.pro ? '' : `<button class="btn btn-primary btn-sm" type="button" data-buy-plan="${AppUI.esc(plan.id)}">Оформить</button>`}
-        </span>
-      </div>`).join('');
-
-    host.innerHTML = `
-      <div class="row" style="gap:8px;margin-bottom:12px">${badge}</div>
-      ${status.pro
-        ? `<p class="muted" style="font-size:13px">Безлимитные ревью и эталоны включены.</p>
-           ${status.subscriptionId ? '<button class="btn btn-ghost btn-sm mt-16" type="button" id="cancelSubBtn">Отменить автопродление</button>' : ''}`
-        : planRows}
-      <div class="field mt-16"><label for="promoInput">Промокод</label>
-        <div class="row" style="gap:8px">
-          <input id="promoInput" placeholder="PILOT-30" style="text-transform:uppercase">
-          <button class="btn btn-outline btn-sm" type="button" id="promoBtn">Применить</button>
-        </div>
-      </div>`;
-
-    host.querySelectorAll('[data-buy-plan]').forEach((button) => {
-      button.addEventListener('click', async () => {
-        try {
-          const order = await Api.createOrder(button.dataset.buyPlan);
-          AppUI.confirm({
-            title: 'Заказ создан',
-            text: `К оплате ${order.amount} ₽. В макете касса не подключена — ссылка для оплаты:`,
-            checklist: [order.confirmationUrl || '—'],
-            confirmText: 'Понятно',
-            cancelText: 'Закрыть'
-          });
-        } catch (error) {
-          AppUI.toast('Не удалось создать заказ: ' + (error && error.message ? error.message : error), 'bad');
-        }
-      });
-    });
-
-    const promoBtn = document.getElementById('promoBtn');
-    if (promoBtn) {
-      promoBtn.addEventListener('click', async () => {
-        const code = document.getElementById('promoInput').value.trim();
-        if (!code) return;
-        try {
-          await Api.redeemPromo(code);
-          AppUI.toast('Промокод применён', 'ok');
-          loadPro();
-        } catch (error) {
-          AppUI.toast('Промокод не подошёл: ' + (error && error.message ? error.message : error), 'bad');
-        }
-      });
-    }
-
-    const cancelBtn = document.getElementById('cancelSubBtn');
-    if (cancelBtn && status.subscriptionId) {
-      cancelBtn.addEventListener('click', () => {
-        AppUI.confirm({
-          title: 'Отменить автопродление?',
-          text: 'Доступ Pro сохранится до конца оплаченного периода.',
-          confirmText: 'Отменить продление',
-          cancelText: 'Оставить'
-        }).then(async (ok) => {
-          if (!ok) return;
-          try {
-            await Api.cancelSubscription(status.subscriptionId);
-            AppUI.toast('Автопродление отменено', 'ok');
-            loadPro();
-          } catch (error) {
-            AppUI.toast('Не удалось отменить: ' + (error && error.message ? error.message : error), 'bad');
-          }
-        });
-      });
-    }
+    host.innerHTML = '<p class="muted">Не удалось загрузить форму предзаписи.</p>';
   }
 
   /* ==================== безопасность ==================== */

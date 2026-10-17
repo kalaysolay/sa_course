@@ -65,10 +65,14 @@
       }).join('');
     }
 
-    /* --- демо-кнопки тарифов --- */
+    /* --- тарифы: вместо демо-оплаты — предзапись на Pro (изучаем спрос) --- */
     document.querySelectorAll('[data-demo-plan]').forEach((button) => {
       button.addEventListener('click', (event) => {
         event.preventDefault();
+        if (window.Waitlist) {
+          Waitlist.open(button.dataset.demoPlan === 'team' ? 'team' : 'landing');
+          return;
+        }
         const plan = button.dataset.demoPlan === 'pro' ? 'Pro (990 ₽/мес)' : 'Team';
         AppUI.modal({
           title: `Тариф ${plan}`,

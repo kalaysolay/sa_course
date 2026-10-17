@@ -780,9 +780,10 @@
         submitLocalFallback(tabs);
         return;
       }
-      // Квота Free исчерпана — честно говорим про Pro, а не «ошибка».
+      // Квота Free исчерпана — вместо paywall предлагаем предзапись на Pro.
       if (error && error.status === 402) {
-        AppUI.toast('Бесплатный лимит ревью исчерпан — оформите Pro, чтобы продолжить', 'warn');
+        if (window.Waitlist) Waitlist.open('quota');
+        else AppUI.toast('Бесплатный лимит ревью исчерпан — оставьте заявку на предзапись Pro', 'warn');
         return;
       }
       AppUI.toast('Не удалось отправить решение: ' + (error && error.message ? error.message : error), 'bad');

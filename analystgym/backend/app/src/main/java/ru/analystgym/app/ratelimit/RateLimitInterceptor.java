@@ -44,6 +44,10 @@ public class RateLimitInterceptor implements HandlerInterceptor {
             bucket = "assessment";
         } else if ("/api/complaints".equals(path)) {
             bucket = "complaints";
+        } else if ("/api/waitlist".equals(path)) {
+            // Предзапись гостевая: лимит дефолтный (60/мин с IP),
+            // отдельный конфиг не заводим — спросим спрос, потом настроим.
+            bucket = "waitlist";
         }
         if (bucket == null) {
             return true;

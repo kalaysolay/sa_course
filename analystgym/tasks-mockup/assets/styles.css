@@ -70,6 +70,9 @@ html { -webkit-text-size-adjust: 100%; }
 body {
   margin: 0;
   min-height: 100vh;
+  /* Страховка от горизонтального скролла на мобиле: clip (а не hidden),
+     чтобы не ломать sticky-шапку. Причины чиним точечно, это лишь сеть. */
+  overflow-x: clip;
   background: var(--bg);
   color: var(--text);
   font-family: var(--font-ui);
@@ -1335,7 +1338,7 @@ html[data-theme="light"] .field textarea:focus { border-color: rgba(77, 124, 15,
   }
   .main-nav.open a { padding: 10px 12px; }
   .main-nav.open a[aria-current="page"]::after { display: none; }
-  .site-header .wrap { position: relative; }
+  .site-header .wrap { position: relative; gap: 12px; }
   .burger { display: inline-flex; }
   .grid-3, .grid-2, .pricing-grid, .collections-grid, .ra-cols, .rp-agents, .competency-grid { grid-template-columns: 1fr; }
   .diagram-split { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(220px, 1fr) minmax(220px, 1fr); }
@@ -1353,6 +1356,16 @@ html[data-theme="light"] .field textarea:focus { border-color: rgba(77, 124, 15,
 
 @media (max-width: 560px) {
   .wrap { padding: 0 16px; }
+  /* Шапка в две строки: иначе бренд + бургер + тема + вход + чип/CTA
+     не влезают в 360px и растягивают страницу вправо. */
+  .site-header { height: auto; }
+  .site-header .wrap { gap: 8px 10px; flex-wrap: wrap; padding-top: 8px; padding-bottom: 8px; }
+  .main-nav.open { top: 100%; }
+  .header-actions { margin-left: auto; flex-wrap: wrap; row-gap: 8px; }
+  /* Длинная кнопка подборки («Начать подборку → <название>») переносится,
+     а не уезжает за правый край карточки. */
+  .collection-foot { flex-wrap: wrap; }
+  .collection-foot .btn { white-space: normal; text-align: left; line-height: 1.45; }
   [data-theme-label] { display: none; }
   .header-actions { gap: 6px; }
   .header-actions .btn { padding: 8px 12px; min-height: 36px; font-size: 13px; }
@@ -1615,12 +1628,14 @@ html[data-theme="gray"] .site-header {
 
 .hub-strip {
   position: relative; z-index: 5;
-  border-top: 1px solid var(--line-soft);
-  background: linear-gradient(180deg, transparent, rgba(211, 242, 106, 0.05));
+  padding: 10px 0 30px;
 }
 .hub-strip-in {
   display: flex; align-items: center; gap: 28px;
-  padding-top: 26px; padding-bottom: 26px;
+  padding: 26px 28px;
+  border: 1px solid var(--line-soft);
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(211, 242, 106, 0.09), rgba(211, 242, 106, 0.02));
 }
 .hub-strip-title {
   font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.14em;
@@ -1637,11 +1652,19 @@ html[data-theme="gray"] .site-header {
 @media (max-width: 860px) {
   .hub-split { flex-direction: column; }
   .hub-half { padding: 96px 24px 70px; }
+  .hub-top { padding: 14px 16px; }
+  /* Лого хаба 76px + подпись не влезают в узкий экран — текст наезжал на лого.
+     Правило здесь (≤860), а не в ≤560: иначе на планшете шапка выше
+     верхнего отступа первой половины и hub-title залазит под лого. */
+  .hub-logo { gap: 10px; min-width: 0; }
+  .hub-logo img, .hub-logo-fallback { width: 48px; height: 48px; border-radius: 13px; }
+  .hub-logo-text { min-width: 0; }
+  .hub-logo-title { font-size: 19px; }
+  .hub-logo-sub { font-size: 10px; }
   .hub-half:hover { flex: 1 1 0; }
   .hub-practice { border-right: 0; border-bottom: 1px solid var(--line-soft); }
   .hub-strip-in { flex-direction: column; align-items: stretch; gap: 16px; }
   .hub-strip .btn { margin-left: 0; }
-  .hub-top { padding: 14px 16px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

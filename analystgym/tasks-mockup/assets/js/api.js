@@ -271,6 +271,11 @@
       }
     },
 
+    /* ---------- предзапись на Pro (вместо paywall): гостевая ---------- */
+    async submitWaitlist(email, phone, source) {
+      return postJson('/api/waitlist', { email, phone, source: source || '' });
+    },
+
     /* ---------- биллинг (Фаза 4): тарифы, заказы, Pro-статус ---------- */    async plans() {
       return getJson('/api/billing/plans');
     },

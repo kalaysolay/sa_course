@@ -67,9 +67,11 @@ public class SecurityConfig {
                         // Стоит раньше публичного GET /api/tasks/**: первое совпадение
                         // побеждает, иначе гейт эталона был бы открыт гостям.
                         // Тарифы публичны (лендинг), вебхук — без сессии (там подпись).
+                        // Предзапись тоже гостевая: спрос меряем и у анонимов.
                         // Стоят раньше общего authenticated: первое совпадение побеждает.
                         .requestMatchers(HttpMethod.GET, "/api/billing/plans").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/billing/webhooks/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/waitlist").permitAll()
                         .requestMatchers("/api/tasks/*/draft", "/api/tasks/*/attempts",
                                 "/api/tasks/*/reference", "/api/attempts/**",
                                 "/api/assessment/**", "/api/complaints/**",

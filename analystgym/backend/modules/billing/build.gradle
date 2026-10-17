@@ -1,4 +1,6 @@
-// Модуль billing: заказы, Pro-подписки, промокоды, адаптер провайдера (Фаза 4).
+// Модуль billing: заказы, Pro-подписки, промокоды, адаптер провайдера (Фаза 4)
+// + предзапись на Pro (WaitlistService): paywall в UI заменён заявкой,
+// спрос меряем до запуска платежей.
 // practice зависит от billing (квота бесплатных ревью), обратно — нет.
 dependencies {
     implementation project(':shared:persistence')
