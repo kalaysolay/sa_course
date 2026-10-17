@@ -8,6 +8,8 @@ output/*
 !output/M01/PROF-ROLE/
 !output/M01/PROF-ROLE/**
 node_modules/
+# Локальные настройки IntelliJ IDEA во всех каталогах проекта
+.idea/
 .DS_Store
 compliance_project_example/
 # AnalystGym backend: сборочный мусор и сгенерированная статика
