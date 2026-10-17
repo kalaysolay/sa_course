@@ -29,12 +29,19 @@
             <a class="btn btn-primary" href="login.html">Войти</a>
             <a class="btn btn-ghost" href="login.html?mode=register">Регистрация</a>
           </div>
+        </div>
+        <!-- Гостю тоже даём сменить стиль: раньше кнопка жила в шапке на всех страницах. -->
+        <div class="panel filter-group">
+          <h4>Оформление</h4>
+          <div data-theme-host><p class="muted">Загрузка…</p></div>
         </div>`;
+      renderTheme(guestBox.querySelector('[data-theme-host]'));
       return;
     }
     accountBox.classList.remove('hidden');
 
     renderProfile(user);
+    renderTheme(document.getElementById('themeBody'));
     renderPassword();
     renderGoogle();
     await Promise.all([
@@ -135,6 +142,29 @@
 
     document.getElementById('securityBtn').addEventListener('click', showSecurity);
     document.getElementById('backToProfileBtn').addEventListener('click', showMain);
+  }
+
+  /* ==================== оформление (переехало из шапки) ==================== */
+
+  /**
+   * Кнопка «Сменить оформление»: открывает меню тем (Тёмная / Серая IDE /
+   * Светлая) через AppUI.themeMenu. Отрисовка в два места — панель для
+   * вошедшего (#themeBody) и гостевой блок ([data-theme-host]).
+   */
+  function renderTheme(host) {
+    if (!host) return;
+    host.innerHTML = `
+      <p class="muted" style="font-size:13px;margin-bottom:10px">Тёмная, «Серая IDE» или светлая — сработает на всём сайте и запомнится.</p>
+      <button class="btn btn-outline btn-sm" type="button" data-theme-toggle title="Сменить оформление">
+        <span aria-hidden="true">◐</span>&nbsp;<span data-theme-label>Серая · IDE</span>
+      </button>`;
+    host.querySelector('[data-theme-toggle]').addEventListener('click', (event) => {
+      event.stopPropagation();
+      AppUI.themeMenu(host.querySelector('[data-theme-toggle]'));
+    });
+    // Кнопка появилась после mountHeader (тот уже прогнал initTheme) —
+    // перечитываем тему, чтобы подпись совпадала с сохранённой.
+    AppUI.initTheme();
   }
 
   /* ==================== предзапись (вместо подписки) ==================== */

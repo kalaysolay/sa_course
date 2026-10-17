@@ -1366,7 +1366,6 @@ html[data-theme="light"] .field textarea:focus { border-color: rgba(77, 124, 15,
      а не уезжает за правый край карточки. */
   .collection-foot { flex-wrap: wrap; }
   .collection-foot .btn { white-space: normal; text-align: left; line-height: 1.45; }
-  [data-theme-label] { display: none; }
   .header-actions { gap: 6px; }
   .header-actions .btn { padding: 8px 12px; min-height: 36px; font-size: 13px; }
   .grid-4 { grid-template-columns: 1fr; }
@@ -1518,10 +1517,6 @@ html[data-theme="light"] .switch[aria-checked="true"] {
   border-color: rgba(77, 124, 15, 0.5);
 }
 
-html[data-theme="light"] .hub-theme-btn {
-  background: rgba(255, 255, 255, 0.7);
-}
-
 /* ============================================================
    Серая тема «IDE» (в духе Darcula): компромисс между чёрной
    и белой. Тёмно-серый хром, приглушённый текст, акцент тот же
@@ -1592,7 +1587,6 @@ html[data-theme="gray"] .site-header {
 .hub-logo-text { display: flex; flex-direction: column; gap: 3px; }
 .hub-logo-title { font-weight: 700; letter-spacing: -0.03em; font-size: 23px; line-height: 1.1; }
 .hub-logo-sub { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; color: var(--dim); }
-.hub-theme-btn { background: rgba(16, 19, 23, 0.55); backdrop-filter: blur(8px); }
 
 .hub-split { flex: 1 1 auto; display: flex; min-height: calc(100vh - 190px); position: relative; z-index: 1; }
 

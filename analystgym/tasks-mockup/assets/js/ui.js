@@ -55,12 +55,17 @@
   UI.theme = function () {
     try {
       const saved = localStorage.getItem('sa-trainer:theme');
-      if (saved === 'gray' || saved === 'light') return saved;
-      return 'dark';
+      // Дефолт сайта — «Серая IDE»: явно выбранную тёмную/светлую уважаем,
+      // всё остальное (нет записи, битое значение) — серая.
+      if (saved === 'dark' || saved === 'light') return saved;
+      return 'gray';
     } catch (error) {
+      // Локалстор недоступен (приватный режим): тема уже применена
+      // инлайн-скриптом в head. Тёмная = отсутствие атрибута,
+      // поэтому «остальное» = серая.
       const attr = document.documentElement.dataset.theme;
-      if (attr === 'gray' || attr === 'light') return attr;
-      return 'dark';
+      if (attr === 'light') return attr;
+      return 'gray';
     }
   };
 
@@ -234,9 +239,6 @@
           ${nav.map((item) => `<a href="${item.href}" ${item.id === active ? 'aria-current="page"' : ''}>${UI.esc(item.label)}</a>`).join('')}
         </nav>
         <div class="header-actions">
-          <button class="btn btn-ghost btn-sm" type="button" data-theme-toggle title="Сменить оформление">
-            <span aria-hidden="true">◐</span>&nbsp;<span data-theme-label>Тёмная</span>
-          </button>
           <span data-auth-slot style="display:contents"></span>
           ${!isCourse && (stats.reviewed || stats.assessment) ? `
             <div class="progress-chip" title="Ваш прогресс в макете">
@@ -250,11 +252,6 @@
             : ''}
         </div>
       </div>`;
-    const toggle = mount.querySelector('[data-theme-toggle]');
-    if (toggle) toggle.addEventListener('click', (event) => {
-      event.stopPropagation();
-      UI.themeMenu(toggle);
-    });
     paintAuthSlot(mount);
     if (window.Api && Api.catalogError && !document.getElementById('catalogError')) {
       const banner = document.createElement('div');

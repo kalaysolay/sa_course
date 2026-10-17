@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <script>try{var __t=localStorage.getItem('sa-trainer:theme');if(__t==='light'||__t==='gray')document.documentElement.setAttribute('data-theme',__t)}catch(e){}</script>
+  <script>try{var __t=localStorage.getItem('sa-trainer:theme');if(__t==='light')document.documentElement.setAttribute('data-theme','light');else if(__t!=='dark')document.documentElement.setAttribute('data-theme','gray')}catch(e){document.documentElement.setAttribute('data-theme','gray')}</script>
   <link rel="icon" type="image/png" href="./assets/logo.png">
   <link rel="stylesheet" href="./assets/styles.css">
 </head>
@@ -24,9 +24,6 @@
         <span class="hub-logo-sub">платформа подготовки аналитиков</span>
       </span>
     </span>
-    <button class="btn btn-ghost btn-sm hub-theme-btn" type="button" id="hubThemeBtn" title="Сменить оформление">
-      <span aria-hidden="true">◐</span>&nbsp;<span data-theme-label>Тёмная</span>
-    </button>
   </div>
 
   <main class="hub-split">
@@ -70,14 +67,9 @@
   <script src="./assets/js/ui.js" defer></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
+      // Тема применяется автоматически (инлайн-скрипт в head + initTheme);
+      // переключатель больше не на хабе — он переехал в кабинет.
       AppUI.initTheme();
-      const btn = document.getElementById('hubThemeBtn');
-      if (btn) {
-        btn.addEventListener('click', (event) => {
-          event.stopPropagation();
-          AppUI.themeMenu(btn);
-        });
-      }
       /* Если файл логотипа ещё не положили в assets — показываем текстовую заглушку */
       const logoImg = document.getElementById('hubLogoImg');
       if (logoImg) {
