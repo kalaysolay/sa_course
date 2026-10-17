@@ -173,8 +173,7 @@
     { href: 'collections.html', label: 'Подборки', id: 'collections' },
     { href: 'courses.html', label: 'Курсы', id: 'courses' },
     { href: 'practice.html#how', label: 'Как это работает', id: 'how' },
-    { href: 'practice.html#pricing', label: 'Тарифы', id: 'pricing' },
-    { href: 'account.html', label: 'Кабинет', id: 'account' }
+    { href: 'practice.html#pricing', label: 'Тарифы', id: 'pricing' }
   ];
 
   const NAV_COURSE = [

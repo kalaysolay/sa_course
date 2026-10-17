@@ -1338,8 +1338,13 @@ html[data-theme="light"] .field textarea:focus { border-color: rgba(77, 124, 15,
   }
   .main-nav.open a { padding: 10px 12px; }
   .main-nav.open a[aria-current="page"]::after { display: none; }
-  .site-header .wrap { position: relative; gap: 12px; }
-  .burger { display: inline-flex; }
+  /* На узком экране обе строки начинаются от одного края; меню открывается под всей шапкой. */
+  .site-header { height: auto; }
+  .site-header .wrap { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px 12px; padding-top: 10px; padding-bottom: 10px; }
+  .site-header .brand { grid-column: 1; grid-row: 1; justify-self: start; }
+  .burger { display: inline-flex; grid-column: 2; grid-row: 1; }
+  .header-actions { grid-column: 1 / -1; grid-row: 2; margin-left: 0; justify-content: flex-start; flex-wrap: wrap; }
+  .main-nav.open { top: 100%; }
   .grid-3, .grid-2, .pricing-grid, .collections-grid, .ra-cols, .rp-agents, .competency-grid { grid-template-columns: 1fr; }
   .diagram-split { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(220px, 1fr) minmax(220px, 1fr); }
   .code-area { border-right: 0; border-bottom: 1px solid var(--line-soft); }
@@ -1356,12 +1361,7 @@ html[data-theme="light"] .field textarea:focus { border-color: rgba(77, 124, 15,
 
 @media (max-width: 560px) {
   .wrap { padding: 0 16px; }
-  /* Шапка в две строки: иначе бренд + бургер + тема + вход + чип/CTA
-     не влезают в 360px и растягивают страницу вправо. */
-  .site-header { height: auto; }
-  .site-header .wrap { gap: 8px 10px; flex-wrap: wrap; padding-top: 8px; padding-bottom: 8px; }
-  .main-nav.open { top: 100%; }
-  .header-actions { margin-left: auto; flex-wrap: wrap; row-gap: 8px; }
+  .site-header .wrap { gap: 8px 10px; padding-top: 8px; padding-bottom: 8px; }
   /* Длинная кнопка подборки («Начать подборку → <название>») переносится,
      а не уезжает за правый край карточки. */
   .collection-foot { flex-wrap: wrap; }
@@ -1526,19 +1526,19 @@ html[data-theme="light"] .switch[aria-checked="true"] {
 html[data-theme="gray"] {
   color-scheme: dark;
 
-  --bg: #2b2d30;
-  --bg-soft: #26282b;
-  --panel: #313335;
-  --panel-2: #383b3e;
-  --panel-3: #414447;
-  --line: #4a4d53;
-  --line-soft: #3a3d42;
-  --line-strong: #5a5e66;
+  --bg: #222427;
+  --bg-soft: #1e2023;
+  --panel: #292c30;
+  --panel-2: #303338;
+  --panel-3: #383c42;
+  --line: #40444b;
+  --line-soft: #33373d;
+  --line-strong: #535963;
 
   --text: #c2c6cc;
   --text-2: #a6abb3;
-  --muted: #868b94;
-  --dim: #62676f;
+  --muted: #979da6;
+  --dim: #858b95;
 }
 
 html[data-theme="gray"] body::before {
@@ -1553,7 +1553,7 @@ html[data-theme="gray"] body::after {
 }
 
 html[data-theme="gray"] .site-header {
-  background: rgba(43, 45, 48, 0.86);
+  background: rgba(34, 36, 39, 0.92);
 }
 
 /* ============================================================
@@ -1572,7 +1572,7 @@ html[data-theme="gray"] .site-header {
 }
 
 .hub-top {
-  position: absolute; top: 0; left: 0; right: 0; z-index: 8;
+  position: relative; flex: 0 0 auto; z-index: 8;
   display: flex; align-items: center; justify-content: space-between;
   padding: 22px 30px; pointer-events: none;
 }
@@ -1580,20 +1580,21 @@ html[data-theme="gray"] .site-header {
 
 .hub-logo { display: flex; align-items: center; gap: 16px; }
 .hub-logo img {
+  flex: 0 0 auto;
   width: 76px; height: 76px; border-radius: 19px; display: block;
   box-shadow: 0 18px 44px -16px rgba(0, 0, 0, 0.85);
 }
 .hub-logo-fallback { width: 76px; height: 76px; border-radius: 19px; font-size: 22px; }
 .hub-logo-text { display: flex; flex-direction: column; gap: 3px; }
 .hub-logo-title { font-weight: 700; letter-spacing: -0.03em; font-size: 23px; line-height: 1.1; }
-.hub-logo-sub { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; color: var(--dim); }
+.hub-logo-sub { font-family: var(--font-mono); font-size: 11px; line-height: 1.45; letter-spacing: 0.08em; color: var(--muted); }
 
-.hub-split { flex: 1 1 auto; display: flex; min-height: calc(100vh - 190px); position: relative; z-index: 1; }
+.hub-split { flex: 1 1 auto; display: flex; min-height: calc(100vh - 310px); position: relative; z-index: 1; }
 
 .hub-half {
   flex: 1 1 0; min-width: 0; position: relative; overflow: hidden;
   display: flex; flex-direction: column; justify-content: center;
-  padding: 110px 54px 90px; text-decoration: none;
+  padding: 56px 54px 64px; text-decoration: none;
   transition: flex 0.55s var(--ease), background 0.3s var(--ease);
 }
 .hub-half:hover { flex: 1.45 1 0; }
@@ -1644,18 +1645,15 @@ html[data-theme="gray"] .site-header {
 }
 
 @media (max-width: 860px) {
-  .hub-split { flex-direction: column; }
-  .hub-half { padding: 96px 24px 70px; }
-  .hub-top { padding: 14px 16px; }
-  /* Лого хаба 76px + подпись не влезают в узкий экран — текст наезжал на лого.
-     Правило здесь (≤860), а не в ≤560: иначе на планшете шапка выше
-     верхнего отступа первой половины и hub-title залазит под лого. */
+  .hub-split { flex-direction: column; min-height: 0; }
+  .hub-half, .hub-half:hover { flex: 0 0 auto; padding: 36px 24px 44px; }
+  .hub-top { padding: 20px 24px; border-bottom: 1px solid var(--line-soft); }
+  .hub-title { font-size: clamp(34px, 8vw, 52px); }
   .hub-logo { gap: 10px; min-width: 0; }
   .hub-logo img, .hub-logo-fallback { width: 48px; height: 48px; border-radius: 13px; }
   .hub-logo-text { min-width: 0; }
   .hub-logo-title { font-size: 19px; }
   .hub-logo-sub { font-size: 10px; }
-  .hub-half:hover { flex: 1 1 0; }
   .hub-practice { border-right: 0; border-bottom: 1px solid var(--line-soft); }
   .hub-strip-in { flex-direction: column; align-items: stretch; gap: 16px; }
   .hub-strip .btn { margin-left: 0; }
