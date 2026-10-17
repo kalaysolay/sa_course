@@ -37,10 +37,12 @@ public class QualityController {
 
     private final QualityService quality;
     private final UserRepository users;
+    private final ru.analystgym.practice.service.ReviewProcessor processor;
 
-    public QualityController(QualityService quality, UserRepository users) {
+    public QualityController(QualityService quality, UserRepository users, ru.analystgym.practice.service.ReviewProcessor processor) {
         this.quality = quality;
         this.users = users;
+        this.processor = processor;
     }
 
     /** Оспорить ревью: жалоба уходит в очередь со статусом «Новая». */
@@ -102,6 +104,13 @@ public class QualityController {
     public AttemptDetail attempt(@PathVariable UUID id, Authentication authentication) {
         staff(authentication);
         return quality.attemptDetail(id);
+    }
+
+    /** Полный контекст и расход проверки доступны только сотрудникам контура качества. */
+    @GetMapping("/api/admin/attempts/{id}/context")
+    public java.util.Map<String, Object> context(@PathVariable UUID id, Authentication authentication) {
+        staff(authentication);
+        return processor.context(id);
     }
 
     @GetMapping("/api/admin/students")

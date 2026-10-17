@@ -41,9 +41,11 @@ import ru.analystgym.practice.web.PracticeDto.TaskDetail;
 public class PracticeController {
 
     private final PracticeService practice;
+    private final ru.analystgym.review.ReviewPipeline pipeline;
 
-    public PracticeController(PracticeService practice) {
+    public PracticeController(PracticeService practice, ru.analystgym.review.ReviewPipeline pipeline) {
         this.practice = practice;
+        this.pipeline = pipeline;
     }
 
     @PutMapping("/tasks/{id}/draft")
@@ -79,17 +81,36 @@ public class PracticeController {
     @PostMapping("/attempts")
     public ResponseEntity<SubmitResponse> submit(
             @RequestBody SubmitRequest body,
-            @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey,
+            @RequestHeader(value = "Idempotency-Key") String idempotencyKey,
             Authentication authentication) {
         UUID userId = currentUser(authentication);
         if (body == null || body.taskId() == null || body.taskId().isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "taskId required");
         }
-        UUID attemptId = practice.submit(userId, body.taskId(), body.tabs(), idempotencyKey, body.taskVersion());
+        practice.submit(userId, body.taskId(), body.tabs(), idempotencyKey, body.taskVersion());
         // 202 и для новой, и для повторной (идемпотентной) отправки:
         // работа уже принята, результат — polling.
         return ResponseEntity.status(HttpStatus.ACCEPTED)
-                .body(new SubmitResponse(attemptId, body.taskId(), "in_review"));
+                .body(practice.submission(userId, idempotencyKey.trim()));
+    }
+
+    @GetMapping("/attempts/submissions/{key}")
+    public SubmitResponse submission(@PathVariable String key, Authentication authentication) {
+        return practice.submission(currentUser(authentication), key);
+    }
+
+    @GetMapping("/attempts/{id}/context")
+    public JsonNode context(@PathVariable UUID id, Authentication authentication) {
+        return practice.taskContext(currentUser(authentication), id);
+    }
+
+    @GetMapping("/review/limits")
+    public ru.analystgym.review.ReviewPlan.Limits limits() { return pipeline.limits(); }
+
+    /** Коды нужны фронту, чтобы отличить конфликт версии от повторного использования ключа. */
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<Map<String, String>> rejected(ResponseStatusException error) {
+        return ResponseEntity.status(error.getStatusCode()).body(Map.of("error", error.getReason() == null ? "request_rejected" : error.getReason()));
     }
 
     @GetMapping("/attempts/{attemptId}")

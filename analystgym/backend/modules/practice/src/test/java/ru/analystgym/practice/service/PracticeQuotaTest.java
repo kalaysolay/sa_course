@@ -26,13 +26,16 @@ class PracticeQuotaTest {
             ru.analystgym.catalog.repo.TaskRepository tasks,
             ru.analystgym.practice.repo.AttemptRepository attempts,
             ru.analystgym.billing.service.BillingService billing) {
+        var users = mock(ru.analystgym.identity.repo.UserRepository.class);
+        when(users.lockById(any())).thenReturn(Optional.of(mock(ru.analystgym.identity.domain.User.class)));
+        when(tasks.findById(any())).thenAnswer(call -> tasks.lockById(call.getArgument(0)));
         return new PracticeService(tasks,
                 mock(ru.analystgym.catalog.repo.LevelRepository.class),
                 mock(ru.analystgym.practice.repo.DraftRepository.class),
                 attempts,
                 mock(ru.analystgym.practice.repo.ReviewRepository.class),
                 mock(ru.analystgym.practice.repo.ReviewJobRepository.class),
-                new ObjectMapper(), billing, 2);
+                new ObjectMapper(), billing, 2, users, mock(ru.analystgym.review.ReviewPipeline.class), "mock");
     }
 
     private static Task published(String id) {
@@ -60,12 +63,12 @@ class PracticeQuotaTest {
         var tasks = mock(ru.analystgym.catalog.repo.TaskRepository.class);
         when(tasks.lockById("t3")).thenReturn(Optional.of(published("t3")));
         var attempts = mock(ru.analystgym.practice.repo.AttemptRepository.class);
-        when(attempts.reviewedTaskIds(any())).thenReturn(Set.of("t1", "t2"));
+        when(attempts.reservedTaskIds(any())).thenReturn(Set.of("t1", "t2"));
         PracticeService service = serviceOf(tasks, attempts, freeBilling());
         List<TabDto> tabs = List.of(new TabDto("x", "doc", "D", "text"));
 
         // when/then: новая задача сверх квоты — 402.
-        assertThatThrownBy(() -> service.submit(UUID.randomUUID(), "t3", tabs, null, null))
+        assertThatThrownBy(() -> service.submit(UUID.randomUUID(), "t3", tabs, "key", null))
                 .isInstanceOf(QuotaExceededException.class);
     }
 
@@ -75,13 +78,13 @@ class PracticeQuotaTest {
         var tasks = mock(ru.analystgym.catalog.repo.TaskRepository.class);
         when(tasks.lockById("t1")).thenReturn(Optional.of(published("t1")));
         var attempts = mock(ru.analystgym.practice.repo.AttemptRepository.class);
-        when(attempts.reviewedTaskIds(any())).thenReturn(Set.of("t1", "t2"));
+        when(attempts.reservedTaskIds(any())).thenReturn(Set.of("t1", "t2"));
         when(attempts.saveAndFlush(any())).thenAnswer(call -> call.getArgument(0));
         PracticeService service = serviceOf(tasks, attempts, freeBilling());
         List<TabDto> tabs = List.of(new TabDto("x", "doc", "D", "text"));
 
         // when/then: повторная отправка идёт в очередь.
-        assertThat(service.submit(UUID.randomUUID(), "t1", tabs, null, null)).isNotNull();
+        assertThat(service.submit(UUID.randomUUID(), "t1", tabs, "key", null)).isNotNull();
     }
 
     @Test
@@ -90,7 +93,7 @@ class PracticeQuotaTest {
         var tasks = mock(ru.analystgym.catalog.repo.TaskRepository.class);
         when(tasks.lockById("t3")).thenReturn(Optional.of(published("t3")));
         var attempts = mock(ru.analystgym.practice.repo.AttemptRepository.class);
-        when(attempts.reviewedTaskIds(any())).thenReturn(Set.of("t1", "t2"));
+        when(attempts.reservedTaskIds(any())).thenReturn(Set.of("t1", "t2"));
         when(attempts.saveAndFlush(any())).thenAnswer(call -> call.getArgument(0));
         var billing = mock(ru.analystgym.billing.service.BillingService.class);
         when(billing.proState(any())).thenAnswer(call ->
@@ -100,6 +103,6 @@ class PracticeQuotaTest {
         List<TabDto> tabs = List.of(new TabDto("x", "doc", "D", "text"));
 
         // when/then: третья задача уходит без 402.
-        assertThat(service.submit(UUID.randomUUID(), "t3", tabs, null, null)).isNotNull();
+        assertThat(service.submit(UUID.randomUUID(), "t3", tabs, "key", null)).isNotNull();
     }
 }

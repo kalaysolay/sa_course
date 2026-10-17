@@ -19,6 +19,10 @@
   let startedAt = Date.now();
   let timerId = null;
   let reviewRunning = false;
+  let submitting = false;
+  let serverPollTimer = null;
+  let pollGeneration = 0;
+  let reviewLimits = null;
 
   const el = {};
 
@@ -64,6 +68,11 @@
     mountActiveTab();
     startTimer();
 
+    if (Api.serverPractice()) {
+      try { reviewLimits = await Api.getReviewLimits(); } catch (error) { /* Сервер проверит лимит при submit. */ }
+      await restoreServerSubmission();
+    }
+
     const last = Store.lastAttempt(task.id);
     if (last && last.status === 'in_review') {
       /* ревью не завершилось (обновление страницы) — перезапускаем на сохранённом снимке */
@@ -81,6 +90,8 @@
   window.addEventListener('ag:before-account-change', () => {
     clearTimeout(saveTimer);
     clearTimeout(serverDraftTimer);
+    clearInterval(serverPollTimer);
+    pollGeneration++;
     if (task && solution) Store.saveSolution(task.id, solution);
     solution = null;
     task = null;
@@ -799,8 +810,13 @@
   }
 
   function askSubmit() {
-    if (reviewRunning) {
+    if (reviewRunning || submitting) {
       AppUI.toast('Ревью уже идёт — дождитесь результата', 'warn');
+      return;
+    }
+    const last = Store.lastAttempt(task.id);
+    if (Api.serverPractice() && last?.server && last.status === 'in_review') {
+      startServerPoll(last, { resume: true });
       return;
     }
     persist();
@@ -816,6 +832,7 @@
         `Вкладок в решении: ${stats.tabs}`,
         `Объём документа: ${stats.words} ${AppUI.plural(stats.words, ['слово', 'слова', 'слов'])}`,
         `Диаграмм с содержимым: ${stats.diagrams}`,
+        ...(reviewLimits ? [`Лимит решения: ${reviewLimits.maxSolutionChars} символов во всех вкладках, включая разметку`] : []),
         'Результат сохранится в истории — можно отправить повторно и сравнить'
       ],
       confirmText: 'Отправить на ревью',
@@ -864,11 +881,21 @@
   /* ==================== отправка через бэк (Фаза 2) ==================== */
 
   async function serverSubmit() {
-    const tabs = JSON.parse(JSON.stringify(solution.tabs));
-    const key = 'web_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+    if (submitting) return;
+    submitting = true;
+    let tabs = JSON.parse(JSON.stringify(solution.tabs));
+    let version = task.version;
+    const pending = Store.pendingSubmission(task.id);
+    if (pending && JSON.stringify(pending.body) !== JSON.stringify({ taskId: task.id, tabs, taskVersion: version })) {
+      const ok = await AppUI.confirm({ title: 'Восстановить предыдущую отправку?',
+        text: 'Ответ сервера на прошлую отправку потерялся. Восстановим именно тот снимок решения; ваши новые правки останутся в черновике.',
+        confirmText: 'Восстановить', cancelText: 'Продолжить писать' });
+      if (!ok) { submitting = false; return; }
+      tabs = pending.body.tabs; version = pending.body.taskVersion;
+    }
     let res = null;
     try {
-      res = await Api.submitAttempt(task.id, tabs, key, task.version);
+      res = await Api.submitReliable(task.id, tabs, version);
     } catch (error) {
       // Восстановление уже попробовал api.js; повторный отказ не подменяем демо-оценкой.
       if (error && error.status === 401) {
@@ -881,10 +908,18 @@
         else AppUI.toast('Бесплатный лимит ревью исчерпан — оставьте заявку на предзапись Pro', 'warn');
         return;
       }
-      AppUI.toast(error.status === 409 ? 'Задача изменилась. Черновик сохранён; обновите страницу и проверьте новое условие перед отправкой.'
-        : 'Не удалось отправить решение: ' + error.message, 'bad');
+      const code = error.body?.error;
+      AppUI.toast(code === 'task_changed' ? 'Задача изменилась. Черновик сохранён; обновите страницу и проверьте новое условие.'
+        : error.status === 413 ? 'Решение или контекст превышают лимит ревью. Сократите решение; черновик сохранён.'
+        : code === 'pending_submission_changed' ? 'Есть предыдущая отправка. Нажмите отправку ещё раз, чтобы восстановить её.'
+        : 'Ответ на отправку не получен. Повтор восстановит ту же попытку; черновик сохранён.', 'bad');
       return;
-    }
+    } finally { submitting = false; }
+    attachServerAttempt(res, tabs);
+    startServerPoll(activeAttempt, {});
+  }
+
+  function attachServerAttempt(res, tabs) {
     const attempt = {
       id: res.attemptId,
       taskId: task.id,
@@ -894,21 +929,40 @@
       review: null,
       server: true
     };
-    Store.addAttempt(task.id, attempt);
+    if (!Store.attempts(task.id).some(a => a.id === attempt.id)) Store.addAttempt(task.id, attempt);
     activeAttempt = attempt;
     renderAttempts();
-    startServerPoll(attempt, {});
   }
 
-  const SERVER_STAGE_LABELS = { system: 'Подготовка', sa: 'Системный аналитик', arch: 'Архитектор', grading: 'Вердикт', done: 'Готово' };
+  /** GET восстанавливает принятый запрос после перезагрузки; POST самопроизвольно не повторяется. */
+  async function restoreServerSubmission() {
+    const pending = Store.pendingSubmission(task.id);
+    if (pending) {
+      try {
+        const saved = await Api.getSubmission(pending.key);
+        if (!saved.attemptId || saved.taskId !== task.id) throw new Error('Неоднозначный ответ восстановления');
+        attachServerAttempt(saved, pending.body.tabs);
+        Store.clearPendingSubmission(task.id);
+      } catch (error) { AppUI.toast('Есть незавершённая отправка. Кнопка отправки восстановит её с прежним ключом.', 'warn'); }
+    }
+    const history = await Api.listAttempts(task.id);
+    const latest = history?.[0];
+    if (latest && latest.attemptId !== Store.lastAttempt(task.id)?.id) {
+      attachServerAttempt(latest, []);
+    }
+  }
+
+  const SERVER_STAGE_LABELS = { system: 'В очереди', waiting: 'Ожидание повторной обработки', sa: 'Системный аналитик', arch: 'Архитектор', grading: 'Вердикт', done: 'Готово' };
 
   /* Polling статуса попытки: прогресс показывает воркер бэка. */
   function startServerPoll(attempt, options) {
+    clearInterval(serverPollTimer);
+    const generation = ++pollGeneration;
     reviewRunning = true;
     el.reviewProgressSection.classList.remove('hidden');
     el.reviewResultSection.classList.add('hidden');
     el.reviewResultSection.innerHTML = '';
-    renderProgressSkeleton();
+    document.getElementById('rpAgents').innerHTML = '<p class="muted">Показываем текущую стадию обработки на сервере. После временного сбоя проверка продолжится автоматически.</p>';
 
     const bar = document.getElementById('reviewProgressBar');
     const label = document.getElementById('reviewProgressLabel');
@@ -921,34 +975,31 @@
 
     el.reviewProgressSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-    const stepItems = Array.from(document.querySelectorAll('.rp-agent li[data-step]'));
     let failures = 0;
-    const pollTimer = setInterval(async () => {
+    let polling = false;
+    const pollTimer = serverPollTimer = setInterval(async () => {
+      if (polling) return;
+      polling = true;
       let state = null;
       try {
         state = await Api.getAttempt(attempt.id);
+        if (generation !== pollGeneration) return;
         failures = 0;
       } catch (error) {
         failures += 1;
         if (failures >= 5) {
           clearInterval(pollTimer);
           reviewRunning = false;
-          if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Отправить решение'; }
+          if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Восстановить статус'; }
           el.reviewProgressSection.classList.add('hidden');
-          AppUI.toast('Сервер недоступен — попробуйте отправить ещё раз', 'bad');
+          AppUI.toast('Связь с сервером потеряна. Кнопка восстановит статус этой проверки.', 'warn');
         }
         return;
-      }
+      } finally { polling = false; }
+      if (generation !== pollGeneration || !task) return;
       const progress = Math.max(0, Math.min(100, state.progress || 0));
       bar.style.width = `${progress}%`;
       label.textContent = `${SERVER_STAGE_LABELS[state.stage] || 'Ревью'} · ${progress}%`;
-      // Шаги зажигаем пропорционально прогрессу (всего их 10, как в движке).
-      const lit = Math.round((progress / 100) * stepItems.length);
-      stepItems.forEach((item, index) => {
-        const done = index < lit;
-        item.dataset.state = done ? 'done' : 'pending';
-        item.querySelector('.mark').textContent = done ? '✓' : '·';
-      });
 
       if (state.status === 'reviewed' && state.review) {
         clearInterval(pollTimer);
@@ -964,6 +1015,8 @@
       } else if (state.status === 'failed') {
         clearInterval(pollTimer);
         reviewRunning = false;
+        attempt.status = 'failed';
+        Store.updateAttempt(task.id, attempt.id, { status: 'failed' });
         if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Отправить решение'; }
         el.reviewProgressSection.classList.add('hidden');
         AppUI.toast('Ревью не удалось посчитать — попробуйте ещё раз', 'bad');
@@ -1099,7 +1152,7 @@
         <div class="panel-head">
           <p class="panel-title">Ответ на решение · ${AppUI.esc(attempt.submittedAt ? AppUI.dateTime(attempt.submittedAt) : '')}</p>
           <div class="row" style="gap:8px">
-            <span class="badge">агентов: 2</span>
+            <span class="badge">агентов: ${review.agents.length}</span>
             <span class="badge badge-violet">${AppUI.esc(review.engine)}</span>
           </div>
         </div>
@@ -1178,11 +1231,22 @@
               </div>
             </div>` : '<div class="grow"></div>'}
           <span class="note">ревью ${AppUI.timeAgo(attempt.submittedAt)}</span>
+          ${attempt.server ? '<button class="btn btn-ghost btn-sm" type="button" id="taskContextBtn">Условие этой попытки</button>' : ''}
           <button class="btn btn-ghost btn-sm" type="button" id="complainBtn">Оспорить</button>
           <button class="btn btn-outline btn-sm" type="button" id="openAuthorBtn">Смотреть эталон</button>
           <button class="btn btn-primary btn-sm" type="button" id="resubmitBtn">Доработать и отправить снова</button>
         </div>
       </div>`;
+
+    document.getElementById('taskContextBtn')?.addEventListener('click', async () => {
+      try {
+        const snapshot = await Api.getTaskContext(attempt.id);
+        const s = snapshot.statement || {};
+        const list = values => `<ul>${(values || []).map(v => `<li>${AppUI.esc(v)}</li>`).join('')}</ul>`;
+        AppUI.modal({ title: snapshot.title + ' · версия ' + snapshot.version, wide: true,
+          html: `<p>${AppUI.esc(s.brief)}</p><h3>Цель</h3><p>${AppUI.esc(s.goal)}</p><h3>Контекст</h3>${list(s.context)}<h3>Входные данные</h3>${list(s.inputs)}<h3>Что сдать</h3>${list(s.deliverables)}<h3>Ограничения</h3>${list(s.constraints)}<h3>Критерии этой проверки</h3>${list((snapshot.rubric || []).map(c => c.title + ' · вес ' + (c.weightValue ?? c.weight)))}` });
+      } catch (error) { AppUI.toast(error.status === 404 ? 'Для старой попытки снимок условия не сохранялся.' : 'Не удалось загрузить условие попытки.', 'warn'); }
+    });
 
     document.getElementById('resubmitBtn').addEventListener('click', () => {
       window.scrollTo({ top: 0, behavior: 'smooth' });

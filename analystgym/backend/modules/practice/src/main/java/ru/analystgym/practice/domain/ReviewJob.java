@@ -18,6 +18,20 @@ import org.hibernate.annotations.UpdateTimestamp;
 @Table(name = "review_jobs")
 public class ReviewJob {
 
+    @Column(name = "lease_token")
+    private UUID leaseToken;
+    @Column(name = "lease_until")
+    private Instant leaseUntil;
+    @Column(name = "next_run_at", nullable = false)
+    private Instant nextRunAt = Instant.now();
+
+    public UUID getLeaseToken() { return leaseToken; }
+    public void setLeaseToken(UUID value) { leaseToken = value; }
+    public Instant getLeaseUntil() { return leaseUntil; }
+    public void setLeaseUntil(Instant value) { leaseUntil = value; }
+    public Instant getNextRunAt() { return nextRunAt; }
+    public void setNextRunAt(Instant value) { nextRunAt = value; }
+
     @Id
     private UUID id;
 

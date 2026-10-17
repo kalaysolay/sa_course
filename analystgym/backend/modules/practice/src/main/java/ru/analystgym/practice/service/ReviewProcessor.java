@@ -2,184 +2,192 @@ package ru.analystgym.practice.service;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import ru.analystgym.catalog.domain.Task;
-import ru.analystgym.catalog.repo.LevelRepository;
-import ru.analystgym.catalog.repo.TaskRepository;
 import ru.analystgym.practice.domain.Attempt;
 import ru.analystgym.practice.domain.Review;
+import ru.analystgym.practice.domain.ReviewCall;
 import ru.analystgym.practice.domain.ReviewJob;
 import ru.analystgym.practice.repo.AttemptRepository;
+import ru.analystgym.practice.repo.ReviewCallRepository;
 import ru.analystgym.practice.repo.ReviewJobRepository;
 import ru.analystgym.practice.repo.ReviewRepository;
-import ru.analystgym.review.MockReviewProvider;
-import ru.analystgym.review.RecCandidate;
-import ru.analystgym.review.ReviewInput;
-import ru.analystgym.review.ReviewPipeline;
-import ru.analystgym.review.ReviewResult;
-import ru.analystgym.review.SolutionTab;
+import ru.analystgym.review.*;
 
-/**
- * Транзакционные шаги воркера. Каждый шаг — своя транзакция, чтобы polling
- * видел промежуточный прогресс (стадии sa/arch), а не только финал:
- * долгий сон внутри одной транзакции прятал бы прогресс до коммита.
- */
+/** Короткие транзакции очереди и журнала. Ни один метод не обращается к модели. */
 @Component
 public class ReviewProcessor {
-
     private final ReviewJobRepository jobs;
     private final AttemptRepository attempts;
     private final ReviewRepository reviews;
-    private final TaskRepository tasks;
-    private final LevelRepository levels;
+    private final ReviewCallRepository calls;
     private final ObjectMapper mapper;
-    /** Движок ревью: mock (детерминированный) или llm (модели). */
-    private final ReviewPipeline pipeline;
-    private final String engine;
+    private final int leaseSeconds, maxTries, retrySeconds;
 
-    public ReviewProcessor(
-            ReviewJobRepository jobs,
-            AttemptRepository attempts,
-            ReviewRepository reviews,
-            TaskRepository tasks,
-            LevelRepository levels,
-            ObjectMapper mapper,
-            ReviewPipeline pipeline,
-            @Value("${review.engine:mock}") String engine) {
-        this.jobs = jobs;
-        this.attempts = attempts;
-        this.reviews = reviews;
-        this.tasks = tasks;
-        this.levels = levels;
-        this.mapper = mapper;
-        this.pipeline = pipeline;
-        this.engine = engine;
+    public ReviewProcessor(ReviewJobRepository jobs, AttemptRepository attempts, ReviewRepository reviews,
+                           ReviewCallRepository calls, ObjectMapper mapper,
+                           @Value("${review.queue.lease-seconds:30}") int leaseSeconds,
+                           @Value("${review.queue.max-tries:3}") int maxTries,
+                           @Value("${review.queue.retry-seconds:2}") int retrySeconds) {
+        if (leaseSeconds < 3 || maxTries < 1 || retrySeconds < 1) throw new IllegalArgumentException("Некорректные настройки очереди");
+        this.jobs = jobs; this.attempts = attempts; this.reviews = reviews; this.calls = calls; this.mapper = mapper;
+        this.leaseSeconds = leaseSeconds; this.maxTries = maxTries; this.retrySeconds = retrySeconds;
     }
 
-    /** Захват oldest-queued (SKIP LOCKED) + пометка «забрали в работу». */
+    public record Claim(UUID jobId, UUID attemptId, UUID token, ReviewPlan plan, List<SolutionTab> tabs) { }
+    public record DoneInfo(UUID userId, String taskTitle, int score) { }
+
+    /** Потерявший захват воркер не может менять стадии, расход и результат новой обработки. */
+    public static class LostLease extends RuntimeException { }
+
     @Transactional
-    public Optional<UUID> claim() {
-        Optional<ReviewJob> next = jobs.claimNext();
-        if (next.isEmpty()) {
+    public Optional<Claim> claim() {
+        Instant now = Instant.now();
+        var next = jobs.claimNext(now);
+        if (next.isEmpty()) return Optional.empty();
+        var job = next.get();
+        var attempt = attempts.lockById(job.getAttemptId()).orElseThrow();
+        for (var call : calls.findByAttemptIdOrderByStartedAtAsc(attempt.getId())) {
+            if ("started".equals(call.getStatus())) call.failed("worker_lease_expired", true);
+        }
+        if (job.getTries() >= maxTries || attempt.getReviewPlan() == null || attempt.getReviewPlan().isNull()) {
+            terminal(job, attempt, job.getTries() >= maxTries ? "review_retries_exhausted" : "legacy_review_requires_resubmit");
             return Optional.empty();
         }
-        ReviewJob job = next.get();
-        job.setStatus("sa_running");
-        job.setStage("system");
-        job.setProgress(5);
-        job.setTries(job.getTries() + 1);
-        job.setLockedAt(Instant.now());
-        jobs.save(job);
-        return Optional.of(job.getId());
-    }
-
-    @Transactional
-    public void markStage(UUID jobId, String status, String stage, int progress) {
-        ReviewJob job = jobs.findById(jobId).orElse(null);
-        if (job == null || "done".equals(job.getStatus()) || "failed".equals(job.getStatus())) {
-            return;
-        }
-        job.setStatus(status);
-        job.setStage(stage);
-        job.setProgress(progress);
-        jobs.save(job);
-    }
-
-    /**
-     * Финал: считаем ревью по снапшотам попытки (не по живым данным задачи),
-     * сохраняем результат, закрываем попытку и задачу.
-     */
-    @Transactional
-    public void finish(UUID jobId) {
-        ReviewJob job = jobs.findById(jobId)
-                .orElseThrow(() -> new IllegalStateException("job gone " + jobId));
-        Attempt attempt = attempts.findById(job.getAttemptId())
-                .orElseThrow(() -> new IllegalStateException("attempt gone " + job.getAttemptId()));
-        Task task = tasks.findById(attempt.getTaskId())
-                .orElseThrow(() -> new IllegalStateException("task gone " + attempt.getTaskId()));
-        String levelName = levels.findById(task.getLevelId())
-                .map(level -> level.getName()).orElse(task.getLevelId());
-        List<SolutionTab> tabs = ReviewMapper.toTabs(attempt.getTabs());
-        List<RecCandidate> candidates = ReviewMapper.toCandidates(tasks.search(null, null, "published", null));
-        // Рубрика — из снапшота попытки; живьём из задачи берём только
-        // название/уровень/вопросы (они на скоринг не влияют).
-        ReviewInput input = ReviewMapper.toInputFromSnapshot(
-                task.getId(), task.getTitle(), task.getLevelId(), levelName,
-                task.getTags() == null ? List.of() : List.of(task.getTags()),
-                ReviewMapper.expectsDiagram(task.getStarterTabs()),
-                attempt.getRubricSnapshot(), task.getInterviewQuestions());
-        Review review = new Review();
-        review.setAttemptId(attempt.getId());
-        if ("llm".equalsIgnoreCase(engine)) {
-            ReviewPipeline.LlmOutcome outcome = pipeline.review(input, tabs, candidates);
-            ReviewResult result = outcome.result();
-            review.setEngine(result.engine());
-            review.setGradeCode(result.grade().code());
-            review.setScore(result.grade().score());
-            review.setResult(mapper.valueToTree(result));
-            review.setProvider(outcome.provider());
-            review.setModel(outcome.model());
-            review.setPromptVersions(mapper.valueToTree(outcome.promptVersions()));
-            review.setInputTokens(outcome.inputTokens());
-            review.setOutputTokens(outcome.outputTokens());
-        } else {
-            ReviewResult result = MockReviewProvider.buildReview(input, tabs, candidates);
-            review.setEngine(result.engine());
-            review.setGradeCode(result.grade().code());
-            review.setScore(result.grade().score());
-            review.setResult(mapper.valueToTree(result));
-            review.setProvider("");
-            review.setModel("");
-            review.setPromptVersions(JsonNodeFactory.instance.objectNode());
-            review.setInputTokens(0);
-            review.setOutputTokens(0);
-        }
-        reviews.save(review);
-
-        attempt.setStatus("reviewed");
-        attempts.save(attempt);
-
-        job.setStatus("done");
-        job.setStage("done");
-        job.setProgress(100);
+        var plan = mapper.convertValue(attempt.getReviewPlan(), ReviewPlan.class);
+        job.setStatus("sa_running"); job.setStage("system"); job.setProgress(5);
+        job.setTries(job.getTries() + 1); job.setLockedAt(now);
+        job.setLeaseToken(UUID.randomUUID()); job.setLeaseUntil(now.plusSeconds(leaseSeconds));
         job.setError(null);
-        jobs.save(job);
+        return Optional.of(new Claim(job.getId(), attempt.getId(), job.getLeaseToken(), plan, ReviewMapper.toTabs(attempt.getTabs())));
     }
 
-    /** Падение: попытка и задача помечаются, причина видна в polling.
-     * Данные готового ревью для письма (читаем после коммита finish). */
-    @Transactional(readOnly = true)
-    public Optional<DoneInfo> doneInfo(UUID jobId) {
-        return jobs.findById(jobId)
-                .flatMap(job -> attempts.findById(job.getAttemptId()))
-                .flatMap(attempt -> reviews.findById(attempt.getId())
-                        .map(review -> new DoneInfo(attempt.getUserId(),
-                                tasks.findById(attempt.getTaskId())
-                                        .map(Task::getTitle).orElse(attempt.getTaskId()),
-                                review.getScore())));
+    @Transactional
+    public void renew(Claim claim) {
+        owned(claim).setLeaseUntil(Instant.now().plusSeconds(leaseSeconds));
     }
 
-    public record DoneInfo(UUID userId, String taskTitle, int score) {
-    }    @Transactional
-    public void fail(UUID jobId, String error) {
-        ReviewJob job = jobs.findById(jobId).orElse(null);
-        if (job == null) {
-            return;
+    @Transactional
+    public void stage(Claim claim, String stage, int progress) {
+        var job = owned(claim);
+        job.setStage(stage); job.setProgress(progress);
+        job.setStatus("grading".equals(stage) ? "grading" : "arch".equals(stage) ? "arch_running" : "sa_running");
+    }
+
+    @Transactional
+    public Optional<LlmReviewer.ParsedAnswer> restored(Claim claim, String agent) {
+        owned(claim);
+        return calls.findFirstByAttemptIdAndAgentIdAndStatusOrderByStartedAtDesc(claim.attemptId(), agent, "accepted")
+                .map(c -> mapper.convertValue(c.getParsedAnswer(), LlmReviewer.ParsedAnswer.class));
+    }
+
+    /** Резерв расхода и запись started коммитятся до отправки HTTP, включая последние доступные токены. */
+    @Transactional
+    public UUID reserve(Claim claim, ReviewPlan.Agent agent, ReviewPlan.Route route, LlmClient.LlmRequest request, int tokens) {
+        owned(claim);
+        var attempt = attempts.lockById(claim.attemptId()).orElseThrow();
+        if (attempt.getCallCount() >= claim.plan().limits().maxCalls()
+                || (long) attempt.getChargedTokens() + tokens > claim.plan().limits().tokenBudget()) {
+            throw new LlmClient.LlmFailedException("review_budget_exhausted", false);
         }
-        String message = error == null ? "review failed" : error;
-        job.setStatus("failed");
-        job.setProgress(100);
-        job.setError(message.length() > 1000 ? message.substring(0, 1000) : message);
-        jobs.save(job);
-        attempts.findById(job.getAttemptId()).ifPresent(attempt -> {
-            attempt.setStatus("failed");
-            attempts.save(attempt);
-        });
+        var call = new ReviewCall(attempt.getId(), claim.token(), agent.id(), route.id(), request.model(),
+                agent.promptKey(), agent.promptVersion(), mapper.valueToTree(request), tokens);
+        calls.save(call);
+        attempt.setCallCount(attempt.getCallCount() + 1);
+        attempt.setChargedTokens(attempt.getChargedTokens() + tokens);
+        return call.getId();
+    }
+
+    /** true означает нарушение бюджета провайдером; ошибка выбрасывается вызывающим уже после коммита журнала. */
+    @Transactional
+    public boolean answered(Claim claim, UUID id, LlmClient.LlmAnswer answer, LlmReviewer.ParsedAnswer parsed, String error) {
+        owned(claim);
+        var attempt = attempts.lockById(claim.attemptId()).orElseThrow();
+        var call = callOwned(claim, id);
+        int oldCharge = call.getChargedTokens();
+        boolean invalidUsage = answer.inputTokens() < 0 || answer.outputTokens() < 0
+                || answer.outputTokens() > claim.plan().limits().maxOutputTokens()
+                || (long) answer.inputTokens() + answer.outputTokens() > call.getReservedTokens();
+        call.answered(answer, parsed == null || invalidUsage ? null : mapper.valueToTree(parsed),
+                invalidUsage ? "provider_usage_over_limit" : error);
+        attempt.setChargedTokens(Math.addExact(attempt.getChargedTokens() - oldCharge, call.getChargedTokens()));
+        return invalidUsage || attempt.getChargedTokens() > claim.plan().limits().tokenBudget();
+    }
+
+    @Transactional
+    public void failedCall(Claim claim, UUID id, String error) {
+        owned(claim); callOwned(claim, id).failed(error, false);
+    }
+
+    /** Результат, попытка и закрытие job фиксируются атомарно. Повторное готовое ревью не создаётся. */
+    @Transactional
+    public Optional<DoneInfo> finish(Claim claim, ReviewResult result, Map<String, Integer> promptVersions) {
+        var job = owned(claim);
+        var attempt = attempts.lockById(claim.attemptId()).orElseThrow();
+        if (reviews.existsById(attempt.getId())) throw new LostLease();
+        var history = calls.findByAttemptIdOrderByStartedAtAsc(attempt.getId());
+        int input = history.stream().mapToInt(c -> c.getInputTokens() == null ? 0 : c.getInputTokens()).sum();
+        int output = history.stream().mapToInt(c -> c.getOutputTokens() == null ? 0 : c.getOutputTokens()).sum();
+        var review = new Review(); review.setAttemptId(attempt.getId());
+        review.setEngine(result.engine()); review.setGradeCode(result.grade().code()); review.setScore(result.grade().score());
+        review.setResult(mapper.valueToTree(result)); review.setPromptVersions(mapper.valueToTree(promptVersions));
+        review.setInputTokens(input); review.setOutputTokens(output);
+        // Старые сводные поля сохраняем; полная трасса по каждому агенту/повтору находится в review_calls.
+        var accepted = history.stream().filter(c -> "accepted".equals(c.getStatus())).toList();
+        review.setProvider(accepted.stream().map(ReviewCall::getProvider).distinct().reduce((a, b) -> a + "," + b).orElse(""));
+        review.setModel(accepted.stream().map(c -> c.getActualModel() == null ? c.getRequestedModel() : c.getActualModel())
+                .distinct().reduce((a, b) -> a + "," + b).orElse(""));
+        reviews.save(review); attempt.setStatus("reviewed");
+        job.setStatus("done"); job.setStage("done"); job.setProgress(100); job.setError(null);
+        job.setLeaseToken(null); job.setLeaseUntil(null);
+        return Optional.of(new DoneInfo(attempt.getUserId(), claim.plan().input().title(), result.grade().score()));
+    }
+
+    @Transactional
+    public void fail(Claim claim, String error, boolean retryable) {
+        var job = owned(claim);
+        var attempt = attempts.lockById(claim.attemptId()).orElseThrow();
+        if (retryable && job.getTries() < maxTries) {
+            job.setStatus("queued"); job.setStage("waiting"); job.setProgress(0); job.setError(error);
+            job.setNextRunAt(Instant.now().plusSeconds((long) retrySeconds * (1L << Math.min(10, job.getTries() - 1))));
+            job.setLeaseToken(null); job.setLeaseUntil(null);
+        } else terminal(job, attempt, error);
+    }
+
+    /** Журнал доступен только через контроллер с проверкой владельца/служебной роли. */
+    @Transactional(readOnly = true)
+    public Map<String, Object> context(UUID attemptId) {
+        var attempt = attempts.findById(attemptId).orElseThrow(() -> new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND));
+        return Map.of("task", attempt.getTaskSnapshot() == null ? mapper.nullNode() : attempt.getTaskSnapshot(),
+                "plan", attempt.getReviewPlan() == null ? mapper.nullNode() : attempt.getReviewPlan(),
+                "calls", calls.findByAttemptIdOrderByStartedAtAsc(attemptId),
+                "chargedTokens", attempt.getChargedTokens(), "callCount", attempt.getCallCount());
+    }
+
+    private ReviewJob owned(Claim claim) {
+        var job = jobs.lockById(claim.jobId()).orElseThrow(LostLease::new);
+        if (!claim.token().equals(job.getLeaseToken()) || job.getLeaseUntil() == null
+                || !job.getLeaseUntil().isAfter(Instant.now()) || List.of("done", "failed", "queued").contains(job.getStatus())) {
+            throw new LostLease();
+        }
+        return job;
+    }
+
+    private ReviewCall callOwned(Claim claim, UUID id) {
+        var call = calls.findById(id).orElseThrow(LostLease::new);
+        if (!call.getAttemptId().equals(claim.attemptId()) || !call.getLeaseToken().equals(claim.token())
+                || !"started".equals(call.getStatus())) throw new LostLease();
+        return call;
+    }
+
+    private static void terminal(ReviewJob job, Attempt attempt, String error) {
+        job.setStatus("failed"); job.setStage("failed"); job.setProgress(100); job.setError(error);
+        job.setLeaseToken(null); job.setLeaseUntil(null); attempt.setStatus("failed");
     }
 }

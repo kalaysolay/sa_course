@@ -17,7 +17,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public final class LlmReviewer {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = new ObjectMapper()
+            .enable(com.fasterxml.jackson.core.JsonParser.Feature.STRICT_DUPLICATE_DETECTION)
+            .enable(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_TRAILING_TOKENS);
 
     /** Визитка агента из БД (имена/фокус правит методист, видит студент). */
     public record Persona(String id, String name, String role, String initials, List<String> checks) {
@@ -34,28 +36,23 @@ public final class LlmReviewer {
     }
 
     /**
-     * Разбирает сырой текст ответа в части критериям и агентам.
-     * Обёртки ```json fences и мусор вокруг JSON терпим, схему — нет.
+     * Разбирает единственный JSON-объект одного агента; обёртки и мусор отклоняются.
      */
-    public static ParsedAnswer parse(String rawText, ReviewInput task, List<String> agentIds) {
+    public static ParsedAnswer parseAgent(String rawText, ReviewInput task, String agentId, String solution) {
         String text = rawText == null ? "" : rawText.trim();
-        if (text.startsWith("```")) {
-            int start = text.indexOf('{');
-            int end = text.lastIndexOf('}');
-            if (start < 0 || end <= start) {
-                throw new LlmBadResponse("no json object");
-            }
-            text = text.substring(start, end + 1);
-        }
         JsonNode root;
         try {
             root = MAPPER.readTree(text);
         } catch (Exception e) {
             throw new LlmBadResponse("not json");
         }
-        if (!root.isObject()) {
+        if (root == null || !root.isObject()) {
             throw new LlmBadResponse("not object");
         }
+        var fields = java.util.Set.of("criteria", "narrative", "covered", "missed", "improve", "questions");
+        root.fieldNames().forEachRemaining(key -> {
+            if (!fields.contains(key)) throw new LlmBadResponse("unknown field " + key);
+        });
         Map<String, ReviewInput.CriterionInput> byId = new HashMap<>();
         if (task.rubric() != null) {
             for (ReviewInput.CriterionInput criterion : task.rubric()) {
@@ -71,47 +68,58 @@ public final class LlmReviewer {
         for (JsonNode item : criteria) {
             String id = item.path("id").asText("");
             String state = item.path("state").asText("");
-            if (!byId.containsKey(id)) {
+            if (!byId.containsKey(id) || states.containsKey(id)) {
                 throw new LlmBadResponse("unknown criterion " + id);
             }
             if (!"hit".equals(state) && !"partial".equals(state) && !"miss".equals(state)) {
                 throw new LlmBadResponse("bad state " + state);
             }
             states.put(id, state);
-            String proof = item.path("evidence").asText("");
-            evidence.put(id, proof.length() > 500 ? proof.substring(0, 500) : proof);
+            if (!item.path("evidence").isTextual()) throw new LlmBadResponse("bad evidence " + id);
+            String proof = item.path("evidence").asText().trim();
+            if (proof.length() > 500 || (!"miss".equals(state) && proof.isBlank())
+                    || (!proof.isBlank() && !normalized(solution).contains(normalized(proof)))) {
+                throw new LlmBadResponse("evidence not in solution " + id);
+            }
+            evidence.put(id, proof);
         }
         for (String id : byId.keySet()) {
             if (!states.containsKey(id)) {
                 throw new LlmBadResponse("criterion missing " + id);
             }
         }
-        Map<String, AgentPart> parts = new HashMap<>();
-        JsonNode agents = root.get("agents");
-        if (agents != null && agents.isArray()) {
-            for (JsonNode item : agents) {
-                String id = item.path("id").asText("");
-                if (!agentIds.contains(id) || parts.containsKey(id)) {
-                    continue;
-                }
-                String narrative = item.path("narrative").asText("").trim();
-                if (narrative.isEmpty()) {
-                    throw new LlmBadResponse("empty narrative " + id);
-                }
-                parts.put(id, new AgentPart(id,
-                        coveredList(item.get("covered")),
-                        missedList(item.get("missed")),
-                        narrative.length() > 5000 ? narrative.substring(0, 5000) : narrative,
-                        improveList(item.get("improve")),
-                        stringsList(item.get("questions"), 4, 500)));
+        String narrative = root.path("narrative").asText("").trim();
+        if (!root.path("narrative").isTextual() || narrative.isEmpty() || narrative.length() > 5000) {
+            throw new LlmBadResponse("bad narrative " + agentId);
+        }
+        requireArray(root, "covered", 10); requireArray(root, "missed", 10);
+        requireArray(root, "improve", 5); requireArray(root, "questions", 4);
+        for (JsonNode question : root.path("questions")) {
+            if (!question.isTextual() || question.asText().isBlank() || question.asText().length() > 500) {
+                throw new LlmBadResponse("bad question");
             }
         }
-        for (String agentId : agentIds) {
-            if (!parts.containsKey(agentId)) {
-                throw new LlmBadResponse("agent missing " + agentId);
+        var part = new AgentPart(agentId, coveredList(root.get("covered")), missedList(root.get("missed")),
+                narrative, improveList(root.get("improve")), stringsList(root.get("questions"), 4, 500));
+        return new ParsedAnswer(Map.copyOf(states), Map.copyOf(evidence), Map.of(agentId, part));
+    }
+
+    private static void requireArray(JsonNode root, String key, int max) {
+        if (!root.path(key).isArray() || root.path(key).size() > max) throw new LlmBadResponse("bad " + key);
+        if (!"questions".equals(key)) for (JsonNode item : root.path(key)) {
+            if (!item.isObject() || !item.path("title").isTextual() || item.path("title").asText().isBlank()
+                    || item.path("title").asText().length() > 200) throw new LlmBadResponse("bad " + key + " item");
+            String detail = "missed".equals(key) ? "why" : "detail";
+            if (!item.path(detail).isTextual() || item.path(detail).asText().length() > 2000) {
+                throw new LlmBadResponse("bad " + key + " explanation");
             }
+            if ("missed".equals(key) && (!List.of("partial", "miss").contains(item.path("state").asText())
+                    || !item.path("critical").isBoolean())) throw new LlmBadResponse("bad missed state");
         }
-        return new ParsedAnswer(states, evidence, parts);
+    }
+
+    private static String normalized(String value) {
+        return value == null ? "" : value.replaceAll("\\s+", " ").trim().toLowerCase(java.util.Locale.ROOT);
     }
 
     public record AgentPart(

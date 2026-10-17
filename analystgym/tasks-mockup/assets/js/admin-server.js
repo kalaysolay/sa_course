@@ -218,10 +218,18 @@ window.AdminServer = (function () {
       const states = { hit: 'Учтено', partial: 'Частично', miss: 'Не учтено' };
       const view = AppUI.modal({ title: data.taskTitle + ' · ' + data.userName,
         html: '<h3>Решение</h3>' + (data.tabs || []).map(t => `<h4>${esc(t.title)}</h4>${t.type === 'doc' ? AppUI.safeHtml(t.content) : `<pre style="white-space:pre-wrap">${esc(t.content)}</pre>`}`).join('') +
+          button('Контекст и расход проверки', 'data-context', b.dataset.attempt) +
           (review ? `<h3>${esc(review.grade?.label)} · ${esc(review.grade?.score ?? '—')}/100</h3><p>${esc(review.summary)}</p><ul>${(review.why || []).map(w => `<li>${esc(w)}</li>`).join('')}</ul>` +
             table(['Критерий', 'Вес', 'Результат', 'Подтверждение / объяснение'], (review.criteria || []).map(c => [esc(c.title), esc(c.weightValue ?? c.weight), esc(states[c.state] || c.state), esc(c.evidence || c.why)])) +
             (review.agents || []).map(a => `<h3>${esc(a.name)} · ${esc(a.score)}/10</h3><p>${esc(a.narrative)}</p><ul>${(a.improve || []).map(i => `<li><b>${esc(i.title)}</b>: ${esc(i.detail)}</li>`).join('')}</ul>`).join('')
             : '<p>Ревью ещё не готово.</p>'), wide: true });
+      view.body.querySelector('[data-context]').onclick = () => run(view.body.querySelector('[data-context]'), async () => {
+        const trace = await Api.get(root + 'attempts/' + enc(b.dataset.attempt) + '/context');
+        AppUI.modal({ title: 'Контекст и расход проверки', wide: true,
+          html: `<p>Версия задачи: ${esc(trace.task?.version ?? 'снимок не сохранялся')}. Вызовов: ${esc(trace.callCount)}. Учтено по бюджету: ${esc(trace.chargedTokens)} токенов.</p><p>При неизвестном расходе сохраняется весь резерв вызова; это оценка бюджета, не счёт провайдера.</p>` +
+            table(['Агент', 'Провайдер / модель', 'Промпт', 'Исход', 'Токены вход / выход', 'Учтено / резерв'], trace.calls.map(c => [esc(c.agentId), esc(c.provider + ' / ' + (c.actualModel || c.requestedModel)), esc(c.promptKey + ' v' + c.promptVersion), esc(c.status + (c.error ? ' · ' + c.error : '')), esc((c.inputTokens ?? '?') + ' / ' + (c.outputTokens ?? '?')), esc(c.chargedTokens + ' / ' + c.reservedTokens)])) +
+            '<details><summary>Снимок задачи, настроек и точные сообщения (для разбора)</summary>' + json(trace) + '</details>' });
+      });
       // В разборе показываем исходник встроенной диаграммы без обращения к внешним сервисам.
       view.body.querySelectorAll('.diagram-embed').forEach(node => {
         const pre = document.createElement('pre'); pre.style.whiteSpace = 'pre-wrap';

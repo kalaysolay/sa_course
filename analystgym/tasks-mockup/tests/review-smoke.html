@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ru">
+<meta charset="utf-8">
+<title>Проверка отправки и стадий ревью</title>
+<pre id="result">RUNNING</pre>
+<script>
+// Изолированный тестовый origin server.py; API заменяется только внутри тестового iframe.
+(async () => {
+  const checks = [], result = document.getElementById('result');
+  const check = (ok, name) => { if (!ok) throw new Error(name); checks.push(name); };
+  const until = async predicate => {
+    const end = Date.now() + 15000;
+    while (!predicate()) {
+      if (Date.now() > end) throw new Error('Таймаут ожидания интерфейса');
+      await new Promise(resolve => setTimeout(resolve, 50));
+    }
+  };
+  let frame;
+  try {
+    frame = document.createElement('iframe'); frame.style.width = '1200px'; frame.style.height = '850px';
+    frame.src = '../task.html?id=int-idempotency';
+    await new Promise(resolve => { frame.onload = resolve; document.body.append(frame); });
+    const w = frame.contentWindow, d = w.document;
+    await w.Api.ready; await until(() => d.getElementById('submitBtn'));
+    w.Store.setUser('review-browser-test'); w.Store.reset();
+    w.Api.mode = 'server'; w.Api.user = { id: 'review-browser-test' };
+    const requests = []; let ready = false;
+    const originalFetch = w.fetch;
+    const response = (body, status = 200) => new w.Response(JSON.stringify(body), { status });
+    w.fetch = async (url, options = {}) => {
+      if (url === '/api/auth/csrf') return response({ token: 'test' });
+      if (url === '/api/attempts') {
+        requests.push(options);
+        if (requests.length === 1) throw new TypeError('Ответ потерян');
+        return response({ attemptId: 'accepted', taskId: 'int-idempotency', status: 'in_review' }, 202);
+      }
+      if (url === '/api/attempts/accepted') {
+        return response(ready ? { status: 'reviewed', progress: 100, stage: 'done', review: w.ReviewEngine.buildReview(w.Store.task('int-idempotency'), []) }
+          : { status: 'in_review', progress: 45, stage: 'arch' });
+      }
+      if (url === '/api/attempts/accepted/context') return response({ title: 'Сохранённая задача', version: 7, statement: { brief: 'Старое условие' }, rubric: [] });
+      return response({}, 404);
+    };
+    w.AppUI.confirm = async () => true;
+    d.getElementById('submitBtn').click();
+    await until(() => requests.length === 1 && w.Store.pendingSubmission('int-idempotency'));
+    check(!!w.Store.pendingSubmission('int-idempotency'), 'Неопределённый ответ сохраняет ключ');
+    d.getElementById('submitBtn').click();
+    await until(() => requests.length === 2 && d.getElementById('submitBtn').disabled);
+    check(requests[0].headers['Idempotency-Key'] === requests[1].headers['Idempotency-Key'], 'Повтор использует прежний ключ');
+    check(requests[0].body === requests[1].body, 'Повтор использует прежнее тело');
+    await until(() => d.getElementById('reviewProgressLabel').textContent.includes('Архитектор'));
+    check(d.querySelectorAll('#rpAgents li[data-step]').length === 0, 'Серверные стадии не рисуют выдуманные шаги');
+    check(d.getElementById('reviewProgressLabel').textContent.includes('45%'), 'Процент получен от сервера');
+    // Для готового ответа возвращаем каталог iframe: основной серверный каталог здесь намеренно пустой.
+    w.Api.catalog.tasks = w.SA_DATA.tasks;
+    ready = true;
+    await until(() => d.getElementById('taskContextBtn'));
+    check(w.Store.lastAttempt('int-idempotency').status === 'reviewed', 'Готовое ревью сохранено в историю');
+    d.getElementById('taskContextBtn').click();
+    await until(() => d.body.textContent.includes('Сохранённая задача · версия 7'));
+    check(d.body.textContent.includes('Старое условие'), 'Историческое условие берётся из снимка API');
+    check(w.Store.pendingSubmission('int-idempotency') === null, 'После приёма незавершённый ключ очищен');
+    w.fetch = originalFetch; w.Store.reset();
+    result.textContent = 'PASS ' + checks.length + '\n' + checks.join('\n');
+  } catch (error) { result.textContent = 'FAIL\n' + error.stack; }
+})();
+</script>
+</html>

@@ -6,7 +6,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -57,6 +56,9 @@ public class PracticeService {
     /** Квота Free и Pro-статус — из биллинга (тарифы practice.html). */
     private final ru.analystgym.billing.service.BillingService billing;
     private final int freeReviewTasks;
+    private final ru.analystgym.identity.repo.UserRepository users;
+    private final ru.analystgym.review.ReviewPipeline pipeline;
+    private final String engine;
 
     public PracticeService(
             TaskRepository tasks,
@@ -67,7 +69,10 @@ public class PracticeService {
             ReviewJobRepository jobs,
             ObjectMapper mapper,
             ru.analystgym.billing.service.BillingService billing,
-            @Value("${billing.free-review-tasks:2}") int freeReviewTasks) {
+            @Value("${billing.free-review-tasks:2}") int freeReviewTasks,
+            ru.analystgym.identity.repo.UserRepository users,
+            ru.analystgym.review.ReviewPipeline pipeline,
+            @Value("${review.engine:mock}") String engine) {
         this.tasks = tasks;
         this.levels = levels;
         this.drafts = drafts;
@@ -77,6 +82,7 @@ public class PracticeService {
         this.mapper = mapper;
         this.billing = billing;
         this.freeReviewTasks = freeReviewTasks;
+        this.users = users; this.pipeline = pipeline; this.engine = engine;
     }
 
     /** Опубликованная задача или 404 (черновики витрине не видны). */
@@ -117,14 +123,20 @@ public class PracticeService {
     @Transactional
     public UUID submit(UUID userId, String taskId, List<TabDto> tabs, String idempotencyKey, Long taskVersion) {
         String key = idempotencyKey == null || idempotencyKey.isBlank() ? null : idempotencyKey.trim();
-        if (key != null && key.length() > MAX_IDEMPOTENCY_KEY) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "idempotency key too long");
+        if (key == null || key.length() > MAX_IDEMPOTENCY_KEY) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "idempotency_key_required");
         }
-        if (key != null) {
-            var existing = attempts.findByUserIdAndIdempotencyKey(userId, key);
-            if (existing.isPresent()) {
-                return existing.get().getId();
+        validateTabs(tabs);
+        String hash = requestHash(taskId, taskVersion, tabs);
+        // Один порядок блокировок с сессиями: пользователь, затем задача/попытка.
+        // Квота и идемпотентность сериализуются до чтения принятых заданий пользователя.
+        users.lockById(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+        var existing = attempts.findByUserIdAndIdempotencyKey(userId, key);
+        if (existing.isPresent()) {
+            if (!hash.equals(existing.get().getRequestHash())) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "idempotency_conflict");
             }
+            return existing.get().getId();
         }
         Task task = tasks.lockById(taskId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
@@ -134,11 +146,12 @@ public class PracticeService {
         if (!java.util.Objects.equals(task.getVersion(), taskVersion)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "task_changed");
         }
-        validateTabs(tabs);
+        var reviewTabs = ReviewMapper.toTabs(mapper.valueToTree(tabs == null ? List.of() : tabs));
+        pipeline.validateSolution(reviewTabs);
         // Тариф Free: полное ревью не более чем по N задачам; повторная
         // отправка по уже разобранной задаче квоту не ест (доработка).
         if (!billing.proState(userId).pro()) {
-            java.util.Set<String> reviewed = attempts.reviewedTaskIds(userId);
+            java.util.Set<String> reviewed = attempts.reservedTaskIds(userId);
             if (!reviewed.contains(taskId) && reviewed.size() >= freeReviewTasks) {
                 throw new QuotaExceededException();
             }
@@ -151,18 +164,16 @@ public class PracticeService {
         attempt.setRubricSnapshot(task.getRubric() == null
                 ? JsonNodeFactory.instance.arrayNode() : task.getRubric());
         attempt.setIdempotencyKey(key);
+        attempt.setRequestHash(hash);
+        var snapshot = (com.fasterxml.jackson.databind.node.ObjectNode) mapper.valueToTree(taskDetail(taskId));
+        String levelName = levels.findById(task.getLevelId()).map(l -> l.getName()).orElse(task.getLevelId());
+        snapshot.put("levelName", levelName);
+        attempt.setTaskSnapshot(snapshot);
+        attempt.setReviewPlan(mapper.valueToTree(pipeline.prepare(engine,
+                ReviewMapper.toInput(task, levelName, task.getRubric()), reviewTabs,
+                ReviewMapper.toCandidates(tasks.search(null, null, "published", null)))));
         attempt.setStatus("in_review");
-        try {
-            attempts.saveAndFlush(attempt);
-        } catch (DataIntegrityViolationException race) {
-            // Гонка двух submit с одним ключом: побеждает первая транзакция,
-            // вторая забирает её попытку вместо дубля.
-            if (key != null) {
-                return attempts.findByUserIdAndIdempotencyKey(userId, key)
-                        .orElseThrow(() -> race).getId();
-            }
-            throw race;
-        }
+        attempts.saveAndFlush(attempt);
         ReviewJob job = new ReviewJob();
         job.setId(UUID.randomUUID());
         job.setAttemptId(attempt.getId());
@@ -171,6 +182,30 @@ public class PracticeService {
         job.setProgress(0);
         jobs.save(job);
         return attempt.getId();
+    }
+
+    private String requestHash(String taskId, Long version, List<TabDto> tabs) {
+        var node = mapper.createObjectNode(); node.put("taskId", taskId); node.put("taskVersion", version);
+        node.set("tabs", mapper.valueToTree(tabs == null ? List.of() : tabs));
+        try {
+            return java.util.HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256")
+                    .digest(mapper.writeValueAsBytes(node)));
+        } catch (java.security.NoSuchAlgorithmException | java.io.IOException error) { throw new IllegalStateException(error); }
+    }
+
+    /** Позволяет восстановить потерянный ответ POST без создания новой попытки. */
+    @Transactional(readOnly = true)
+    public ru.analystgym.practice.web.PracticeDto.SubmitResponse submission(UUID userId, String key) {
+        var attempt = attempts.findByUserIdAndIdempotencyKey(userId, key)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        return new ru.analystgym.practice.web.PracticeDto.SubmitResponse(attempt.getId(), attempt.getTaskId(), attempt.getStatus());
+    }
+
+    @Transactional(readOnly = true)
+    public JsonNode taskContext(UUID userId, UUID id) {
+        var attempt = attempts.findByIdAndUserId(id, userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        if (attempt.getTaskSnapshot() == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "legacy_context_unavailable");
+        return attempt.getTaskSnapshot();
     }
 
     /** Состояние попытки для polling: статус + прогресс + готовое ревью. */

@@ -37,7 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(properties = {
         "app.admin-emails=boss@example.com", "app.google.enabled=false", "app.mail.enabled=false",
         "ratelimit.login-per-min=1000", "ratelimit.register-per-min=1000", "ratelimit.reset-per-min=1000",
-        "review.engine=mock"
+        "review.engine=mock", "review.queue.enabled=false"
 })
 @AutoConfigureMockMvc
 class SessionIntegrationTest {
@@ -58,6 +58,258 @@ class SessionIntegrationTest {
     @Autowired JwtService jwt;
     @Autowired ru.analystgym.practice.repo.AttemptRepository attempts;
     @Autowired ru.analystgym.practice.repo.ReviewRepository reviews;
+    @Autowired ru.analystgym.practice.service.PracticeService practice;
+    @Autowired ru.analystgym.practice.service.ReviewProcessor processor;
+    @Autowired ru.analystgym.practice.repo.ReviewJobRepository jobs;
+    @Autowired ru.analystgym.practice.repo.ReviewCallRepository calls;
+    @Autowired ru.analystgym.review.ReviewPipeline pipeline;
+    @Autowired org.springframework.jdbc.core.JdbcTemplate jdbc;
+
+    @org.junit.jupiter.api.BeforeEach
+    void изолироватьОчередьТестовойБазы() {
+        // Воркеры отключены; незавершённые сценарии предыдущего теста не захватываются следующим.
+        jdbc.update("UPDATE review_jobs SET status='failed', stage='failed', lease_token=NULL, lease_until=NULL WHERE status <> 'done'");
+        jdbc.update("UPDATE attempts SET status='failed' WHERE status IN ('queued','in_review')");
+    }
+
+    private UUID studentId() throws Exception {
+        String address = email(); register(address);
+        return users.findByEmail(address).orElseThrow().getId();
+    }
+
+    private UUID submit(UUID user, com.fasterxml.jackson.databind.JsonNode task, String key, String text) {
+        return practice.submit(user, task.path("id").asText(), List.of(
+                new ru.analystgym.practice.web.PracticeDto.TabDto("doc", "doc", "Решение", text)),
+                key, task.path("version").asLong());
+    }
+
+    private void expire(ru.analystgym.practice.service.ReviewProcessor.Claim claim) {
+        jdbc.update("UPDATE review_jobs SET lease_until=now()-interval '1 second', next_run_at=now() WHERE id=?", claim.jobId());
+    }
+
+    @Test
+    void seedПромптыРаботаютПоHTTPАВосстановлениеНеПовторяетГотовогоАгента() throws Exception {
+        var editor = staff("METHODIST"); var task = publishedTask(editor);
+        task = updateTask(editor, task, Map.of("rubric", List.of(
+                Map.of("id", "contract", "title", "Контракт", "weightValue", 7, "focus", "sa", "keywords", List.of("контракт"), "why", "Договор"),
+                Map.of("id", "arch-c", "title", "Надёжность", "weightValue", 7, "focus", "arch", "keywords", List.of("резерв"), "why", "Сбой"))));
+        var user = studentId(); String solution = "Контракт " + "x".repeat(13000) + " tail_evidence";
+        UUID id = submit(user, task, "http", solution);
+        var attempt = attempts.findById(id).orElseThrow();
+        var original = json.convertValue(attempt.getReviewPlan(), ru.analystgym.review.ReviewPlan.class);
+        var tabs = ru.analystgym.practice.service.ReviewMapper.toTabs(attempt.getTabs());
+        // Берём реальные seed-версии промптов из БД, заменяется только адрес провайдера.
+        jdbc.update("UPDATE prompt_versions SET traffic=CASE WHEN v=1 THEN 100 ELSE 0 END WHERE prompt_key IN ('sa-reviewer','arch-reviewer')");
+        var seeded = pipeline.prepare("llm", original.input(), tabs, original.candidates());
+        assertThat(seeded.agents()).hasSize(2).allSatisfy(a -> {
+            assertThat(a.promptVersion()).isEqualTo(1);
+            assertThat(a.system()).contains(ru.analystgym.review.ReviewPipeline.CONTRACT).doesNotContain("tail_evidence");
+        });
+        var requests = new java.util.concurrent.CopyOnWriteArrayList<com.fasterxml.jackson.databind.JsonNode>();
+        var server = com.sun.net.httpserver.HttpServer.create(new java.net.InetSocketAddress("127.0.0.1", 0), 0);
+        server.createContext("/chat/completions", exchange -> {
+            var request = json.readTree(exchange.getRequestBody()); requests.add(request);
+            var context = json.readTree(request.path("messages").get(1).path("content").asText());
+            var answer = json.createObjectNode(); var criteria = answer.putArray("criteria");
+            if (requests.size() > 1) {
+                var c = criteria.addObject(); c.put("id", context.path("criteriaToReview").get(0).path("id").asText());
+                c.put("state", "hit"); c.put("evidence", "tail_evidence");
+            }
+            answer.put("narrative", "Полный разбор по условию.");
+            for (String name : List.of("covered", "missed", "improve", "questions")) answer.putArray(name);
+            var envelope = Map.of("model", "stub-actual-model", "usage", Map.of("prompt_tokens", 7, "completion_tokens", 3),
+                    "choices", List.of(Map.of("message", Map.of("content", answer.toString()))));
+            byte[] response = json.writeValueAsBytes(envelope);
+            exchange.getResponseHeaders().add("Content-Type", "application/json");
+            exchange.sendResponseHeaders(200, response.length);
+            try (var output = exchange.getResponseBody()) { output.write(response); }
+        });
+        server.start();
+        try {
+            var route = new ru.analystgym.review.ReviewPlan.Route("stub", 5L,
+                    "http://127.0.0.1:" + server.getAddress().getPort(), "stub-model", "UNUSED_TEST_ENV", 10);
+            var frozen = new ru.analystgym.review.ReviewPlan(1, "llm", seeded.input(), seeded.candidates(), seeded.agents(), List.of(route), seeded.limits());
+            attempt.setReviewPlan(json.valueToTree(frozen)); attempts.saveAndFlush(attempt);
+            updateTask(editor, task, Map.of("title", "Уже другая редакция"));
+            var old = processor.claim().orElseThrow(); var firstAgent = frozen.agents().get(0); var secondAgent = frozen.agents().get(1);
+            assertThat(firstAgent.id()).isEqualTo("arch");
+            var firstRequest = new ru.analystgym.review.LlmClient.LlmRequest("stub-model", firstAgent.system(), firstAgent.user(), 10, 2000);
+            var call = processor.reserve(old, firstAgent, route, firstRequest, ru.analystgym.review.ReviewPipeline.reservation(firstRequest));
+            var parsed = new ru.analystgym.review.LlmReviewer.ParsedAnswer(Map.of("arch-c", "miss"), Map.of("arch-c", ""),
+                    Map.of("arch", new ru.analystgym.review.LlmReviewer.AgentPart("arch", List.of(), List.of(), "Сохранённый разбор архитектора", List.of(), List.of())));
+            assertThat(processor.answered(old, call, new ru.analystgym.review.LlmClient.LlmAnswer("Сырой ответ", "cached-model", 2, 3), parsed, null)).isFalse();
+            var interruptedRequest = new ru.analystgym.review.LlmClient.LlmRequest("stub-model", secondAgent.system(), secondAgent.user(), 10, 2000);
+            var interrupted = processor.reserve(old, secondAgent, route, interruptedRequest, ru.analystgym.review.ReviewPipeline.reservation(interruptedRequest));
+            expire(old); var recovered = processor.claim().orElseThrow();
+            assertThat(calls.findById(interrupted).orElseThrow().getStatus()).isEqualTo("unknown");
+            assertThatThrownBy(() -> processor.failedCall(old, interrupted, "late"))
+                    .isInstanceOf(ru.analystgym.practice.service.ReviewProcessor.LostLease.class);
+            var httpPipeline = new ru.analystgym.review.ReviewPipeline(null, null, null, json, null, "", "") {
+                @Override protected ru.analystgym.review.LlmClient clientFor(ru.analystgym.review.ReviewPlan.Route r) {
+                    assertThat(org.springframework.transaction.support.TransactionSynchronizationManager.isActualTransactionActive()).isFalse();
+                    return new ru.analystgym.review.HttpLlmClient(r.baseUrl(), r.model(), r.keyEnv(), json) {
+                        @Override protected String apiKey() { return "local-stub-only"; }
+                    };
+                }
+            };
+            var worker = new ru.analystgym.practice.service.ReviewWorker(processor, httpPipeline,
+                    org.mockito.Mockito.mock(ru.analystgym.notify.service.NotificationService.class), 1);
+            try { worker.process(recovered); } finally { worker.close(); }
+            assertThat(attempts.findById(id).orElseThrow().getStatus()).isEqualTo("reviewed");
+            var result = reviews.findById(id).orElseThrow();
+            assertThat(result.getInputTokens()).isEqualTo(16); // включая невалидный ответ и сохранённого агента
+            assertThat(requests).hasSize(2).allSatisfy(r -> {
+                assertThat(r.path("max_tokens").asInt()).isEqualTo(2000);
+                try {
+                    var context = json.readTree(r.path("messages").get(1).path("content").asText());
+                    assertThat(context.path("solution").asText().trim()).endsWith("tail_evidence").hasSize(solution.length());
+                    assertThat(context.path("task").path("statement").path("brief").asText()).isEqualTo("Новое условие с сервера");
+                    assertThat(context.path("task").path("taskVersion").asLong()).isEqualTo(frozen.input().taskVersion());
+                    assertThat(context.path("criteriaToReview")).hasSize(1);
+                } catch (java.io.IOException e) { throw new AssertionError(e); }
+            });
+            assertThat(result.getResult().path("criteria").findValuesAsText("state")).containsExactly("hit", "miss");
+            var ledger = calls.findByAttemptIdOrderByStartedAtAsc(id);
+            assertThat(ledger).hasSize(4).extracting(ru.analystgym.practice.domain.ReviewCall::getStatus)
+                    .containsExactly("accepted", "unknown", "invalid", "accepted");
+            assertThat(ledger.get(2).getChargedTokens()).isEqualTo(10);
+            assertThat(ledger.get(3).getActualModel()).isEqualTo("stub-actual-model");
+            assertThat(ledger.get(1).getChargedTokens()).isEqualTo(ledger.get(1).getReservedTokens());
+            assertThat(practice.taskContext(user, id).path("version").asLong()).isEqualTo(frozen.input().taskVersion());
+        } finally { server.stop(0); }
+    }
+
+    @Test
+    void исчерпанныйБюджетНеРазрешаетСледующийHTTPИПревышениеUsageФиксируется() throws Exception {
+        var task = publishedTask(staff("METHODIST")); var user = studentId(); var id = submit(user, task, "budget", "Контракт");
+        var attempt = attempts.findById(id).orElseThrow();
+        var plan = json.convertValue(attempt.getReviewPlan(), ru.analystgym.review.ReviewPlan.class);
+        attempt.setReviewPlan(json.valueToTree(new ru.analystgym.review.ReviewPlan(1, "llm", plan.input(), plan.candidates(), List.of(), List.of(),
+                new ru.analystgym.review.ReviewPlan.Limits(20000, 64000, 2000, 5000, 1))));
+        attempts.saveAndFlush(attempt);
+        var claim = processor.claim().orElseThrow();
+        var agent = new ru.analystgym.review.ReviewPlan.Agent("sa", "Имя", "Роль", "И", List.of(), "m", 1L, "sa-reviewer", UUID.randomUUID(), 1, 1L, "s", "u");
+        var route = new ru.analystgym.review.ReviewPlan.Route("p", 1L, "mock://local", "m", "", 10);
+        var request = new ru.analystgym.review.LlmClient.LlmRequest("m", "s", "u", 10, 2000);
+        var call = processor.reserve(claim, agent, route, request, 3000);
+        assertThat(processor.answered(claim, call, new ru.analystgym.review.LlmClient.LlmAnswer("{}", "m", Integer.MAX_VALUE, Integer.MAX_VALUE), null, "invalid")).isTrue();
+        assertThat(calls.findById(call).orElseThrow().getError()).isEqualTo("provider_usage_over_limit");
+        assertThat(attempts.findById(id).orElseThrow().getChargedTokens()).isEqualTo(3000);
+        assertThatThrownBy(() -> processor.reserve(claim, agent, route, request, 3000))
+                .isInstanceOf(ru.analystgym.review.LlmClient.LlmFailedException.class).hasMessage("review_budget_exhausted");
+        assertThat(calls.findByAttemptIdOrderByStartedAtAsc(id)).hasSize(1);
+        processor.fail(claim, "provider_usage_over_limit", false);
+    }
+
+    @Test
+    void конкурентныеПовторыВозвращаютОднуПопыткуАИзменениеТелаДаёт409() throws Exception {
+        var editor = staff("METHODIST"); var task = publishedTask(editor); var user = studentId();
+        try (var executor = java.util.concurrent.Executors.newFixedThreadPool(2)) {
+            var gate = new java.util.concurrent.CountDownLatch(1);
+            var first = executor.submit(() -> { gate.await(); return submit(user, task, "same", "Первое решение"); });
+            var second = executor.submit(() -> { gate.await(); return submit(user, task, "same", "Первое решение"); });
+            gate.countDown();
+            UUID id = first.get(15, java.util.concurrent.TimeUnit.SECONDS);
+            assertThat(second.get(15, java.util.concurrent.TimeUnit.SECONDS)).isEqualTo(id);
+            assertThat(attempts.findByUserIdAndTaskIdOrderByCreatedAtDesc(user, task.path("id").asText())).hasSize(1);
+            assertThatThrownBy(() -> submit(user, task, "same", "Другое решение"))
+                    .isInstanceOf(org.springframework.web.server.ResponseStatusException.class).hasMessageContaining("idempotency_conflict");
+            updateTask(editor, task, Map.of("title", "Правка после приёма"));
+            assertThat(submit(user, task, "same", "Первое решение")).isEqualTo(id);
+            assertThat(practice.submission(user, "same").attemptId()).isEqualTo(id);
+            assertThat(practice.taskContext(user, id).path("title").asText()).isEqualTo(task.path("title").asText());
+            assertThatThrownBy(() -> practice.taskContext(UUID.randomUUID(), id))
+                    .isInstanceOf(org.springframework.web.server.ResponseStatusException.class);
+        }
+    }
+
+    @Test
+    void конкурентнаяКвотаВключаетРаботуВОчередиИТехническийСбойОсвобождаетМесто() throws Exception {
+        var editor = staff("METHODIST"); var user = studentId();
+        var tasks = List.of(publishedTask(editor), publishedTask(editor), publishedTask(editor));
+        var accepted = new java.util.concurrent.ConcurrentLinkedQueue<UUID>();
+        var denied = new java.util.concurrent.atomic.AtomicInteger();
+        try (var executor = java.util.concurrent.Executors.newFixedThreadPool(3)) {
+            var gate = new java.util.concurrent.CountDownLatch(1);
+            var futures = tasks.stream().map(t -> executor.submit(() -> {
+                gate.await();
+                try { accepted.add(submit(user, t, t.path("id").asText(), "Контракт")); }
+                catch (ru.analystgym.practice.web.QuotaExceededException expected) { denied.incrementAndGet(); }
+                return true;
+            })).toList();
+            gate.countDown();
+            for (var f : futures) f.get(15, java.util.concurrent.TimeUnit.SECONDS);
+        }
+        assertThat(accepted).hasSize(2); assertThat(denied.get()).isEqualTo(1);
+        var claim = processor.claim().orElseThrow(); processor.fail(claim, "technical_failure", false);
+        assertThat(attempts.reservedTaskIds(user)).hasSize(1);
+        var deniedTask = tasks.stream().filter(t -> attempts.findByUserIdAndIdempotencyKey(user, t.path("id").asText()).isEmpty()).findFirst().orElseThrow();
+        assertThat(submit(user, deniedTask, "after-failure", "Контракт")).isNotNull();
+    }
+
+    @Test
+    void истёкшийЗахватВосстанавливаетсяАСтарыйВоркерНеМожетЗаписатьРезультат() throws Exception {
+        var task = publishedTask(staff("METHODIST")); var user = studentId(); var id = submit(user, task, "lease", "Контракт");
+        var old = processor.claim().orElseThrow(); processor.stage(old, "grading", 90); expire(old);
+        var recovered = processor.claim().orElseThrow();
+        assertThat(recovered.token()).isNotEqualTo(old.token());
+        assertThatThrownBy(() -> processor.stage(old, "sa", 10))
+                .isInstanceOf(ru.analystgym.practice.service.ReviewProcessor.LostLease.class);
+        var result = ru.analystgym.review.MockReviewProvider.buildReview(old.plan().input(), old.tabs(), old.plan().candidates());
+        assertThatThrownBy(() -> processor.finish(old, result, Map.of()))
+                .isInstanceOf(ru.analystgym.practice.service.ReviewProcessor.LostLease.class);
+        processor.finish(recovered, result, Map.of());
+        assertThat(reviews.findById(id)).isPresent();
+        assertThat(attempts.findById(id).orElseThrow().getStatus()).isEqualTo("reviewed");
+        assertThatThrownBy(() -> processor.finish(recovered, result, Map.of()))
+                .isInstanceOf(ru.analystgym.practice.service.ReviewProcessor.LostLease.class);
+        assertThat(processor.claim()).isEmpty();
+    }
+
+    @Test
+    void backoffИЧислоЗахватовОграничены() throws Exception {
+        var task = publishedTask(staff("METHODIST")); var user = studentId(); var id = submit(user, task, "retry", "Контракт");
+        var first = processor.claim().orElseThrow(); processor.fail(first, "provider_rate_limited", true);
+        assertThat(processor.claim()).isEmpty();
+        jdbc.update("UPDATE review_jobs SET next_run_at=now()-interval '1 second' WHERE id=?", first.jobId());
+        var second = processor.claim().orElseThrow(); expire(second);
+        var third = processor.claim().orElseThrow(); expire(third);
+        assertThat(processor.claim()).isEmpty();
+        assertThat(attempts.findById(id).orElseThrow().getStatus()).isEqualTo("failed");
+        assertThat(attempts.reservedTaskIds(user)).isEmpty();
+        assertThat(jobs.findByAttemptId(id).orElseThrow().getTries()).isEqualTo(3);
+    }
+
+    @Test
+    void слишкомБольшоеРешениеОтклоняетсяДоПопыткиИЖурнала() throws Exception {
+        var task = publishedTask(staff("METHODIST")); var user = studentId();
+        assertThatThrownBy(() -> submit(user, task, "big", "x".repeat(20001)))
+                .isInstanceOf(org.springframework.web.server.ResponseStatusException.class).hasMessageContaining("solution_too_large");
+        assertThat(attempts.findByUserIdAndIdempotencyKey(user, "big")).isEmpty();
+        assertThat(attempts.reservedTaskIds(user)).isEmpty();
+    }
+
+    @Test
+    void контекстДоступенВладельцуИПерсоналуНоНеДругомуСтуденту() throws Exception {
+        var editor = staff("METHODIST"); var task = publishedTask(editor);
+        var login = register(email()); var access = cookie(login, "ag_access");
+        var postBody = Map.of("taskId", task.path("id").asText(), "taskVersion", task.path("version").asLong(), "tabs", List.of());
+        var created = bodyOf(mvc.perform(post("/api/attempts").with(csrf()).cookie(access)
+                .header("Idempotency-Key", "context").contentType("application/json").content(json.writeValueAsString(postBody)))
+                .andExpect(status().isAccepted()).andReturn());
+        String id = created.path("attemptId").asText();
+        mvc.perform(get("/api/attempts/submissions/context").cookie(access)).andExpect(status().isOk());
+        mvc.perform(get("/api/attempts/" + id + "/context").cookie(access)).andExpect(status().isOk())
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath("$.authorSolution").doesNotExist());
+        mvc.perform(get("/api/admin/attempts/" + id + "/context").cookie(access)).andExpect(status().isForbidden());
+        mvc.perform(get("/api/admin/attempts/" + id + "/context").cookie(editor)).andExpect(status().isOk());
+        var other = cookie(register(email()), "ag_access");
+        mvc.perform(get("/api/attempts/" + id + "/context").cookie(other)).andExpect(status().isNotFound());
+        mvc.perform(get("/api/attempts/submissions/context").cookie(other)).andExpect(status().isNotFound());
+        mvc.perform(post("/api/attempts").with(csrf()).cookie(access).header("Idempotency-Key", "context")
+                .contentType("application/json").content(json.writeValueAsString(Map.of("taskId", task.path("id").asText(), "tabs", List.of()))))
+                .andExpect(status().isConflict());
+    }
 
     private MvcResult register(String email) throws Exception {
         return mvc.perform(post("/api/auth/register").with(csrf()).contentType("application/json")
@@ -199,7 +451,7 @@ class SessionIntegrationTest {
         var editor = staff("METHODIST"); var task = publishedTask(editor);
         var student = cookie(register(email()), "ag_access");
         updateTask(editor, task, Map.of("title", "Новая редакция задачи"));
-        mvc.perform(post("/api/attempts").with(csrf()).cookie(student).contentType("application/json")
+        mvc.perform(post("/api/attempts").header("Idempotency-Key", UUID.randomUUID()).with(csrf()).cookie(student).contentType("application/json")
                 .content(json.writeValueAsString(Map.of("taskId", task.path("id").asText(), "taskVersion", task.path("version").asLong(), "tabs", List.of()))))
                 .andExpect(status().isConflict());
     }

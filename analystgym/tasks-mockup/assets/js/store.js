@@ -51,6 +51,21 @@
     }
   }
 
+  // Отдельная запись на задачу: автосохранение черновика в другой вкладке не стирает ключ отправки.
+  function submissionKey(taskId) { return key() + ':submission:' + encodeURIComponent(taskId); }
+  function submissionRecord(taskId) {
+    const id = submissionKey(taskId);
+    if (backend === 'memory' && memory.has(id)) return memory.get(id);
+    try { return JSON.parse(window.localStorage.getItem(id) || '{}'); }
+    catch (error) { return memory.get(id) || {}; }
+  }
+  function writeSubmission(taskId, record) {
+    const id = submissionKey(taskId), copy = JSON.parse(JSON.stringify(record));
+    memory.set(id, copy);
+    try { window.localStorage.setItem(id, JSON.stringify(copy)); }
+    catch (error) { backend = 'memory'; }
+  }
+
   // До проверки /me не читаем даже гостевые данные: они могут мигнуть на странице чужого аккаунта.
   let state = blank();
 
@@ -90,6 +105,23 @@
     },
 
     owner() { return owner; },
+
+    /** Читаем актуальный ключ и из соседней вкладки перед повторной отправкой. */
+    pendingSubmission(taskId) {
+      const pending = submissionRecord(taskId).pending;
+      return pending ? JSON.parse(JSON.stringify(pending)) : null;
+    },
+
+    savePendingSubmission(taskId, request) {
+      writeSubmission(taskId, { ...submissionRecord(taskId), pending: request });
+    },
+
+    clearPendingSubmission(taskId) {
+      writeSubmission(taskId, { ...submissionRecord(taskId), pending: null });
+    },
+
+    lastSubmission(taskId) { return submissionRecord(taskId).accepted || null; },
+    acceptSubmission(taskId, accepted) { writeSubmission(taskId, { pending: null, accepted }); },
 
     dismissGuestImport() {
       state.guestImportOffered = true;

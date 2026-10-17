@@ -52,7 +52,20 @@ review:
   llm:
     primary: ${REVIEW_LLM_PRIMARY:deepseek}
     fallback: ${REVIEW_LLM_FALLBACK:glm}
-    max-tokens: 8000
+  limits:
+    max-solution-chars: ${REVIEW_MAX_SOLUTION_CHARS:20000}
+    max-input-bytes: ${REVIEW_MAX_INPUT_BYTES:64000}
+    max-output-tokens: ${REVIEW_MAX_OUTPUT_TOKENS:2000}
+    token-budget: ${REVIEW_TOKEN_BUDGET:160000}
+    max-calls: ${REVIEW_MAX_CALLS:6}
+  queue:
+    enabled: ${REVIEW_QUEUE_ENABLED:true}
+    workers: ${REVIEW_WORKERS:2}
+    lease-seconds: ${REVIEW_LEASE_SECONDS:30}
+    max-tries: ${REVIEW_MAX_TRIES:3}
+    retry-seconds: ${REVIEW_RETRY_SECONDS:2}
+    poll-ms: ${REVIEW_POLL_MS:500}
+    heartbeat-ms: ${REVIEW_HEARTBEAT_MS:1000}
 # Лимиты API (прод — через env при абузе).
 ratelimit:
   register-per-min: ${RATELIMIT_REGISTER_PER_MIN:5}

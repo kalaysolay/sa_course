@@ -11,7 +11,7 @@ function browser(fetch, saved = new Map()) {
   document.cookie = '';
   document.readyState = 'complete';
   const c = {
-    document, navigator: {}, Event, TextEncoder, AbortSignal, console,
+    document, navigator: {}, crypto: require('node:crypto').webcrypto, Event, TextEncoder, AbortSignal, console,
     location: { protocol: 'http:', reload() { c.reloaded = true; } },
     addEventListener: events.addEventListener.bind(events), dispatchEvent: events.dispatchEvent.bind(events),
     localStorage: { getItem: k => saved.get(k) || null, setItem: (k, v) => saved.set(k, v) },
@@ -95,6 +95,84 @@ function server(handler) {
     return handler(url, options);
   };
 }
+
+test('Потеря ответа и перезагрузка сохраняют точные тело и ключ отправки', async () => {
+  const saved = new Map(); const requests = [];
+  const fetch = server(async (url, options) => {
+    if (url === '/api/auth/me') return response({ id: 'a' });
+    if (url === '/api/attempts') {
+      const persisted = JSON.parse(saved.get('sa-trainer:v2:a:submission:live')).pending;
+      assert.equal(persisted.key, options.headers['Idempotency-Key']);
+      assert.equal(JSON.stringify(persisted.body), options.body);
+      requests.push(options);
+      if (requests.length === 1) throw new TypeError('Ответ потерян после приёма');
+      return response({ attemptId: 'same-attempt', taskId: 'live', status: 'in_review' }, 202);
+    }
+    return response({}, 404);
+  });
+  let c = browser(fetch, saved); c.load('api.js'); await c.Api.ready;
+  const tabs = [{ id: 'doc', type: 'doc', title: 'Решение', content: 'Контракт' }];
+  await assert.rejects(c.Api.submitReliable('live', tabs, 8));
+  c = browser(fetch, saved); c.load('api.js'); await c.Api.ready;
+  assert.equal(requests.length, 1, 'Перезагрузка сама не отправляет POST');
+  assert.equal((await c.Api.submitReliable('live', tabs, 8)).attemptId, 'same-attempt');
+  assert.equal(requests[0].body, requests[1].body);
+  assert.equal(requests[0].headers['Idempotency-Key'], requests[1].headers['Idempotency-Key']);
+  assert.equal(c.Store.pendingSubmission('live'), null);
+});
+
+test('Изменённый черновик не подменяет запрос с неопределённым исходом', async () => {
+  let posts = 0;
+  const c = browser(server(async (url) => {
+    if (url === '/api/auth/me') return response({ id: 'a' });
+    posts++; throw new TypeError('Сеть');
+  }));
+  c.load('api.js'); await c.Api.ready;
+  await assert.rejects(c.Api.submitReliable('live', [], 8));
+  const key = c.Store.pendingSubmission('live').key;
+  await assert.rejects(c.Api.submitReliable('live', [{ content: 'Новые правки' }], 8),
+    e => e.body.error === 'pending_submission_changed');
+  assert.equal(posts, 1); assert.equal(c.Store.pendingSubmission('live').key, key);
+  c.Store.setUser('b'); assert.equal(c.Store.pendingSubmission('live'), null);
+  c.Store.setUser('a'); assert.equal(c.Store.pendingSubmission('live').key, key);
+});
+
+test('Две вкладки с Web Locks объединяют одновременные отправки, черновики не стирают ключ', async () => {
+  const saved = new Map(); let posts = 0, chain = Promise.resolve();
+  const locks = { request(name, send) { const result = chain.then(send); chain = result.catch(() => {}); return result; } };
+  const fetch = server(async url => {
+    if (url === '/api/auth/me') return response({ id: 'a' });
+    posts++; return response({ attemptId: 'one', taskId: 'live', status: 'in_review' }, 202);
+  });
+  const a = browser(fetch, saved), b = browser(fetch, saved);
+  a.navigator.locks = b.navigator.locks = locks;
+  a.load('api.js'); b.load('api.js'); await Promise.all([a.Api.ready, b.Api.ready]);
+  const [first, second] = await Promise.all([a.Api.submitReliable('live', [], 8), b.Api.submitReliable('live', [], 8)]);
+  assert.equal(posts, 1); assert.equal(first.attemptId, second.attemptId);
+  a.Store.savePendingSubmission('x', { key: 'x' });
+  b.Store.savePendingSubmission('y', { key: 'y' });
+  b.Store.saveSolution('live', { tabs: [] });
+  a.Store.clearPendingSubmission('x');
+  assert.equal(a.Store.pendingSubmission('y').key, 'y');
+});
+
+test('Однозначный отказ очищает ключ, временный сбой сохраняет его', async () => {
+  let code = 503;
+  const c = browser(server(async url => url === '/api/auth/me' ? response({ id: 'a' }) : response({ error: 'solution_too_large' }, code)));
+  c.load('api.js'); await c.Api.ready;
+  await assert.rejects(c.Api.submitReliable('live', [], 8));
+  assert.ok(c.Store.pendingSubmission('live'));
+  code = 413;
+  await assert.rejects(c.Api.submitReliable('live', [], 8));
+  assert.equal(c.Store.pendingSubmission('live'), null);
+});
+
+test('Успешный HTTP без корректного идентификатора попытки сохраняет исходный ключ', async () => {
+  const c = browser(server(async url => url === '/api/auth/me' ? response({ id: 'a' }) : response({}, 202)));
+  c.load('api.js'); await c.Api.ready;
+  await assert.rejects(c.Api.submitReliable('live', [], 8));
+  assert.ok(c.Store.pendingSubmission('live'));
+});
 
 test('Черновики, попытки и диагностика одного аккаунта не видны другому и гостю', () => {
   const c = browser();

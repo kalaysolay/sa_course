@@ -16,7 +16,14 @@ public record ReviewInput(
         /** Была ли в стартовых вкладках задачи хоть одна диаграмма. */
         boolean expectsDiagram,
         List<CriterionInput> rubric,
-        List<String> interviewQuestions) {
+        List<String> interviewQuestions,
+        com.fasterxml.jackson.databind.JsonNode statement, Long taskVersion) {
+
+    /** Совместимость входов чистого скоринга и старых сохранённых примеров. */
+    public ReviewInput(String id, String title, String level, String levelName, List<String> tags,
+                       boolean expectsDiagram, List<CriterionInput> rubric, List<String> interviewQuestions) {
+        this(id, title, level, levelName, tags, expectsDiagram, rubric, interviewQuestions, null, null);
+    }
 
     /** Критерий рубрики как его видит движок (1-в-1 с review-engine.js). */
     public record CriterionInput(

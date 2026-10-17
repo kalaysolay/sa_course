@@ -76,7 +76,7 @@ public class SecurityConfig {
                                 "/api/tasks/*/reference", "/api/attempts/**",
                                 "/api/assessment/**", "/api/complaints/**",
                                 "/api/admin/**", "/api/billing/**").authenticated()
-                        .requestMatchers(HttpMethod.GET, "/api/tasks/**", "/api/collections/**", "/api/dictionaries/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/tasks/**", "/api/collections/**", "/api/dictionaries/**", "/api/review/limits").permitAll()
                         // /error обязан быть публичным: иначе контейнерный error-dispatch
                         // на 404 контроллера пере-проверяется цепочкой и маскарадит 404 в 401.
                         .requestMatchers("/error").permitAll()

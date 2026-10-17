@@ -305,6 +305,50 @@
       return postJson('/api/attempts', { taskId, tabs: tabs || [], taskVersion }, extra);
     },
 
+    /** Сохраняем ключ и точное тело ДО POST. Неопределённый исход не разрешает новый ключ. */
+    async submitReliable(taskId, tabs, taskVersion) {
+      const owner = Store.owner();
+      const observed = Store.lastSubmission(taskId)?.result.attemptId;
+      const send = async () => {
+        if (!owner || Store.owner() !== owner) throw accountError();
+        const body = { taskId, tabs: tabs || [], taskVersion };
+        const accepted = Store.lastSubmission(taskId);
+        // Пока ждали Web Lock, соседняя вкладка уже получила ответ на то же действие.
+        if (accepted && accepted.result.attemptId !== observed && JSON.stringify(accepted.body) === JSON.stringify(body)) return accepted.result;
+        let pending = Store.pendingSubmission(taskId);
+        if (pending && JSON.stringify(pending.body) !== JSON.stringify(body)) {
+          const error = new Error('Сначала восстановите предыдущую отправку.');
+          error.body = { error: 'pending_submission_changed' };
+          throw error;
+        }
+        if (!pending) {
+          pending = { key: 'web_' + crypto.randomUUID(), body };
+          Store.savePendingSubmission(taskId, pending);
+        }
+        try {
+          const result = await postJson('/api/attempts', pending.body, { 'Idempotency-Key': pending.key });
+          if (Store.owner() !== owner) throw accountError();
+          if (typeof result.attemptId !== 'string' || !result.attemptId.trim() || result.taskId !== taskId
+              || !['queued', 'in_review', 'reviewed', 'failed'].includes(result.status)) {
+            throw new Error('Неоднозначный ответ отправки');
+          }
+          Store.acceptSubmission(taskId, { body: pending.body, result });
+          return result;
+        } catch (error) {
+          const code = error.body?.error;
+          if (Store.owner() === owner && ([400, 402, 404, 413].includes(error.status) || code === 'task_changed')) {
+            Store.clearPendingSubmission(taskId);
+          }
+          throw error;
+        }
+      };
+      return navigator.locks ? navigator.locks.request('ag-submit:' + owner + ':' + taskId, send) : send();
+    },
+
+    getSubmission(key) { return getJson('/api/attempts/submissions/' + encodeURIComponent(key)); },
+    getTaskContext(id) { return getJson('/api/attempts/' + encodeURIComponent(id) + '/context'); },
+    getReviewLimits() { return getJson('/api/review/limits'); },
+
     async getAttempt(attemptId) {
       return getJson('/api/attempts/' + encodeURIComponent(attemptId));
     },

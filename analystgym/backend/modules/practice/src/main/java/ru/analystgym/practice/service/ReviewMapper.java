@@ -28,7 +28,7 @@ public final class ReviewMapper {
                 task.getTags() == null ? List.of() : List.of(task.getTags()),
                 expectsDiagram(task.getStarterTabs()),
                 mapRubric(rubric),
-                strings(task.getInterviewQuestions()));
+                strings(task.getInterviewQuestions()), task.getStatement(), task.getVersion());
     }
 
     /** Вход движка из снапшотов попытки (рубрика заморожена на момент submit). */

@@ -21,6 +21,30 @@ import com.fasterxml.jackson.databind.JsonNode;
 @Table(name = "attempts")
 public class Attempt {
 
+    @Column(name = "request_hash")
+    private String requestHash;
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "task_snapshot", columnDefinition = "jsonb")
+    private JsonNode taskSnapshot;
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "review_plan", columnDefinition = "jsonb")
+    private JsonNode reviewPlan;
+    @Column(name = "charged_tokens", nullable = false)
+    private int chargedTokens;
+    @Column(name = "call_count", nullable = false)
+    private int callCount;
+
+    public String getRequestHash() { return requestHash; }
+    public void setRequestHash(String value) { requestHash = value; }
+    public JsonNode getTaskSnapshot() { return taskSnapshot; }
+    public void setTaskSnapshot(JsonNode value) { taskSnapshot = value; }
+    public JsonNode getReviewPlan() { return reviewPlan; }
+    public void setReviewPlan(JsonNode value) { reviewPlan = value; }
+    public int getChargedTokens() { return chargedTokens; }
+    public void setChargedTokens(int value) { chargedTokens = value; }
+    public int getCallCount() { return callCount; }
+    public void setCallCount(int value) { callCount = value; }
+
     @Id
     private UUID id;
 
