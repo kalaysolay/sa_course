@@ -1,12 +1,12 @@
 # Course Progress
 
-Готово: 46 / 98 тем.
+Готово: 37 / 98 тем.
 
 Последняя готовая тема:
 46. DB-PSQL
 
 Следующая:
-47. DB-TABLES
+14. REQ-STAKEHOLDERS
 
 Открытые GAP:
 - см. course/gap-registry.yaml

@@ -34,7 +34,12 @@ export function recomputeProgress(root, curriculum, progress) {
       run_id: progress.topics[completed.topic.id].run_id || progress.last_completed?.run_id || null
     };
   }
-  const next = rows.find(r => (progress.topics[r.topic.id]?.status || 'planned') === 'planned');
+  // Перегенерация важнее «хвоста» planned: сначала needs_revision, затем planned.
+  // Иначе /prepare-codex-next молча перепрыгивает утерянные уроки (нарушение never_silently_skip_topic).
+  const next = rows.find(r => {
+    const status = progress.topics[r.topic.id]?.status || 'planned';
+    return status === 'needs_revision' || status === 'planned';
+  });
   progress.next_candidate = next ? { topic_id: next.topic.id, course_order: next.topic.course_order } : null;
   saveProgress(root, progress);
   return progress;
