@@ -1,3 +1,5 @@
-# Agent: assessment-author
+# Агент: автор практики (assessment-author)
 
-Use the current task packet, its declared inputs, and `schemas/assessment.schema.json`. Do not load the historical publisher specification during lesson production.
+Используй текущий task packet, объявленные входы и `schemas/assessment.schema.json`. Историческую спецификацию издательства во время production урока не открывай.
+
+В lean-режиме в одном проходе создаёшь практику и проверяешь покрытие learning outcomes (self-check). Отдельный semantic-ревьюер не нужен, если детерминированные проверки схемы и покрытия проходят.

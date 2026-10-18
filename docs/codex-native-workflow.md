@@ -1,8 +1,8 @@
-# Codex-native course production workflow
+# Codex-native производство уроков
 
-Primary path: Codex/ChatGPT desktop app. No OPENAI_API_KEY is required.
+Основной путь: Codex/ChatGPT desktop app. `OPENAI_API_KEY` не нужен.
 
-## Commands
+## Команды
 
 ```powershell
 node scripts\publisher.mjs /prepare-codex-next
@@ -10,37 +10,38 @@ node scripts\publisher.mjs /prepare-codex-lesson 1
 node scripts\publisher.mjs /publish-lesson 1 --adapter codex
 ```
 
-The command creates a run with status CODEX_TASKS_READY and writes input context plus role packets under runs/<runId>/codex-tasks/.
+Команда создаёт run со статусом `CODEX_TASKS_READY` и пишет контекст плюс пакеты ролей в `runs/<runId>/codex-tasks/`.
 
-## Lean role order
+## Порядок lean-ролей
 
-1. Planner + Researcher -> compact brief and source claim map.
-2. Lecture Writer -> one complete lecture draft.
-3. Lean Review -> two verdicts from one read: content/coverage and learning/editorial.
-4. Assessment Author -> assessment plus LO coverage self-check.
-5. Project Artifact Author -> only when Topic Passport declares expected artifacts.
-6. Course Tracker Updater -> reads the finalized manifest and payload metrics only.
+1. Планировщик + исследователь → компактный brief и карта утверждений → источники.
+2. Автор лекции → один полный черновик.
+3. Lean-ревью → два вердикта за одно чтение: content/coverage и learning/editorial.
+4. Автор практики → assessment + self-check покрытия LO.
+5. Автор проектных артефактов → только если Topic Passport объявляет expected artifacts.
+6. Обновление трекера → читает только финальный manifest и payload metrics.
 
-Run deterministic finalization before the tracker task:
+Перед пакетом трекера выполни локальную финализацию:
 
 ```powershell
 node scripts\publisher.mjs /finalize-codex-run <runId>
 ```
 
-Format, relative-link, schema, and assessment-coverage checks run locally. Only critical and major issues trigger revision. Rerun only the failed perspective, and allow at most one full rewrite in lean mode.
+Проверки формата, относительных ссылок, схем и покрытия assessment — локально. Rewrite только на critical/major. Перезапускай только упавшую перспективу; в lean — не больше одного полного rewrite.
 
-## Course tracker
+## Трекер курса
 
-Every Codex-native run must finish by updating the Google Sheets course tracker:
+Каждый Codex-native run завершается обновлением трекера:
 
-- Spreadsheet: https://docs.google.com/spreadsheets/d/1She4DAsy9KIQ0uXdMDbTvtDsftT3BNBiorYMScyArew/edit
-- Sheet: `План лекций`
-- Existing rows are matched by `Topic ID` in column `H`.
-- If the topic row exists, update the relevant cells for that lesson; do not append a duplicate row.
-- If the topic row is missing, append it using the same column order as the existing tracker.
-- `Артефакты` stays a newline-separated list inside one cell.
-- `Статус артефакта` captures lifecycle details such as created, continued, changed, not started, or not used in this lesson.
+- Таблица: https://docs.google.com/spreadsheets/d/1She4DAsy9KIQ0uXdMDbTvtDsftT3BNBiorYMScyArew/edit
+- Лист: `План лекций`
+- Существующие строки ищутся по `Topic ID` в колонке `H`.
+- Если строка есть — обновляй её; не добавляй дубликат.
+- Если Topic ID нет — добавь строку в том же порядке колонок.
+- `Артефакты` — список через перевод строки в одной ячейке.
+- `Статус артефакта` — жизненный цикл: создан, продолжен, изменён, не начат, в этом уроке не использовался и т.п.
+- Если Google Drive MCP недоступен — правь локальный xlsx-экспорт теми же правилами; синхронизируй вкладку `Документация` по `course/lesson-generation-pipeline.md`.
 
-## Adapter policy
+## Политика адаптеров
 
-Primary: Codex/ChatGPT app task packets. Test/demo: FakeAgentAdapter. Optional only: OpenAIAdapter for future headless automation when an external API key is explicitly desired.
+Основной: task packets для Codex/ChatGPT app. Тесты/демо: FakeAgentAdapter. Опционально: OpenAIAdapter для headless, только если явно нужен внешний API-ключ.

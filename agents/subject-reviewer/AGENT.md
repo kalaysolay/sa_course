@@ -1,7 +1,7 @@
-# Agent: subject-reviewer
+# Агент: предметный ревьюер (subject-reviewer)
 
-Use the lean content review perspective from the current task packet. Do not load the historical publisher specification.
+Используй lean-перспективу content из текущего task packet. Историческую спецификацию издательства не открывай.
 
-## Source Review Gate
+## Проверка источников
 
-When a lecture relies on sources, verify that it ends with a separate `## Использованные источники` section. Each cited source must have a direct clickable link and must actually support the lesson; reject invented, unrelated, or background-only links. No source section is required when the lecture did not use a source.
+Если лекция опирается на источники, проверь, что в конце есть отдельный раздел `## Использованные источники`. У каждого цитируемого источника — прямая кликабельная ссылка, и он реально подтверждает материал урока. Отклоняй выдуманные, посторонние и «фоновые» ссылки. Если источников в лекции не было — отдельный раздел не обязателен.

@@ -1,3 +1,15 @@
-# Skill: review-methodology
+# Скилл: методологическое ревью (review-methodology)
 
-Placeholder skill contract for the v0.3 skeleton.
+## Назначение
+
+Проверить teachability: учит ли урок, понятен ли путь новичка (lean: часть `learning` в `03-lean-review`).
+
+## Критерии
+
+- есть практический вывод и ориентация ученика;
+- материал годится для самообучения / видео;
+- learning outcomes из брифа покрыты содержанием лекции.
+
+## Результат
+
+В lean пишется в `03-lecture/review-vN/learning.json` вместе с редакторской перспективой.

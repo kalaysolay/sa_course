@@ -1,3 +1,3 @@
-# Agent: assessment-reviewer
+# Агент: ревьюер практики (assessment-reviewer)
 
-Legacy role. In lean mode assessment schema and LO coverage are checked deterministically; use this role only for a failed validation diagnosis.
+Устаревшая отдельная роль. В lean-режиме схему assessment и покрытие LO проверяет оркестратор детерминированно. Вызывай эту роль только для диагностики, если валидация упала.

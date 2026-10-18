@@ -1,32 +1,36 @@
-# Lean lesson production contract
+# Контракт lean-производства урока
 
-The production goal is an approved lesson package with the smallest useful model context.
+Цель production — одобренный Lesson Package при минимально полезном контексте для модели.
 
-## Context rule
+## Правило контекста
 
-Each task reads only the files listed in its task packet. Pass artifacts between stages by path. Do not paste prior artifacts into dispatch messages and do not open the historical publisher specification during a normal lesson run.
+Каждая задача читает только файлы из своего task packet. Артефакты между стадиями передавай путями. Не вставляй предыдущие артефакты целиком в dispatch и не открывай историческую спецификацию издательства в обычном run.
 
-## Stages
+## Стадии
 
-1. Plan and research: produce a compact Lesson Brief and a claim-to-source map.
-2. Write: produce one complete lecture draft.
-3. Review: read the lecture once and write two verdicts: `content` and `learning`.
-4. Assess: author the assessment and its LO coverage self-check in one pass.
-5. Project: run only when Topic Passport `project.expected_artifacts` is non-empty.
-6. Finalize locally, then update the tracker from the generated manifest.
+1. План и research: компактный Lesson Brief и карта утверждений → источники.
+2. Написание: один полный черновик лекции.
+3. Ревью: одно чтение лекции → два вердикта: `content` и `learning`.
+4. Практика: assessment и self-check покрытия LO за один проход.
+5. Проект: только если в Topic Passport непустой `project.expected_artifacts`.
+6. Локальная финализация, затем обновление трекера по manifest.
 
-## Revision policy
+## Политика доработок
 
-- Deterministic format, link, schema, and coverage checks run before semantic review.
-- Only `critical` and `major` issues trigger revision.
-- `minor` and `suggestion` issues are recorded without a rewrite.
-- Rerun only a failed review perspective.
-- Allow at most one full rewrite per artifact in lean mode; otherwise request human review.
+- Детерминированные проверки формата, ссылок, схем и покрытия — до semantic-ревью.
+- Rewrite запускают только `critical` и `major`.
+- `minor` и `suggestion` фиксируются без переписывания.
+- Перезапускай только упавшую перспективу ревью.
+- В lean — не больше одного полного rewrite на артефакт; иначе — human review.
 
-## Output budgets
+## Бюджеты вывода
 
-Default limits live in `publisher.yaml`. Approved reviews contain only a verdict, a short summary, and an empty issues array. Source packs map claims to evidence instead of retelling source documents.
+Лимиты по умолчанию — в `publisher.yaml`. Одобренные ревью содержат только verdict, короткий summary и пустой массив issues. Source pack связывает утверждения с evidence, а не пересказывает источники.
 
-## Completion
+## Завершение
 
-Run `node scripts/publisher.mjs /finalize-codex-run <runId>`. Finalization validates the package, updates course progress, and writes `99-package/payload-metrics.json`. The tracker task reads only the manifest and metrics.
+```powershell
+node scripts/publisher.mjs /finalize-codex-run <runId>
+```
+
+Финализация валидирует пакет, обновляет progress курса и пишет `99-package/payload-metrics.json`. Пакет трекера читает только manifest и metrics.

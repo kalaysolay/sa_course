@@ -1,3 +1,18 @@
-# Skill: revise-lesson
+# Скилл: переработать лекцию (revise-lesson)
 
-Placeholder skill contract for the v0.3 skeleton.
+## Назначение
+
+Точечная доработка лекции по issues ревью (lean: не больше одного полного rewrite).
+
+## Входы
+
+- отклонённый draft;
+- `content.json` / `learning.json` (или legacy review-файлы);
+- исходный Lesson Brief и source pack.
+
+## Правила
+
+- Править только то, что блокирует (`critical` / `major`).
+- `minor` и `suggestion` можно зафиксировать, но не обязаны запускать rewrite.
+- Перезапускай только упавшую перспективу ревью.
+- Сохраняй предыдущий draft; новый — следующей версией (`draft-v2.md` и т.п.).

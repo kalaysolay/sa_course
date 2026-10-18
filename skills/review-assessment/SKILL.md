@@ -1,3 +1,12 @@
-# Skill: review-assessment
+# Скилл: ревью практики (review-assessment)
 
-Placeholder skill contract for the v0.3 skeleton.
+## Назначение
+
+В lean по умолчанию — детерминированная проверка схемы и покрытия LO при finalize.
+
+Отдельный semantic-pass нужен только если валидация упала или есть спорный project_case.
+
+## Блокеры
+
+- LO из брифа не покрыт ни одним item;
+- бриф требует project_case, а в assessment его нет.

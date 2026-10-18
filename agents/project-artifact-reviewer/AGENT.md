@@ -1,3 +1,3 @@
-# Agent: project-artifact-reviewer
+# Агент: ревьюер проектных артефактов (project-artifact-reviewer)
 
-Legacy role. Lean mode uses author self-check and deterministic package validation; invoke only for a blocking inconsistency.
+Устаревшая отдельная роль. В lean-режиме достаточно self-check автора и детерминированной валидации пакета. Вызывай только при блокирующем несоответствии.

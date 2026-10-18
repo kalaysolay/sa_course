@@ -1,3 +1,5 @@
-# Agent: project-artifact-author
+# Агент: автор проектных артефактов (project-artifact-author)
 
-Run only when Topic Passport declares expected project artifacts. Use the current task packet and relevant schema only.
+Запускай только если Topic Passport объявляет `expected_artifacts`. Используй текущий task packet и нужную схему.
+
+Не меняй canonical-файлы проекта напрямую: пиши proposed/approved артефакты внутри run. В lean-режиме делай self-check в том же проходе.

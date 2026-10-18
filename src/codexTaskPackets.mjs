@@ -52,51 +52,51 @@ function buildStages(ctx) {
   const stages = [
     {
       id: '01-plan-research',
-      role: 'Lesson Planner and Researcher',
+      role: 'Планировщик урока и исследователь',
       outputs: ['01-brief/lesson-brief-final.json', '02-research/source-pack.md'],
       inputs: ['00-input/course-context.yaml', '00-input/topic-passport.json', '00-input/source-registry-slice.json', '00-input/audience.md'],
-      task: 'Create a compact lesson brief and a claim-to-source map in one pass.',
+      task: 'За один проход создать компактный Lesson Brief и карту утверждений → источники.',
       rules: [
-        `Keep the brief under ${limits.lesson_brief_chars || 6000} characters unless a schema-required field makes that impossible.`,
-        `Keep the source pack under ${limits.source_pack_chars || 5000} characters; record claims, direct links, caveats, and availability instead of retelling sources.`,
-        'Do not read the monolithic publisher specification unless the listed inputs leave a required output field ambiguous.'
+        `Держи brief короче ${limits.lesson_brief_chars || 6000} символов, если только схема не требует обязательных полей длиннее.`,
+        `Держи source pack короче ${limits.source_pack_chars || 5000} символов: фиксируй утверждения, прямые ссылки, оговорки и availability, а не пересказ источников.`,
+        'Не открывай монолитную спецификацию издательства, пока перечисленных входов хватает для обязательных полей результата.'
       ]
     },
     {
       id: '02-writer',
-      role: 'Lecture Writer',
+      role: 'Автор лекции',
       outputs: ['03-lecture/draft-v1.md'],
       inputs: ['01-brief/lesson-brief-final.json', '02-research/source-pack.md', '00-input/course-style.md'],
-      task: 'Write one complete Russian lecture draft from the approved compact inputs.',
+      task: 'Написать один полный черновик лекции на русском по утверждённым компактным входам.',
       rules: [
-        `The first line must be exactly: \`# Лекция ${ctx.topic.course_order}. ${ctx.topic.title}\`.`,
-        'Use the source pack by reference; do not reproduce it inside the lecture.',
-        'End with direct public source links only. Never link to run-relative files with ../.'
+        `Первая строка должна быть ровно: \`# Лекция ${ctx.topic.course_order}. ${ctx.topic.title}\`.`,
+        'Используй source pack по ссылкам; не копируй его содержимое внутрь лекции.',
+        'В конце — только прямые публичные ссылки на реально использованные источники. Никогда не ссылайся на файлы run через ../.'
       ]
     },
     {
       id: '03-lean-review',
-      role: 'Lean Lecture Review',
+      role: 'Lean-ревью лекции',
       outputs: ['03-lecture/review-v1/content.json', '03-lecture/review-v1/learning.json', '03-lecture/final.md'],
       inputs: ['01-brief/lesson-brief-final.json', '02-research/source-pack.md', '03-lecture/draft-v1.md', '00-input/course-style.md'],
-      task: 'Read the lecture once and review it from two perspectives: content/coverage and learning/editorial.',
+      task: 'Прочитать лекцию один раз и вынести два вердикта: content/coverage и learning/editorial.',
       rules: [
-        `For an approved perspective keep its JSON under ${limits.approved_review_chars || 600} characters.`,
-        'Only critical and major issues trigger revision. Minor issues are recorded without a rewrite.',
-        'If revision is required, preserve the draft, create a targeted next version, and rerun only the failed perspective.',
-        'Allow at most one full rewrite. Copy the approved draft to 03-lecture/final.md.'
+        `Для одобренной перспективы держи её JSON короче ${limits.approved_review_chars || 600} символов.`,
+        'Rewrite запускают только critical и major. Minor фиксируй без переписывания.',
+        'Если нужна доработка — сохрани draft, сделай точечную следующую версию и перезапусти только упавшую перспективу.',
+        'Не больше одного полного rewrite. Одобренный текст скопируй в 03-lecture/final.md.'
       ]
     },
     {
       id: '04-assessment',
-      role: 'Assessment Author with Self-check',
+      role: 'Автор практики с self-check',
       outputs: ['04-assessment/draft.json', '04-assessment/exercises.md', '04-assessment/answers.md'],
       inputs: ['01-brief/lesson-brief-final.json', '03-lecture/final.md'],
-      task: 'Create the assessment and verify learning-outcome coverage in the same pass.',
+      task: 'Создать практику и в том же проходе проверить покрытие learning outcomes.',
       rules: [
-        `Default to at most ${limits.assessment_default_items || 9} items; exceed this only when the brief explicitly requires more.`,
-        'Include answers, explanations, observable criteria, and an LO coverage map.',
-        'Do not create a separate semantic reviewer task when deterministic schema and coverage checks pass.'
+        `По умолчанию не больше ${limits.assessment_default_items || 9} заданий; превышай только если brief явно требует больше.`,
+        'Добавь ответы, объяснения, наблюдаемые критерии и карту покрытия LO.',
+        'Не создавай отдельную semantic-ревью задачу, если детерминированные проверки схемы и покрытия проходят.'
       ]
     }
   ];
@@ -104,25 +104,25 @@ function buildStages(ctx) {
   if (requiresProjectStage(ctx.passport)) {
     stages.push({
       id: '05-project-artifacts',
-      role: 'Project Artifact Author with Self-check',
+      role: 'Автор проектных артефактов с self-check',
       outputs: ['05-project/project-change.json', '05-project/proposed/', '05-project/approved/'],
       inputs: ['00-input/project-state.yaml', '00-input/topic-passport.json', '01-brief/lesson-brief-final.json', '03-lecture/final.md'],
-      task: 'Create only the project artifacts explicitly required by the Topic Passport and self-check them once.',
+      task: 'Создать только артефакты из Topic Passport и один раз сделать self-check.',
       rules: [
-        'Do not create an additional lesson-only artifact when the assessment already contains the project exercise.',
-        'Do not mutate canonical project files; write proposed and approved run artifacts only.',
-        'Only critical or major issues justify one targeted revision.'
+        'Не плоди отдельный lesson-only артефакт, если практика уже содержит project exercise.',
+        'Не меняй canonical-файлы проекта; пиши только proposed и approved внутри run.',
+        'Один targeted rewrite — только при critical или major.'
       ]
     });
   }
 
   stages.push({
     id: '06-tracker-updater',
-    role: 'Course Tracker Updater',
+    role: 'Обновление трекера курса',
     outputs: ['99-package/tracker-update-report.md'],
     inputs: ['99-package/lesson-manifest.json', '99-package/payload-metrics.json'],
-    task: 'After local finalization, update the Google Sheets tracker from the manifest.',
-    rules: ['Read no lecture drafts, reviews, source pack, or project state unless the manifest reports an unresolved inconsistency.']
+    task: 'После локальной финализации обновить трекер (Google Sheets или локальный xlsx) по manifest.',
+    rules: ['Не читай черновики лекции, ревью, source pack или project state, пока manifest не сообщит о несоответствии.']
   });
   return stages;
 }
@@ -174,36 +174,37 @@ export function buildCodexTaskPackets(ctx) {
 function dispatchMarkdown(ctx, manifest) {
   const courseTracker = manifest.courseTracker;
   return [
-    `# Codex Agent Dispatch: ${ctx.topic.id}`,
+    `# Диспетчер Codex-агентов: ${ctx.topic.id}`,
     '',
     `Run: ${ctx.run.runId}`,
-    `Topic: ${ctx.topic.course_order}. ${ctx.topic.title}`,
-    `Mode: Codex/ChatGPT app agents, no external OpenAI API key required.`,
+    `Тема: ${ctx.topic.course_order}. ${ctx.topic.title}`,
+    'Режим: агенты Codex/ChatGPT app, внешний OPENAI_API_KEY не нужен.',
     '',
-    '## How to use',
+    '## Как работать',
     '',
-    '1. Execute only the task packets listed below, in order. Do not recreate omitted legacy stages.',
-    '2. Read only each packet’s declared inputs. Pass artifacts by file path rather than copying their full text between agents.',
-    '3. Run deterministic format/schema checks before semantic review. Only critical and major issues trigger a revision.',
-    '4. Rerun only the failed review perspective and allow at most one full rewrite per artifact.',
-    `5. After authoring, run \`node scripts/publisher.mjs /finalize-codex-run ${ctx.run.runId}\`.`,
-    '6. Finish with the tracker packet, using the generated manifest and payload metrics.',
+    '1. Выполняй только пакеты задач ниже, строго по порядку. Не восстанавливай опущенные legacy-стадии.',
+    '2. Читай только объявленные входы каждого пакета. Передавай артефакты путями к файлам, а не копированием всего текста между агентами.',
+    '3. Перед semantic-ревью прогони детерминированные проверки формата/схемы. Rewrite — только на critical и major.',
+    '4. Перезапускай только упавшую перспективу ревью; не больше одного полного rewrite на артефакт.',
+    `5. После авторских стадий выполни \`node scripts/publisher.mjs /finalize-codex-run ${ctx.run.runId}\`.`,
+    '6. Заверши пакетом трекера, опираясь на готовый manifest и payload-metrics.',
     '',
-    '## Course Tracker',
+    '## Трекер курса',
     '',
-    `- Spreadsheet: ${courseTracker.spreadsheetUrl}`,
-    `- Sheet: ${courseTracker.sheetName}`,
-    `- Match existing lessons by Topic ID in column ${courseTracker.topicIdColumn}.`,
-    '- Update the existing row instead of appending a duplicate. Append only when the Topic ID is absent.',
-    '- Preserve multiline cells in `Модуль / раздел / урок` and `Артефакты`.',
+    `- Таблица: ${courseTracker.spreadsheetUrl}`,
+    `- Лист: ${courseTracker.sheetName}`,
+    `- Ищи существующий урок по Topic ID в колонке ${courseTracker.topicIdColumn}.`,
+    '- Обновляй существующую строку, не дублируй. Новую строку добавляй только если Topic ID отсутствует.',
+    '- Сохраняй многострочные ячейки в `Модуль / раздел / урок` и `Артефакты`.',
+    '- Если Google Drive недоступен — обнови локальный xlsx-экспорт трекера тем же правилами.',
     '',
-    '## Task Map',
+    '## Карта задач',
     '',
     ...manifest.tasks.map(task => `- ${task.id} | ${task.role} | ${task.taskFile} -> ${task.expectedOutputs.join(', ')}`),
     '',
-    '## Current Open Gaps',
+    '## Открытые GAP',
     '',
-    ...(ctx.openGaps.length ? ctx.openGaps.map(gap => `- ${gap.id}: ${gap.type}/${gap.severity} - ${gap.description}`) : ['- none']),
+    ...(ctx.openGaps.length ? ctx.openGaps.map(gap => `- ${gap.id}: ${gap.type}/${gap.severity} — ${gap.description}`) : ['- нет']),
     ''
   ].join('\n');
 }
@@ -212,19 +213,20 @@ function stageMarkdown(stage, ctx, courseTracker) {
   const trackerLines = stage.id === '06-tracker-updater'
     ? [
         '',
-        '## Google Sheets Tracker Update',
+        '## Обновление трекера (Google Sheets / локальный xlsx)',
         '',
-        `- Spreadsheet: ${courseTracker.spreadsheetUrl}`,
-        `- Sheet: ${courseTracker.sheetName}`,
-        `- Locate the row where column ${courseTracker.topicIdColumn} equals \`${ctx.topic.id}\`.`,
-        '- If the row exists, update only the cells for this lesson and any related artifact-status cells that changed.',
-        '- If the row does not exist, append a new row using the same column order and formatting as existing rows.',
-        '- Set `Лекция сгенерирована` to `Да` when `03-lecture/final.md` or packaged `lecture.md` exists.',
-        '- Set `Лекция отредактирована` to `Да` when the approved/final lecture exists after review.',
-        '- Put artifacts in one cell with newline-separated entries.',
-        '- Use `Статус артефакта` for artifact lifecycle, not a binary yes/no: examples are `Не начат`, `Создан`, `Продолжен`, `Изменен`, `Не создавался в этом уроке`, or a concise path-specific status.',
-        '- Update `Статус урока`, `Output`, and `Run ID` from the final run state.',
-        '- Write `99-package/tracker-update-report.md` with the spreadsheet URL, row number, changed columns, and any unresolved issue.',
+        `- Таблица: ${courseTracker.spreadsheetUrl}`,
+        `- Лист: ${courseTracker.sheetName}`,
+        `- Найди строку, где колонка ${courseTracker.topicIdColumn} = \`${ctx.topic.id}\`.`,
+        '- Если строка есть — обнови только ячейки этого урока и связанные статусы артефактов.',
+        '- Если строки нет — добавь новую в том же порядке колонок и формате.',
+        '- `Лекция сгенерирована` = `Да`, если есть `03-lecture/final.md` или packaged `lecture.md`.',
+        '- `Лекция отредактирована` = `Да`, если есть одобренная/финальная лекция после ревью.',
+        '- Артефакты — в одной ячейке, пункты через перевод строки.',
+        '- `Статус артефакта` — жизненный цикл, не да/нет: например `Не начат`, `Создан`, `Продолжен`, `Изменен`, `Не создавался в этом уроке`.',
+        '- Обнови `Статус урока`, `Output` и `Run ID` по финальному состоянию run.',
+        '- При необходимости синхронизируй вкладку `Документация` (`Начат`, `Где начато`) — см. `course/lesson-generation-pipeline.md`.',
+        '- Запиши `99-package/tracker-update-report.md`: URL/путь таблицы, номер строки, изменённые колонки, нерешённые вопросы.',
         ''
       ]
     : [];
@@ -232,29 +234,29 @@ function stageMarkdown(stage, ctx, courseTracker) {
   return [
     `# ${stage.role}: ${ctx.topic.id}`,
     '',
-    `Task: ${stage.task}`,
-    'Expected outputs:',
+    `Задача: ${stage.task}`,
+    'Ожидаемые результаты:',
     ...stage.outputs.map(output => `- \`${output}\``),
     '',
-    '## Hard Constraints',
+    '## Жёсткие ограничения',
     '',
-    '- Write only inside this run directory.',
-    '- Preserve Russian language for learner-facing course content.',
-    '- Use the Compliance project case as the through-line for examples and exercises.',
-    '- Do not skip missing prerequisites or source gaps; record them explicitly.',
-    '- Do not load `docs/course-publisher-spec-v0.3.md` unless a declared input cannot resolve a required field.',
+    '- Пиши только внутри каталога этого run.',
+    '- Учебный контент для студента — на русском.',
+    '- Сквозной кейс примеров и практики — проект Compliance.',
+    '- Не пропускай молча отсутствующие prerequisites или source gaps; фиксируй явно.',
+    '- Не открывай `docs/course-publisher-spec-v0.3.md`, пока объявленных входов хватает.',
     '',
-    '## Topic Context',
+    '## Контекст темы',
     '',
-    `- Module: ${ctx.module.id} - ${ctx.module.title}`,
-    `- Section: ${ctx.section.id} - ${ctx.section.title}`,
-    `- Topic: ${ctx.topic.course_order}. ${ctx.topic.title} (${ctx.topic.id})`,
+    `- Модуль: ${ctx.module.id} — ${ctx.module.title}`,
+    `- Раздел: ${ctx.section.id} — ${ctx.section.title}`,
+    `- Тема: ${ctx.topic.course_order}. ${ctx.topic.title} (${ctx.topic.id})`,
     '',
-    '## Files To Read First',
+    '## Сначала прочитай',
     '',
     ...stage.inputs.map(input => `- \`${input}\``),
     '',
-    '## Lean Rules',
+    '## Правила lean',
     '',
     ...stage.rules.map(rule => `- ${rule}`),
     ...trackerLines,

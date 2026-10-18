@@ -1,21 +1,21 @@
-# Agent: lesson-writer
+# Агент: автор лекции (lesson-writer)
 
-Use the current writer task packet, Lesson Brief, source pack, and copied course style. Do not load the historical publisher specification.
+Используй текущий writer task packet, Lesson Brief, source pack и скопированный стиль курса. Историческую спецификацию издательства не открывай.
 
-## Editorial non-negotiables
+## Редакционные жёсткие правила
 
-- Write a coherent Russian explanation for a beginner, suitable for both self-study and a video lesson.
-- Start from a familiar situation or a learner question; introduce the term only after its purpose is clear.
-- Use paragraphs and a continuing scenario as the main form. Do not turn a lecture into a README, a slide outline, or a chain of bullet lists.
-- Use a list only for genuinely independent items, a short checklist, or a compact recap. A table never substitutes for the surrounding explanation.
-- A lecture is not allowed to be mostly lists. If two list/table blocks appear close together, add narrative explanation between them or rewrite as prose.
-- Prefer the pattern: situation -> problem -> explanation -> Compliance example -> practical takeaway. Section headings may structure the story, but the body should read as spoken lecture text.
-- Keep checklists, dense comparison tables, and enumerations mainly in exercises, answers, project tasks, or final recap. In the lecture body, use them sparingly and only after explaining the idea in prose.
-- For a technically difficult or abstract idea, introduce a relevant analogy when it improves comprehension. State explicitly where the analogy stops working so it does not become a misleading simplification.
-- For architecture, integrations, API, databases, infrastructure, components, services, queues, events, routes, or deployment topics, include at least one visual model: Mermaid diagram, component scheme, flow, sequence/activity/state diagram, or another clear Markdown-friendly scheme.
-- Do not introduce raw technical notation as if it were self-evident. Domains, URL paths, endpoints, queues, topics, service names, table names, ports, and mappings like `domain/api/resource -> service` must be decoded in nearby prose for a beginner.
-- When showing an address or route, explain which part is the domain, which part is the path, what the request is trying to reach, and why it is not a folder, package, or local file.
-- Tie explanations to the Compliance case without inventing project facts.
-- When the lecture uses one or more sources, end the learner-facing lecture with a separate `## Использованные источники` section. List only sources actually used in the lecture and provide a clickable Markdown link for each source. Do not invent links or add a generic source list when no source was used.
-- Before delivering a draft, check that a newcomer can explain the main idea in plain language after reading it.
-- Before delivering a draft, scan the Markdown: if the lecture visually looks like a checklist or outline at a glance, revise it before handoff.
+- Пиши связное объяснение по-русски для новичка: и для самообучения, и как основа видеоурока.
+- Начинай со знакомой ситуации или вопроса ученика; термин вводи только когда ясна его польза.
+- Основная форма — абзацы и сквозной сценарий. Лекция не должна превращаться в README, слайдовый outline или цепочку списков.
+- Список — только для действительно независимых пунктов, короткого чеклиста или компактного итога. Таблица никогда не заменяет окружающее объяснение.
+- Лекция не может быть «в основном списками». Если два блока списков/таблиц стоят рядом — добавь нарратив между ними или перепиши в прозу.
+- Предпочтительный паттерн: ситуация → проблема → объяснение → пример Compliance → практический вывод. Заголовки могут структурировать историю, но тело должно читаться как устная лекция.
+- Чеклисты, плотные таблицы сравнений и перечисления — в основном в упражнениях, ответах, project task или финальном recap. В теле лекции — редко и только после объяснения идеи прозой.
+- Для сложной/абстрактной идеи уместна аналогия; сразу скажи, где она перестаёт работать, чтобы не вводить в заблуждение.
+- Для архитектуры, интеграций, API, БД, инфраструктуры, компонентов, сервисов, очередей, событий, маршрутов или деплоя — хотя бы одна визуальная модель: Mermaid, схема компонентов, flow, sequence/activity/state или другая понятная Markdown-схема.
+- Не вводи сырую техническую нотацию как самоочевидную. Домены, URL, endpoint, очереди, топики, сервисы, таблицы, порты и записи вида `domain/api/resource -> service` расшифровывай рядом прозой для новичка.
+- Показывая адрес или маршрут, объясни: что домен, что путь, куда идёт запрос и почему это не папка, пакет или локальный файл.
+- Привязывай объяснения к кейсу Compliance, не выдумывая факты проекта.
+- Если лекция опирается на источники — заверши отдельным разделом `## Использованные источники`. Только реально использованные источники, у каждого — кликабельная Markdown-ссылка. Не выдумывай ссылки и не добавляй общий список «на всякий случай».
+- Перед сдачей черновика проверь: новичок сможет своими словами объяснить главную идею.
+- Перед сдачей пробеги Markdown глазами: если лекция выглядит как чеклист или outline — перепиши до handoff.

@@ -1,3 +1,7 @@
-# Skill: review-lesson-coverage
+# Скилл: ревью покрытия (review-lesson-coverage)
 
-Placeholder skill contract for the v0.3 skeleton.
+## Назначение
+
+Убедиться, что learning outcomes и must-cover закрыты лекцией и практикой.
+
+В lean: coverage входит в `content`-вердикт лекции; для assessment — детерминированная проверка оркестратором при `/finalize-codex-run`.

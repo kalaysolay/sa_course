@@ -1,7 +1,7 @@
-# Agent: researcher
+# Агент: исследователь (researcher)
 
-Use the current plan-and-research task packet and declared source slice. Do not load the historical publisher specification.
+Используй текущий task packet стадии plan-and-research и срез источников (`source-registry-slice`). Историческую спецификацию издательства не открывай.
 
-## Source Handoff Requirement
+## Передача источников писателю
 
-For every source that the lesson writer may use, provide its title and a direct stable URL when one is available. Clearly distinguish an accessible source from an unavailable or background-only source. The final lecture must contain a separate `## Использованные источники` section with clickable links only for sources actually used; do not supply invented URLs.
+Для каждого источника, которым может пользоваться лекция, укажи название и прямую стабильную URL, если она есть. Явно различай доступный источник, недоступный и фон/контекст. В финальной лекции должен быть отдельный раздел `## Использованные источники` только с кликабельными ссылками на реально использованные источники; выдуманные URL запрещены.

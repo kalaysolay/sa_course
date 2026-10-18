@@ -1,3 +1,5 @@
-# Agent: content-critic
+# Агент: критик содержания (content-critic)
 
-Use the current review task packet and declared inputs. Combine correctness with coverage and do not load the historical publisher specification.
+Используй текущий review task packet и объявленные входы. Совмещай проверку корректности и покрытия темы. Историческую спецификацию издательства не открывай.
+
+В lean-режиме эта роль обычно входит в объединённый проход `03-lean-review` (перспектива content).
