@@ -1,0 +1,12 @@
+{
+  "module": "M03",
+  "section": "M03-S04",
+  "topic": {
+    "id": "REQ-SPECIFICATION",
+    "slug": "requirements-specification",
+    "title": "Спецификация и документирование требований",
+    "order": 1,
+    "course_order": 17,
+    "passport": "course/modules/M03-requirements/sections/S04-specification/topics/requirements-specification.yaml"
+  }
+}

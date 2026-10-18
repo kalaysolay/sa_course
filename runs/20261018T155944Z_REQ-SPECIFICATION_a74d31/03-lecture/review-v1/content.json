@@ -1,0 +1,7 @@
+{
+  "reviewer": "lean-content",
+  "artifact": "03-lecture/draft-v1.md",
+  "verdict": "APPROVED",
+  "summary": "Утверждения совпадают с source-pack и артефактами Compliance (ТЗ, реестр, open questions). LO и mustCover закрыты; doNotCover (UML, change mgmt, IEEE SRS) не нарушен. Аудитория — аналитик, без ярлыка «джун».",
+  "issues": []
+}

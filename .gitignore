@@ -8,6 +8,9 @@ runs/*
 # Lesson packages в output/
 output/*
 !output/.gitkeep
+# Локальный экспорт трекера курса (Google Sheets — источник для online)
+!output/План лекций курса системного аналитика.xlsx
+!output/План лекций курса системного аналитика.updated.xlsx
 
 node_modules/
 # Локальные настройки IntelliJ IDEA во всех каталогах проекта

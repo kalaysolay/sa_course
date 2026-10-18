@@ -1,0 +1,29 @@
+{
+  "topicId": "REQ-SPECIFICATION",
+  "runId": "20261018T155944Z_REQ-SPECIFICATION_a74d31",
+  "status": "COMPLETED",
+  "workflowVersion": "0.4-lean",
+  "learningOutcomes": [
+    "REQ-SPECIFICATION-LO1",
+    "REQ-SPECIFICATION-LO2",
+    "REQ-SPECIFICATION-LO3",
+    "REQ-SPECIFICATION-LO4",
+    "REQ-SPECIFICATION-LO5",
+    "REQ-SPECIFICATION-LO6"
+  ],
+  "files": {
+    "lecture": "lecture.md",
+    "exercises": "exercises.md",
+    "answers": "answers.md",
+    "sources": "sources.md"
+  },
+  "projectChanges": [],
+  "reviews": {
+    "content": "APPROVED",
+    "learning": "APPROVED",
+    "format": "APPROVED",
+    "assessment": "APPROVED",
+    "project": "SKIPPED"
+  },
+  "metrics": "payload-metrics.json"
+}

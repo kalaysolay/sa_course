@@ -1,7 +1,31 @@
 {
   "journal_type": "implementation_gap_style",
-  "updated_at": "2026-08-10T01:25:00+05:00",
+  "updated_at": "2026-10-18T23:10:00+05:00",
   "entries": [
+    {
+      "id": "IMPL-0022",
+      "status": "closed",
+      "severity": "info",
+      "type": "lesson_production",
+      "iteration": "production-v0.4-lean",
+      "title": "Regenerated lessons 14–17 after package loss",
+      "description": "Rebuilt REQ-STAKEHOLDERS, REQ-ELICITATION, REQ-MODELING, and REQ-SPECIFICATION via lean Codex pipeline after lesson packages were lost on re-clone (gitignore whitelist). Progress, local Excel tracker (План лекций), and Документация statuses synced; next_candidate is REQ-MANAGEMENT (#18).",
+      "evidence": [
+        "output/M03/REQ-STAKEHOLDERS/",
+        "output/M03/REQ-ELICITATION/",
+        "output/M03/REQ-MODELING/",
+        "output/M03/REQ-SPECIFICATION/",
+        "runs/20261018T080717Z_REQ-STAKEHOLDERS_e25ed8/",
+        "runs/20261018T114453Z_REQ-ELICITATION_3aa008/",
+        "runs/20261018T142344Z_REQ-MODELING_c0483d/",
+        "runs/20261018T155944Z_REQ-SPECIFICATION_a74d31/",
+        "course/progress.yaml next_candidate=REQ-MANAGEMENT",
+        "output/План лекций курса системного аналитика.xlsx"
+      ],
+      "created_at": "2026-10-18T23:10:00+05:00",
+      "resolved_at": "2026-10-18T23:10:00+05:00"
+    },
+
     {
       "id": "IMPL-0001",
       "status": "closed",
