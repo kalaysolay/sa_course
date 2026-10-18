@@ -1,7 +1,24 @@
 {
   "journal_type": "implementation_gap_style",
-  "updated_at": "2026-10-18T23:10:00+05:00",
+  "updated_at": "2026-10-18T23:40:00+05:00",
   "entries": [
+    {
+      "id": "IMPL-0023",
+      "status": "closed",
+      "severity": "info",
+      "type": "lesson_production",
+      "iteration": "production-v0.4-lean",
+      "title": "Lesson 18 REQ-MANAGEMENT regenerated (detailed)",
+      "description": "Published a detailed REQ-MANAGEMENT lecture (~30k chars) covering educational baseline, change request, registry statuses, decision owner, basic traceability, and Compliance friction cases. Progress and local Excel tracker synced; next_candidate is UML-USE-CASE (#19).",
+      "evidence": [
+        "output/M03/REQ-MANAGEMENT/",
+        "runs/20261018T183322Z_REQ-MANAGEMENT_bb789b/",
+        "course/progress.yaml next_candidate=UML-USE-CASE",
+        "output/План лекций курса системного аналитика.xlsx"
+      ],
+      "created_at": "2026-10-18T23:40:00+05:00",
+      "resolved_at": "2026-10-18T23:40:00+05:00"
+    },
     {
       "id": "IMPL-0022",
       "status": "closed",

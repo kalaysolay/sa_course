@@ -1,0 +1,12 @@
+{
+  "module": "M03",
+  "section": "M03-S05",
+  "topic": {
+    "id": "REQ-MANAGEMENT",
+    "slug": "requirements-management",
+    "title": "Управление требованиями",
+    "order": 1,
+    "course_order": 18,
+    "passport": "course/modules/M03-requirements/sections/S05-management/topics/requirements-management.yaml"
+  }
+}

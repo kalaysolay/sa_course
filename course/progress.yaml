@@ -1,12 +1,12 @@
 {
   "course_id": "system-analysis",
-  "updated_at": "2026-10-18T18:10:00.000Z",
+  "updated_at": "2026-10-18T18:45:22.281Z",
   "summary": {
     "total_topics": 98,
-    "completed": 41,
+    "completed": 42,
     "in_progress": 0,
     "blocked": 0,
-    "needs_revision": 5,
+    "needs_revision": 4,
     "planned": 52
   },
   "last_completed": {
@@ -15,8 +15,8 @@
     "run_id": "20260911T045957Z_DB-PSQL_f739a4"
   },
   "next_candidate": {
-    "topic_id": "REQ-MANAGEMENT",
-    "course_order": 18
+    "topic_id": "UML-USE-CASE",
+    "course_order": 19
   },
   "topics": {
     "PROF-ANALYST-TYPES": {
@@ -174,11 +174,12 @@
       "course_order": 18,
       "module_id": "M03",
       "title": "Управление требованиями",
-      "status": "needs_revision",
-      "output": null,
+      "status": "completed",
+      "output": "output/M03/REQ-MANAGEMENT/",
       "previous_run_id": "manual-20260813-REQ-MANAGEMENT",
       "previous_output": "output/M03/REQ-MANAGEMENT/",
-      "note": "Lesson package lost after re-clone (never committed due to .gitignore whitelist). Artifacts missing from output/; regenerate from scratch."
+      "note": "Regenerated 2026-10-18 after package loss on re-clone. Detailed lecture (~30k chars).",
+      "run_id": "20261018T183322Z_REQ-MANAGEMENT_bb789b"
     },
     "UML-USE-CASE": {
       "course_order": 19,

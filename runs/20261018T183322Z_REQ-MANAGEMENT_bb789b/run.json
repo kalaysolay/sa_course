@@ -1,0 +1,27 @@
+{
+  "runId": "20261018T183322Z_REQ-MANAGEMENT_bb789b",
+  "topicId": "REQ-MANAGEMENT",
+  "status": "COMPLETED",
+  "startedAt": "2026-10-18T18:33:22.413Z",
+  "updatedAt": "2026-10-18T18:45:06.005Z",
+  "workflowVersion": "0.4-lean",
+  "adapter": {
+    "name": "CodexAppAdapter",
+    "version": "0.3-task-packets",
+    "externalApiRequired": false
+  },
+  "promptVersions": {
+    "methodologist": "stakeholders-iteration-2",
+    "contentCritic": "stakeholders-iteration-2",
+    "writer": "stakeholders-iteration-2",
+    "reviewPanel": "stakeholders-iteration-3",
+    "assessment": "stakeholders-iteration-4",
+    "projectArtifacts": "stakeholders-iteration-5"
+  },
+  "revision": {
+    "lecture": 0,
+    "assessment": 0,
+    "projectArtifacts": 0
+  },
+  "errors": []
+}

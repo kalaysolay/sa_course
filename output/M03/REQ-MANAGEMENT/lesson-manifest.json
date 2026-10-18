@@ -1,0 +1,31 @@
+{
+  "topicId": "REQ-MANAGEMENT",
+  "runId": "20261018T183322Z_REQ-MANAGEMENT_bb789b",
+  "status": "COMPLETED",
+  "workflowVersion": "0.4-lean",
+  "learningOutcomes": [
+    "REQ-MANAGEMENT-LO1",
+    "REQ-MANAGEMENT-LO2",
+    "REQ-MANAGEMENT-LO3",
+    "REQ-MANAGEMENT-LO4",
+    "REQ-MANAGEMENT-LO5",
+    "REQ-MANAGEMENT-LO6",
+    "REQ-MANAGEMENT-LO7",
+    "REQ-MANAGEMENT-LO8"
+  ],
+  "files": {
+    "lecture": "lecture.md",
+    "exercises": "exercises.md",
+    "answers": "answers.md",
+    "sources": "sources.md"
+  },
+  "projectChanges": [],
+  "reviews": {
+    "content": "APPROVED",
+    "learning": "APPROVED",
+    "format": "APPROVED",
+    "assessment": "APPROVED",
+    "project": "SKIPPED"
+  },
+  "metrics": "payload-metrics.json"
+}
