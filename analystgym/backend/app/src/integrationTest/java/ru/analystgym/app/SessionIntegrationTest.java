@@ -82,6 +82,13 @@ class SessionIntegrationTest {
         return users.findByEmail(address).orElseThrow().getId();
     }
 
+    /** Стенд без SMTP остаётся здоровым при работающей БД; выключенный канал не даёт ложный 503. */
+    @Test
+    void проверкаЗдоровьяНеТребуетВыключеннуюПочту() throws Exception {
+        var health = bodyOf(mvc.perform(get("/actuator/health")).andExpect(status().isOk()).andReturn());
+        assertThat(health.path("status").asText()).isEqualTo("UP");
+    }
+
     @Test
     void гостевойТестФиксируетБанкИСохраняетсяПослеВходаНаДругомУстройстве() throws Exception {
         mvc.perform(get("/assets/js/questions.js")).andExpect(status().isNotFound());

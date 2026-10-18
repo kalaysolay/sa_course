@@ -2,6 +2,11 @@
 
 ## Быстрый старт
 
+Инструкция для VPS/HTTPS, настройки окружения, обновление и восстановление:
+[`../deploy/DEPLOY.md`](../deploy/DEPLOY.md). Compose принудительно включает
+Secure-куки, поэтому вход через него проверяется за HTTPS/Caddy. Для локального
+HTTP использовать bootRun с тестовой БД и APP_COOKIES_SECURE=false.
+
 V15 (аудит 11–13): прохождения диагностики фиксируют банк и прогресс;
 старый POST `/api/assessment/submissions` заменён стартом `/runs`, сохранением
 `PUT /runs/{id}` и финишем `/runs/{id}/finish`. Гостевой доступ — секрет
@@ -20,9 +25,10 @@ Mock теперь явно демонстрационный и ограниче�
 
 ```bash
 # 1. Статика макета подтянется сама при сборке (таска syncMockup).
-# 2. Поднять всё:
-docker compose -f ../deploy/docker-compose.yml up --build
-# 3. Открыть: http://localhost:8080 (хаб), /api/health (JSON).
+# 2. Конфигурацию предварительно заполнить по deploy/DEPLOY.md.
+docker compose --env-file ../deploy/.env -f ../deploy/docker-compose.yml build app
+docker compose --env-file ../deploy/.env -f ../deploy/docker-compose.yml up -d --no-build --pull missing
+# 3. Открыть настроенный HTTPS-домен; /api/health — проверка HTTP API.
 ```
 
 Первого администратора создаёт отдельная серверная команда: задать
@@ -44,14 +50,14 @@ docker compose -f ../deploy/docker-compose.yml up --build
 Полный контракт и роли: `../tasks-mockup/docs/product-spec.md`, руководство:
 `../tasks-mockup/docs/admin-guide.md`.
 
-Проверки пакета безопасности: `./gradlew build :app:integrationTest`
+Проверки пакета безопасности: `sh ./gradlew build :app:integrationTest`
 (для integrationTest нужен Docker) и
 `node --test ../tasks-mockup/tests/session.test.cjs`.
 При старом Testcontainers и новом Docker можно передать JVM-свойство
 `-Dapi.version=1.44` через `JAVA_TOOL_OPTIONS`; Docker endpoint берётся из
 активного контекста (`DOCKER_HOST` при необходимости).
 
-Локальная разработка без Docker: `./gradlew bootRun` (нужны JDK 21
+Локальная разработка без Docker: `sh ./gradlew :app:bootRun` (нужны JDK 21
 и запущенный postgres; redis коду не нужен — лимиты в памяти).
 
 ## Порты и переменные

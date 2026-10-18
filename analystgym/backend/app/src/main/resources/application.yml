@@ -127,6 +127,12 @@ notifications:
   poll-ms: ${NOTIFICATION_POLL_MS:1000}
 
 management:
+  # Выключенный почтовый канал не должен делать весь стенд нездоровым:
+  # JavaMailSender существует и без SMTP-настроек, поэтому его автопроверку
+  # включаем вместе с реальной доставкой, а не по наличию бина.
+  health:
+    mail:
+      enabled: ${app.mail.enabled:false}
   endpoints:
     web:
       exposure:

@@ -10,7 +10,12 @@ COPY backend/app/build.gradle ./app/
 RUN gradle dependencies --no-daemon -q || true
 # Потом весь код и собственно сборка c тестами (см. шапку).
 COPY backend/ ./
-RUN gradle build :app:bootJar --no-daemon
+# syncMockup читает соседний каталог, как при обычном локальном build.
+# Без него образ собирался с пустой статикой, хотя Java-тесты проходили.
+COPY tasks-mockup/ /home/gradle/tasks-mockup/
+# Исключаем только plain JAR точки входа: иначе COPY app-*.jar находит
+# два файла. Тесты и JAR остальных модулей остаются частью сборки.
+RUN gradle build :app:bootJar -x :app:jar --no-daemon
 
 # Этап рантайма: только JRE, без Gradle и исходников (меньше образ и поверхность атаки).
 FROM eclipse-temurin:21-jre

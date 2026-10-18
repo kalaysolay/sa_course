@@ -1,0 +1,10 @@
+# В сборку не передаём секреты и результаты локальных запусков.
+**/.env
+**/.env.*
+**/.gradle
+**/build
+backend/app/src/main/resources/static
+**/__pycache__
+**/*.pyc
+.idea
+.git
