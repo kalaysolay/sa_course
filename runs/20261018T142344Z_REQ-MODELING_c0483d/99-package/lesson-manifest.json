@@ -1,0 +1,29 @@
+{
+  "topicId": "REQ-MODELING",
+  "runId": "20261018T142344Z_REQ-MODELING_c0483d",
+  "status": "COMPLETED",
+  "workflowVersion": "0.4-lean",
+  "learningOutcomes": [
+    "REQ-MODELING-LO1",
+    "REQ-MODELING-LO2",
+    "REQ-MODELING-LO3",
+    "REQ-MODELING-LO4",
+    "REQ-MODELING-LO5",
+    "REQ-MODELING-LO6"
+  ],
+  "files": {
+    "lecture": "lecture.md",
+    "exercises": "exercises.md",
+    "answers": "answers.md",
+    "sources": "sources.md"
+  },
+  "projectChanges": [],
+  "reviews": {
+    "content": "APPROVED",
+    "learning": "APPROVED",
+    "format": "APPROVED",
+    "assessment": "APPROVED",
+    "project": "SKIPPED"
+  },
+  "metrics": "payload-metrics.json"
+}

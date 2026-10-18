@@ -1,12 +1,12 @@
 # Course Progress
 
-Готово: 39 / 98 тем.
+Готово: 40 / 98 тем.
 
 Последняя готовая тема:
 46. DB-PSQL
 
 Следующая:
-16. REQ-MODELING
+17. REQ-SPECIFICATION
 
 Открытые GAP:
 - см. course/gap-registry.yaml

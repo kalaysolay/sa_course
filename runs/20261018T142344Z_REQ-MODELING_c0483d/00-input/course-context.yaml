@@ -1,0 +1,12 @@
+{
+  "module": "M03",
+  "section": "M03-S03",
+  "topic": {
+    "id": "REQ-MODELING",
+    "slug": "requirements-modeling",
+    "title": "Моделирование и формализация требований",
+    "order": 1,
+    "course_order": 16,
+    "passport": "course/modules/M03-requirements/sections/S03-formalization/topics/requirements-modeling.yaml"
+  }
+}

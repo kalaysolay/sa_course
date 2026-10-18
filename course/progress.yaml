@@ -1,12 +1,12 @@
 {
   "course_id": "system-analysis",
-  "updated_at": "2026-10-18T11:46:22.199Z",
+  "updated_at": "2026-10-18T14:28:46.287Z",
   "summary": {
     "total_topics": 98,
-    "completed": 39,
+    "completed": 40,
     "in_progress": 0,
     "blocked": 0,
-    "needs_revision": 7,
+    "needs_revision": 6,
     "planned": 52
   },
   "last_completed": {
@@ -15,8 +15,8 @@
     "run_id": "20260911T045957Z_DB-PSQL_f739a4"
   },
   "next_candidate": {
-    "topic_id": "REQ-MODELING",
-    "course_order": 16
+    "topic_id": "REQ-SPECIFICATION",
+    "course_order": 17
   },
   "topics": {
     "PROF-ANALYST-TYPES": {
@@ -148,11 +148,12 @@
       "course_order": 16,
       "module_id": "M03",
       "title": "Моделирование и формализация требований",
-      "status": "needs_revision",
-      "output": null,
+      "status": "completed",
+      "output": "output/M03/REQ-MODELING/",
       "previous_run_id": "manual-20260813-REQ-MODELING",
       "previous_output": "output/M03/REQ-MODELING/",
-      "note": "Lesson package lost after re-clone (never committed due to .gitignore whitelist). Artifacts missing from output/; regenerate from scratch."
+      "note": "Regenerated 2026-10-18. Previous package was lost after re-clone and is superseded by this run.",
+      "run_id": "20261018T142344Z_REQ-MODELING_c0483d"
     },
     "REQ-SPECIFICATION": {
       "course_order": 17,

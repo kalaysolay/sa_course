@@ -35,6 +35,12 @@ Orchestrator управляет workflow и состоянием. Он не пи
 - Keep `Артефакты` as a newline-separated list inside one cell.
 - Use `Статус артефакта` for lifecycle/status detail, not a binary yes/no: an artifact can be started in one lesson and continued or changed in another.
 
+## Качество лекций
+
+- Аудитория — аналитики; не называй их «джунами» и не пиши свысока.
+- Ясность важнее «энциклопедии».
+- Где в теме есть работа с людьми — бери **негативные случаи** (не помогают, отвечают водой, саботируют, избегают), разбирай ситуацию и давай рабочие способы решения; при необходимости опирайся на источники.
+
 ## Запрещено
 
 - silently skip blocked topics;

@@ -1,32 +1,27 @@
-# Source pack: REQ-ELICITATION
+# Sources: REQ-ELICITATION
 
-Passport запрещает external research (`allow_external_research: false`). Опора — авторская линия курса и уже существующие артефакты Compliance.
+Карта утверждений и внешние источники, реально использованные в лекции 15.
 
-## Availability
+## Claims → sources
 
-| id | availability | note |
-| --- | --- | --- |
-| SRC-AUTHOR-MATERIALS | available | `references/author-materials` + логика M03 |
+1. **Сопротивление stakeholders при elicitation — типичное явление** (страх потери работы/контроля, недоверие к изменению).  
+   → [IIBA: Engaging Stakeholders in Elicitation and Collaboration](https://www.iiba.org/professional-development/knowledge-centre/articles/engaging-stakeholders-in-elicitation-and-collaboration/)
 
-## Claims
+2. **Формат встречи влияет на готовность говорить**: небезопасная групповая динамика мешает; one-on-one помогает снять напряжение и обсудить реальные concerns.  
+   → [PMI: Gathering requirements — “Go away, please!”](https://www.pmi.org/learning/library/gathering-requirements-go-away-please-7448)
 
-1. **Выявление требований — целенаправленная работа по извлечению и прояснению информации о потребности, процессе, ограничениях и ожиданиях**, а не стенограмма «заказчик сказал».  
-   Evidence: авторская модель курса после REQ-INTRO / REQ-FNFR / REQ-STAKEHOLDERS.
+3. **Если живой доступ ограничен, elicitation не останавливается**: анализ документов, наблюдение, подготовка вопросов до встречи.  
+   → [Bridging the Gap: 3 elicitation techniques without stakeholder access](https://www.bridging-the-gap.com/3-elicitation-techniques-you-can-do-without-stakeholder-access/)
 
-2. **Базовый набор способов для junior-уровня:** интервью, наблюдение, анализ документов, воркшоп, короткий опрос/анкета.  
-   Evidence: авторская программа M03-S02; согласуется с практикой курса в `elicitation-plan.md`.
+4. **Сопротивление вопросам снижается, если вместо допроса дать артефакт/черновик на правку.**  
+   → [RequirementsFirst: When stakeholders won't answer your questions](https://requirementsfirst.com/posts/handling-stakeholder-resistance-to-questions/)
 
-3. **Способ выбирают под роль и цель:** глубина знаний → интервью; скрытые шаги «как делают на самом деле» → наблюдение; регламенты/шаблоны → документы; согласование нескольких ролей → воркшоп; много однотипных респондентов → анкета.  
-   Evidence: связка с `stakeholders.md` (интерес/влияние/что выяснить/как взаимодействовать).
+5. **Интервью нужно готовить**: цель, открытые вопросы, фиксация и follow-up.  
+   → [IIBA: Interviews — Example (PDF)](https://www.iiba.org/contentassets/c415419c9c82444b98f9b0ff9c0fc891/interviews--example.pdf)
 
-4. **После активности результат нужно зафиксировать:** требования-кандидаты, решения, открытые вопросы, следующие действия.  
-   Evidence: правила в `project/compliance/business-analysis/elicitation-plan.md` и шаблон `interview-notes.md`.
+6. **Базовые способы elicitation и план на Compliance** — авторская линия курса + артефакты `elicitation-plan.md` / `stakeholders.md`.  
+   → SRC-AUTHOR-MATERIALS
 
-5. **Один метод редко закрывает всю картину** — план elicitation комбинирует активности.  
-   Evidence: таблица EL-01…EL-06 в elicitation-plan.
+## Availability note
 
-## Writer guidance
-
-- Не ссылаться на внешние URL и отсутствующие книги.
-- Можно опираться на артефакты проекта как на учебный контекст без раздела «Использованные источники», либо указать только авторские материалы курса без выдуманных ссылок.
-- Не превращать лекцию в полный elicitation plan — план показать как пример мышления.
+Локальные книги из других тем M03 (Wiegers / «Путь аналитика») в этом уроке не использовались: опирались на открытые материалы IIBA/PMI и практику курса.
