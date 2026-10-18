@@ -1,0 +1,10 @@
+{"ts":"2026-10-18T08:07:17.354Z","event":"RUN_CREATED","topicId":"REQ-STAKEHOLDERS"}
+{"ts":"2026-10-18T08:07:17.362Z","event":"STATE_CHANGED","status":"TOPIC_RESOLVED"}
+{"ts":"2026-10-18T08:07:17.367Z","event":"STATE_CHANGED","status":"PROGRESS_CHECKED"}
+{"ts":"2026-10-18T08:07:17.378Z","event":"SOURCE_PREFLIGHT","policy":"continue_with_secondary_and_register_minor_gap","missingPrimary":["SRC-WIEGERS-REQUIREMENTS"],"severity":"minor","blocking":false}
+{"ts":"2026-10-18T08:07:17.380Z","event":"STATE_CHANGED","status":"CONTEXT_READY"}
+{"ts":"2026-10-18T08:07:17.391Z","event":"CODEX_TASKS_CREATED","taskDir":"codex-tasks","taskCount":6}
+{"ts":"2026-10-18T08:07:17.393Z","event":"STATE_CHANGED","status":"CODEX_TASKS_READY"}
+{"ts":"2026-10-18T08:09:41.783Z","event":"STATE_CHANGED","status":"PACKAGE_READY"}
+{"ts":"2026-10-18T08:09:41.788Z","event":"CODEX_RUN_FINALIZED","output":"output/M03/REQ-STAKEHOLDERS/","metrics":{"measuredAt":"2026-10-18T08:09:41.776Z","stageCount":0,"payloadInputChars":0,"payloadOutputChars":0,"plannedCodexInputChars":79223,"producedCodexOutputChars":53064,"exactUsageAvailable":false,"exactUsage":{"inputTokens":0,"outputTokens":0,"totalTokens":0,"cachedInputTokens":0,"reasoningTokens":0}}}
+{"ts":"2026-10-18T08:09:41.789Z","event":"STATE_CHANGED","status":"COMPLETED"}

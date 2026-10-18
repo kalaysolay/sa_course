@@ -1,0 +1,12 @@
+{
+  "module": "M03",
+  "section": "M03-S02",
+  "topic": {
+    "id": "REQ-STAKEHOLDERS",
+    "slug": "stakeholders",
+    "title": "Заинтересованные лица",
+    "order": 1,
+    "course_order": 14,
+    "passport": "course/modules/M03-requirements/sections/S02-elicitation/topics/stakeholders.yaml"
+  }
+}

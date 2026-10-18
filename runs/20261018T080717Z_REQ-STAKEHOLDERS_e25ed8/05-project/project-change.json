@@ -1,0 +1,10 @@
+{
+  "topicId": "REQ-STAKEHOLDERS",
+  "changes": [
+    {
+      "artifact": "business-analysis/stakeholders.md",
+      "action": "update",
+      "summary": "Обновлён реестр после регена урока 14: добавлен заказчик/спонсор, уточнены формулировки назначения и связи с elicitation."
+    }
+  ]
+}

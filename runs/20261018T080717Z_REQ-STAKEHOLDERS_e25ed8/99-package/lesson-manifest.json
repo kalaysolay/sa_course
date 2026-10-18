@@ -1,0 +1,30 @@
+{
+  "topicId": "REQ-STAKEHOLDERS",
+  "runId": "20261018T080717Z_REQ-STAKEHOLDERS_e25ed8",
+  "status": "COMPLETED",
+  "workflowVersion": "0.4-lean",
+  "learningOutcomes": [
+    "REQ-STAKEHOLDERS-LO1",
+    "REQ-STAKEHOLDERS-LO2",
+    "REQ-STAKEHOLDERS-LO3",
+    "REQ-STAKEHOLDERS-LO4",
+    "REQ-STAKEHOLDERS-LO5"
+  ],
+  "files": {
+    "lecture": "lecture.md",
+    "exercises": "exercises.md",
+    "answers": "answers.md",
+    "sources": "sources.md"
+  },
+  "projectChanges": [
+    "business-analysis/stakeholders.md"
+  ],
+  "reviews": {
+    "content": "APPROVED",
+    "learning": "APPROVED",
+    "format": "APPROVED",
+    "assessment": "APPROVED",
+    "project": "APPROVED"
+  },
+  "metrics": "payload-metrics.json"
+}

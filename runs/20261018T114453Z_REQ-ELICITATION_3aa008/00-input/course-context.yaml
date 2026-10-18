@@ -1,0 +1,12 @@
+{
+  "module": "M03",
+  "section": "M03-S02",
+  "topic": {
+    "id": "REQ-ELICITATION",
+    "slug": "elicitation-methods",
+    "title": "Способы выявления требований",
+    "order": 2,
+    "course_order": 15,
+    "passport": "course/modules/M03-requirements/sections/S02-elicitation/topics/elicitation-methods.yaml"
+  }
+}

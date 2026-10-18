@@ -1,0 +1,28 @@
+{
+  "topicId": "REQ-ELICITATION",
+  "runId": "20261018T114453Z_REQ-ELICITATION_3aa008",
+  "status": "COMPLETED",
+  "workflowVersion": "0.4-lean",
+  "learningOutcomes": [
+    "REQ-ELICITATION-LO1",
+    "REQ-ELICITATION-LO2",
+    "REQ-ELICITATION-LO3",
+    "REQ-ELICITATION-LO4",
+    "REQ-ELICITATION-LO5"
+  ],
+  "files": {
+    "lecture": "lecture.md",
+    "exercises": "exercises.md",
+    "answers": "answers.md",
+    "sources": "sources.md"
+  },
+  "projectChanges": [],
+  "reviews": {
+    "content": "APPROVED",
+    "learning": "APPROVED",
+    "format": "APPROVED",
+    "assessment": "APPROVED",
+    "project": "SKIPPED"
+  },
+  "metrics": "payload-metrics.json"
+}

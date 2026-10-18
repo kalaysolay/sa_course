@@ -1,0 +1,128 @@
+{
+  "mode": "codex-app",
+  "externalApiRequired": false,
+  "runId": "20261018T080717Z_REQ-STAKEHOLDERS_e25ed8",
+  "topicId": "REQ-STAKEHOLDERS",
+  "topicTitle": "Заинтересованные лица",
+  "courseOrder": 14,
+  "workflowVersion": "0.4-lean",
+  "createdAt": "2026-10-18T08:07:17.381Z",
+  "courseTracker": {
+    "spreadsheetUrl": "https://docs.google.com/spreadsheets/d/1She4DAsy9KIQ0uXdMDbTvtDsftT3BNBiorYMScyArew/edit",
+    "spreadsheetId": "1She4DAsy9KIQ0uXdMDbTvtDsftT3BNBiorYMScyArew",
+    "sheetName": "План лекций",
+    "topicIdColumn": "H",
+    "headerRow": 4,
+    "dataStartRow": 5,
+    "columns": {
+      "lessonTree": "A",
+      "lectureGenerated": "B",
+      "lectureEdited": "C",
+      "artifacts": "D",
+      "artifactStatus": "E",
+      "lessonStatus": "F",
+      "courseOrder": "G",
+      "topicId": "H",
+      "output": "I",
+      "runId": "J"
+    }
+  },
+  "optimization": {
+    "mode": "lean",
+    "projectStageRequired": true,
+    "expectedProjectArtifacts": [
+      "business-analysis/stakeholders.md"
+    ],
+    "rerunFailedChecksOnly": true
+  },
+  "taskCount": 6,
+  "dispatch": "codex-tasks/00-dispatch.md",
+  "tasks": [
+    {
+      "id": "01-plan-research",
+      "role": "Планировщик урока и исследователь",
+      "taskFile": "codex-tasks/01-plan-research.md",
+      "expectedOutputs": [
+        "01-brief/lesson-brief-final.json",
+        "02-research/source-pack.md"
+      ],
+      "inputFiles": [
+        "00-input/course-context.yaml",
+        "00-input/topic-passport.json",
+        "00-input/source-registry-slice.json",
+        "00-input/audience.md"
+      ]
+    },
+    {
+      "id": "02-writer",
+      "role": "Автор лекции",
+      "taskFile": "codex-tasks/02-writer.md",
+      "expectedOutputs": [
+        "03-lecture/draft-v1.md"
+      ],
+      "inputFiles": [
+        "01-brief/lesson-brief-final.json",
+        "02-research/source-pack.md",
+        "00-input/course-style.md"
+      ]
+    },
+    {
+      "id": "03-lean-review",
+      "role": "Lean-ревью лекции",
+      "taskFile": "codex-tasks/03-lean-review.md",
+      "expectedOutputs": [
+        "03-lecture/review-v1/content.json",
+        "03-lecture/review-v1/learning.json",
+        "03-lecture/final.md"
+      ],
+      "inputFiles": [
+        "01-brief/lesson-brief-final.json",
+        "02-research/source-pack.md",
+        "03-lecture/draft-v1.md",
+        "00-input/course-style.md"
+      ]
+    },
+    {
+      "id": "04-assessment",
+      "role": "Автор практики с self-check",
+      "taskFile": "codex-tasks/04-assessment.md",
+      "expectedOutputs": [
+        "04-assessment/draft.json",
+        "04-assessment/exercises.md",
+        "04-assessment/answers.md"
+      ],
+      "inputFiles": [
+        "01-brief/lesson-brief-final.json",
+        "03-lecture/final.md"
+      ]
+    },
+    {
+      "id": "05-project-artifacts",
+      "role": "Автор проектных артефактов с self-check",
+      "taskFile": "codex-tasks/05-project-artifacts.md",
+      "expectedOutputs": [
+        "05-project/project-change.json",
+        "05-project/proposed/",
+        "05-project/approved/"
+      ],
+      "inputFiles": [
+        "00-input/project-state.yaml",
+        "00-input/topic-passport.json",
+        "01-brief/lesson-brief-final.json",
+        "03-lecture/final.md"
+      ]
+    },
+    {
+      "id": "06-tracker-updater",
+      "role": "Обновление трекера курса",
+      "taskFile": "codex-tasks/06-tracker-updater.md",
+      "expectedOutputs": [
+        "99-package/tracker-update-report.md"
+      ],
+      "inputFiles": [
+        "99-package/lesson-manifest.json",
+        "99-package/payload-metrics.json"
+      ]
+    }
+  ]
+}

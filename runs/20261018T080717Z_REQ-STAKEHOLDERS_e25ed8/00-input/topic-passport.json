@@ -1,0 +1,59 @@
+{
+  "id": "REQ-STAKEHOLDERS",
+  "title": "Заинтересованные лица",
+  "course_order": 14,
+  "purpose": "Научить начинающего аналитика понимать, кто влияет на проект, кому важен его результат и от кого необходимо получать информацию и требования.",
+  "scope": {
+    "include": [
+      "понятие stakeholder",
+      "способы выявления заинтересованных лиц",
+      "внутренние и внешние stakeholders",
+      "интерес и влияние",
+      "stakeholder register",
+      "выбор способа взаимодействия"
+    ],
+    "exclude": [
+      "сложные enterprise governance frameworks",
+      "глубокое управление политическими конфликтами",
+      "RACI как самостоятельную большую тему"
+    ]
+  },
+  "prerequisites": {
+    "topics": [
+      "REQ-FNFR"
+    ]
+  },
+  "previous_topics": [
+    "REQ-FNFR"
+  ],
+  "next_topics": [
+    "REQ-ELICITATION"
+  ],
+  "project": {
+    "stage": "business_analysis",
+    "case": "Аналитик подключён к проекту автоматизации комплаенса и должен понять, с кем необходимо работать перед полноценным выявлением требований.",
+    "expected_artifacts": [
+      "business-analysis/stakeholders.md"
+    ]
+  },
+  "author_notes": [
+    "Не превращать тему в классификацию ради классификации.",
+    "Показать, почему пользователь системы и stakeholder — не одно и то же.",
+    "Разобрать заказчика, сотрудника, комплаенс-офицера и руководителя."
+  ],
+  "sources": {
+    "primary": [
+      "SRC-WIEGERS-REQUIREMENTS"
+    ],
+    "secondary": [
+      "SRC-PUT-ANALYTIKA"
+    ],
+    "examples": [
+      "REF-MY-STAKEHOLDER-DOC-01"
+    ],
+    "allow_external_research": true
+  },
+  "source_policy": {
+    "on_missing_primary": "continue_with_secondary_and_register_minor_gap"
+  }
+}
