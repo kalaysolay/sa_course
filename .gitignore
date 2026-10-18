@@ -1,12 +1,14 @@
+# Production runs: трекаем все каталоги, иначе после clone регены пропадут
+# (раньше был точечный whitelist — из‑за него потерялись M03/M04).
 runs/*
 !runs/.gitkeep
-!runs/20260809T071602Z_PROF-ROLE_b0c871/
-!runs/20260809T071602Z_PROF-ROLE_b0c871/**
+!runs/*/
+!runs/*/**
+
+# Lesson packages в output/
 output/*
 !output/.gitkeep
-!output/M01/
-!output/M01/PROF-ROLE/
-!output/M01/PROF-ROLE/**
+
 node_modules/
 # Локальные настройки IntelliJ IDEA во всех каталогах проекта
 .idea/
@@ -16,36 +18,26 @@ compliance_project_example/
 analystgym/backend/.gradle/
 analystgym/backend/**/build/
 analystgym/backend/app/src/main/resources/static/
-!runs/20260809T093219Z_PROF-ANALYST-TYPES_9292d0/
-!runs/20260809T093219Z_PROF-ANALYST-TYPES_9292d0/**
+
+# --- output: готовые модули ---
+!output/M01/
+!output/M01/PROF-ROLE/
+!output/M01/PROF-ROLE/**
 !output/M01/PROF-ANALYST-TYPES/
 !output/M01/PROF-ANALYST-TYPES/**
-!runs/20260809T100139Z_PROF-BA-SA_8c72f6/
-!runs/20260809T100139Z_PROF-BA-SA_8c72f6/**
 !output/M01/PROF-BA-SA/
 !output/M01/PROF-BA-SA/**
-!runs/20260809T102228Z_PROF-BA-SA-BOUNDARY_0d03d1/
-!runs/20260809T102228Z_PROF-BA-SA-BOUNDARY_0d03d1/**
 !output/M01/PROF-BA-SA-BOUNDARY/
 !output/M01/PROF-BA-SA-BOUNDARY/**
-!runs/20260809T112619Z_PROF-ROLE_6c6b73/
-!runs/20260809T112619Z_PROF-ROLE_6c6b73/**
-!runs/20260809T145925Z_PROF-LIFECYCLE_aab1d3/
-!runs/20260809T145925Z_PROF-LIFECYCLE_aab1d3/**
 !output/M01/PROF-LIFECYCLE/
 !output/M01/PROF-LIFECYCLE/**
-!runs/20260809T161109Z_PROF-SKILLS_b07baa/
-!runs/20260809T161109Z_PROF-SKILLS_b07baa/**
 !output/M01/PROF-SKILLS/
 !output/M01/PROF-SKILLS/**
-!runs/20260809T170136Z_PROF-BA-SA-PATH_7fe2ed/
-!runs/20260809T170136Z_PROF-BA-SA-PATH_7fe2ed/**
 !output/M01/PROF-BA-SA-PATH/
 !output/M01/PROF-BA-SA-PATH/**
-!runs/20260809T201933Z_PROF-ARTIFACTS_6a253e/
-!runs/20260809T201933Z_PROF-ARTIFACTS_6a253e/**
 !output/M01/PROF-ARTIFACTS/
 !output/M01/PROF-ARTIFACTS/**
+
 !output/M02/
 !output/M02/TEAM-ROLES/
 !output/M02/TEAM-ROLES/**
@@ -53,18 +45,14 @@ analystgym/backend/app/src/main/resources/static/
 !output/M02/DEV-MODELS/**
 !output/M02/SDLC-STAGES/
 !output/M02/SDLC-STAGES/**
+
+# M03 и M04 — целиком (реген и последующие уроки не должны снова выпадать из git)
 !output/M03/
-output/M03/*
-!output/M03/REQ-INTRO/
-!output/M03/REQ-INTRO/**
-!output/M03/REQ-FNFR/
-!output/M03/REQ-FNFR/**
-!runs/20260813T175901Z_ARCH-IS-TYPES_18cc60/
-!runs/20260813T175901Z_ARCH-IS-TYPES_18cc60/**
-!runs/20260813T175914Z_ARCH-BASIC-SCHEMA_b3a25f/
-!runs/20260813T175914Z_ARCH-BASIC-SCHEMA_b3a25f/**
+!output/M03/**
+!output/M04/
+!output/M04/**
+
 !output/M05/
-output/M05/*
 !output/M05/ARCH-IS-TYPES/
 !output/M05/ARCH-IS-TYPES/**
 !output/M05/ARCH-BASIC-SCHEMA/
@@ -73,10 +61,6 @@ output/M05/*
 !output/M05/ARCH-STYLES/**
 !output/M05/ARCH-MONOLITH/
 !output/M05/ARCH-MONOLITH/**
-!runs/20260813T210022Z_ARCH-MICROSERVICES_2c7b79/
-!runs/20260813T210022Z_ARCH-MICROSERVICES_2c7b79/**
-!runs/20260813T210028Z_ARCH-REVERSE-PROXY_26b24e/
-!runs/20260813T210028Z_ARCH-REVERSE-PROXY_26b24e/**
 !output/M05/ARCH-MICROSERVICES/
 !output/M05/ARCH-MICROSERVICES/**
 !output/M05/ARCH-REVERSE-PROXY/
