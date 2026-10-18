@@ -1,0 +1,475 @@
+{
+  "schemaVersion": 1,
+  "sourceSha256": "2cad459b7d3b231f67c3932294b30f11957541aa5d933775c1d74563c624251d",
+  "sourceCapturedAt": "2026-10-18T04:36:07.118533+00:00",
+  "productionVerified": false,
+  "questionCount": 138,
+  "tasks": [
+    {
+      "id": "db-dwh-metrics",
+      "title": "Витрина выручки: данные, качество и SLA отчётности",
+      "taskVersion": 0,
+      "questions": 8,
+      "p0": 4,
+      "status": "draft-awaiting-clarifications"
+    },
+    {
+      "id": "db-migration",
+      "title": "Миграция 200 млн строк без простоя: план и риски",
+      "taskVersion": 0,
+      "questions": 9,
+      "p0": 5,
+      "status": "draft-awaiting-clarifications"
+    },
+    {
+      "id": "db-normalization",
+      "title": "Таблица заявок «как в Excel» → нормальная схема",
+      "taskVersion": 0,
+      "questions": 9,
+      "p0": 4,
+      "status": "draft-awaiting-clarifications"
+    },
+    {
+      "id": "db-slow-report",
+      "title": "Отчёт по продажам собирается 40 минут: найти причину",
+      "taskVersion": 0,
+      "questions": 12,
+      "p0": 6,
+      "status": "draft-awaiting-clarifications"
+    },
+    {
+      "id": "des-er-catalog",
+      "title": "Модель данных каталога товаров: от Excel-таблицы к схеме",
+      "taskVersion": 0,
+      "questions": 8,
+      "p0": 3,
+      "status": "draft-awaiting-clarifications"
+    },
+    {
+      "id": "des-loyalty",
+      "title": "Система лояльности ритейлера: начисление и списание баллов",
+      "taskVersion": 0,
+      "questions": 9,
+      "p0": 4,
+      "status": "draft-awaiting-clarifications"
+    },
+    {
+      "id": "des-notifications",
+      "title": "Сервис уведомлений: каналы, предпочтения, дедупликация",
+      "taskVersion": 0,
+      "questions": 8,
+      "p0": 4,
+      "status": "draft-awaiting-clarifications"
+    },
+    {
+      "id": "des-order-state",
+      "title": "Модель состояний заказа и переходы между ними",
+      "taskVersion": 0,
+      "questions": 8,
+      "p0": 3,
+      "status": "draft-awaiting-clarifications"
+    },
+    {
+      "id": "int-idempotency",
+      "title": "Идемпотентное списание: платёжный запрос к REST API",
+      "taskVersion": 0,
+      "questions": 8,
+      "p0": 4,
+      "status": "draft-awaiting-clarifications"
+    },
+    {
+      "id": "int-kafka-events",
+      "title": "Событийная интеграция заказа: Kafka, гарантии и согласованность",
+      "taskVersion": 0,
+      "questions": 9,
+      "p0": 4,
+      "status": "draft-awaiting-clarifications"
+    },
+    {
+      "id": "int-oauth-partner",
+      "title": "Доступ партнёра к нашему API: OAuth 2.0, лимиты и аудит",
+      "taskVersion": 0,
+      "questions": 8,
+      "p0": 4,
+      "status": "draft-awaiting-clarifications"
+    },
+    {
+      "id": "int-soap-migration",
+      "title": "Перевод интеграции с SOAP на REST без остановки потока",
+      "taskVersion": 0,
+      "questions": 8,
+      "p0": 5,
+      "status": "draft-awaiting-clarifications"
+    },
+    {
+      "id": "int-timeouts",
+      "title": "Нестабильный внешний сервис: таймауты и повторные попытки",
+      "taskVersion": 0,
+      "questions": 8,
+      "p0": 4,
+      "status": "draft-awaiting-clarifications"
+    },
+    {
+      "id": "req-api-contract",
+      "title": "Контракт API для мобильного приложения: версии, пагинация, ошибки",
+      "taskVersion": 0,
+      "questions": 9,
+      "p0": 4,
+      "status": "draft-awaiting-clarifications"
+    },
+    {
+      "id": "req-stakeholder-conflict",
+      "title": "Продажи против рисков: конфликт требований и решение аналитика",
+      "taskVersion": 0,
+      "questions": 8,
+      "p0": 4,
+      "status": "draft-awaiting-clarifications"
+    },
+    {
+      "id": "req-vague-feature",
+      "title": "«Хотим как у конкурентов»: из идеи в требования",
+      "taskVersion": 0,
+      "questions": 9,
+      "p0": 4,
+      "status": "draft-awaiting-clarifications"
+    }
+  ],
+  "files": [
+    {
+      "file": "db-dwh-metrics/00-task.md",
+      "sha256": "23a130820f201309f32b81c22b39e9e493d55142df1f4aabcc2d7cedddbc4ae9"
+    },
+    {
+      "file": "db-dwh-metrics/01-questions.md",
+      "sha256": "4df020214bbb9a571d0ee8d60385d24370987ee4fc7908e7befd69de902f6927"
+    },
+    {
+      "file": "db-dwh-metrics/02-solution.md",
+      "sha256": "0a3e556c3d7af6d1f935aabc977779beaaaf28b0a5851cbbd17a233e8c088db6"
+    },
+    {
+      "file": "db-dwh-metrics/03-rationale.md",
+      "sha256": "c779a5b2eb56fd60eaf55d4be3fa872f97420fa699286d0a9c252031a1fa44b7"
+    },
+    {
+      "file": "db-dwh-metrics/04-evaluation.md",
+      "sha256": "f89178042238a0bd15fcdb94db1c005fdfb10a8329981e193a1513e80008a33b"
+    },
+    {
+      "file": "db-migration/00-task.md",
+      "sha256": "d1eecce495db5eb86a0546a0233962e005a3e0237040be2e5dcd276137d110a4"
+    },
+    {
+      "file": "db-migration/01-questions.md",
+      "sha256": "9ec7fdc2d3e3f0e42ef225695d4b14fca5b796ca3c0b5bd6cfdf860bbbc5f40a"
+    },
+    {
+      "file": "db-migration/02-solution.md",
+      "sha256": "26f5ea03a849921e7a81dec63f35e82b9fe92aee2bb625246fb141ecd46b5b62"
+    },
+    {
+      "file": "db-migration/03-rationale.md",
+      "sha256": "75fdb08d7b575c3c4a3ddd327fc08852a4c161e5fdd3857a166ca78d73365107"
+    },
+    {
+      "file": "db-migration/04-evaluation.md",
+      "sha256": "a409aa4f90e723795bf573aedd41a56a6ab75aba81f624b9cf3a91aac66ce2af"
+    },
+    {
+      "file": "db-normalization/00-task.md",
+      "sha256": "a352b96e22d4124e0730a2a0e7260a57abfbbf61e4160a52830d02d54eaa7a19"
+    },
+    {
+      "file": "db-normalization/01-questions.md",
+      "sha256": "ab370de8b451c770a70b629c795c4d3318636fb5ba6a01998e1bcd1310cf6e61"
+    },
+    {
+      "file": "db-normalization/02-solution.md",
+      "sha256": "e9a453571740b18ad056381ec853de80d78308fefbb753471204485bdc8814ab"
+    },
+    {
+      "file": "db-normalization/03-rationale.md",
+      "sha256": "4e6d134c1ec0c7eb97f0b624faaea65807c99ca7cfdae79ee22b932f0cfb7344"
+    },
+    {
+      "file": "db-normalization/04-evaluation.md",
+      "sha256": "0eb389a6a2afff683c9209e8d8136f1e98a2b889077eb7aa300b804bc04f3e71"
+    },
+    {
+      "file": "db-slow-report/00-task.md",
+      "sha256": "1292285b7fb872883e879b4ba85c26638d205d03e1e38e7445f4d7e6ac56ebd3"
+    },
+    {
+      "file": "db-slow-report/01-questions.md",
+      "sha256": "31627db83aafd01217af09c9acbafce07c9025b34f6f29d3ef07a380bf9ee230"
+    },
+    {
+      "file": "db-slow-report/02-solution.md",
+      "sha256": "588a77f452768d2c9ea24931e351bcff7ca65149ffd2dc6db53fa1eb268c4f98"
+    },
+    {
+      "file": "db-slow-report/03-rationale.md",
+      "sha256": "99b3e6a0b25b1b000646f7a2104e2517b6b74c36089cd9cdaf46cdb0c930840c"
+    },
+    {
+      "file": "db-slow-report/04-evaluation.md",
+      "sha256": "52ea28f6068c5d06023bb34f711c3ba135f293d0a1967a6aa76ab42b4b5d329c"
+    },
+    {
+      "file": "des-er-catalog/00-task.md",
+      "sha256": "b3ee1b748c517a759dda2e684cc914ad6e9ed7b82c1ff63dcc779fe6e66172e4"
+    },
+    {
+      "file": "des-er-catalog/01-questions.md",
+      "sha256": "aa05168ae0185cecf6b1bc49c31abbff92f1875e204b79b80b3227dade49acd7"
+    },
+    {
+      "file": "des-er-catalog/02-solution.md",
+      "sha256": "1d6de6eba53d7650b0f8ad9c463da3f036fae2efdf6dd19e907c67c009a3802c"
+    },
+    {
+      "file": "des-er-catalog/03-rationale.md",
+      "sha256": "b3945a71a774a70c602701a80c05aebd82b788bf7870f4c89841b08b58615c02"
+    },
+    {
+      "file": "des-er-catalog/04-evaluation.md",
+      "sha256": "d09b633e12502c8d02c18411e30d4dbb0e852897ca86f4524bf13d9c1eb85cc1"
+    },
+    {
+      "file": "des-loyalty/00-task.md",
+      "sha256": "8e393181bc2556efb9a5da61d9dc2d021402bf40f14fe699e0dee5a1c8f23ce1"
+    },
+    {
+      "file": "des-loyalty/01-questions.md",
+      "sha256": "f3330a1de76a35ecce2b706fb346e7350db36a05445e0443284ea5966c472f45"
+    },
+    {
+      "file": "des-loyalty/02-solution.md",
+      "sha256": "bc27a29b0b57b086d6cc5382108f2319b18a93dcc8ddd7301af33e1d112c5fce"
+    },
+    {
+      "file": "des-loyalty/03-rationale.md",
+      "sha256": "9775dd47512deac4aff8eb4bfeb141d6c00bae847aac06a34d822515d660a959"
+    },
+    {
+      "file": "des-loyalty/04-evaluation.md",
+      "sha256": "0bfeb2dfe2d68426a8e2e41d08f004d8de19c9d71e8756a2cdb676c91c543820"
+    },
+    {
+      "file": "des-notifications/00-task.md",
+      "sha256": "ac1fbf860c967042b911bf24e09347ae2bc79c2695716df356e8ebe5e61efb99"
+    },
+    {
+      "file": "des-notifications/01-questions.md",
+      "sha256": "987da934dab2b5aa66bdeaa2e26071d39377fc237d0fe28bdbe68fb058ec3aea"
+    },
+    {
+      "file": "des-notifications/02-solution.md",
+      "sha256": "7c9cc403818459545a88c1f9479df5574d062cd2d3f882a2aa487f879f699968"
+    },
+    {
+      "file": "des-notifications/03-rationale.md",
+      "sha256": "5b71e3d0a511b69743c4ae082ae476f9ad0886d3ab6316ab71b35d96d04b7933"
+    },
+    {
+      "file": "des-notifications/04-evaluation.md",
+      "sha256": "ded0a32272b7dc5e8e3b4e1adac4bfb30676066249cac5426bd0dd9049531bd7"
+    },
+    {
+      "file": "des-order-state/00-task.md",
+      "sha256": "ad095fea3966c1e55261628c825f0bb1980882e0ed4c3d7a228d0e8715aeda96"
+    },
+    {
+      "file": "des-order-state/01-questions.md",
+      "sha256": "f59c29eaf862d8354f073f5067bf8e547e8aaddd429895a985c0a105f60fa005"
+    },
+    {
+      "file": "des-order-state/02-solution.md",
+      "sha256": "4f7672bd5dabca2ac333b1aa8204ebd5e52d46c9584945b61544db15bee2a2d9"
+    },
+    {
+      "file": "des-order-state/03-rationale.md",
+      "sha256": "27a32fe8aa00ace4a6e0bc11d6b3d2a74a5e49a3969d29a4cddef8fc9233d523"
+    },
+    {
+      "file": "des-order-state/04-evaluation.md",
+      "sha256": "0c06da6489597c21db63420a32a8f3ce06b44c689e197281c57294779453182a"
+    },
+    {
+      "file": "int-idempotency/00-task.md",
+      "sha256": "491209ac3f13d535576dd9d6ae12e73dc61e0bcd646be6a5eef872c620ce93a5"
+    },
+    {
+      "file": "int-idempotency/01-questions.md",
+      "sha256": "d3b5dd293d315f5b08df64f09fca75ac176e33f7c76b2db0361004b736db645d"
+    },
+    {
+      "file": "int-idempotency/02-solution.md",
+      "sha256": "69fc21e276db32a9567acffd46fabc0608eecd288f49e64bef03e76541aa2a75"
+    },
+    {
+      "file": "int-idempotency/03-rationale.md",
+      "sha256": "b2ed6d4d020a40b3954112b9eb62d67234543389d3a3c3d5d0075dd057590051"
+    },
+    {
+      "file": "int-idempotency/04-evaluation.md",
+      "sha256": "54867b2d79b4dd784bfee918ab9fbf603c5799a24b29996c4bd7fd28afea560c"
+    },
+    {
+      "file": "int-kafka-events/00-task.md",
+      "sha256": "6003fe1e153424a3cadaed709c04182e89b7b3fd36b03e0506aecc0f6ff82a05"
+    },
+    {
+      "file": "int-kafka-events/01-questions.md",
+      "sha256": "b696c3ecfd0125d4400997ee76615903593a6b9f1a612face32c2d26bc16d486"
+    },
+    {
+      "file": "int-kafka-events/02-solution.md",
+      "sha256": "027cc239416ede0b29ebae6a54f2028c88676cf0258a962bfe0c6e93445415e9"
+    },
+    {
+      "file": "int-kafka-events/03-rationale.md",
+      "sha256": "ae8807df0b3ed12f86d46f6397dcae3141326c14f3675e5c4666dfa4894314e2"
+    },
+    {
+      "file": "int-kafka-events/04-evaluation.md",
+      "sha256": "ff7f01972b99c56b3c40f80a78be69b3f4ef331c17560340a02c1e6832c7be78"
+    },
+    {
+      "file": "int-oauth-partner/00-task.md",
+      "sha256": "9294f0c7f6381bd5a4b571e6dd7376e94339cfc4357898a50de827c03e7b1532"
+    },
+    {
+      "file": "int-oauth-partner/01-questions.md",
+      "sha256": "4c197065bdda8498b52f96192e4f5c4e83f040b82a284452631bcf5f4fdddd96"
+    },
+    {
+      "file": "int-oauth-partner/02-solution.md",
+      "sha256": "4f84b19d64b557383dd04e40056431cd538d613d3295f4431bd16f106693903d"
+    },
+    {
+      "file": "int-oauth-partner/03-rationale.md",
+      "sha256": "0015e2ffca53d0d9fec17b18cf44bfda46c8aa8f31ea36525d00f2d81e71afee"
+    },
+    {
+      "file": "int-oauth-partner/04-evaluation.md",
+      "sha256": "81a7874e9af8708839fb93b61b5820277be38df88a7640033dc88b1e9bd92f51"
+    },
+    {
+      "file": "int-soap-migration/00-task.md",
+      "sha256": "c1324c700a46f25060c41e6b7923a80b008dae1ef5f2f719d145212fb78368ba"
+    },
+    {
+      "file": "int-soap-migration/01-questions.md",
+      "sha256": "d53fdc79b0453d81ac761afe657ff468618af33b194d10744728179f90f96cc5"
+    },
+    {
+      "file": "int-soap-migration/02-solution.md",
+      "sha256": "a87ae479dd51a3ba4345d4c560e2318697a4db109b552b32798d02925894cef4"
+    },
+    {
+      "file": "int-soap-migration/03-rationale.md",
+      "sha256": "087169b1d838b69fb9d7d20c9fc48c9415d210a2930aa90553aa77e4cea853a2"
+    },
+    {
+      "file": "int-soap-migration/04-evaluation.md",
+      "sha256": "9751a49aba88579ae2d5c75da1b870ebd77ad28560f0a983be6e27fd4375b098"
+    },
+    {
+      "file": "int-timeouts/00-task.md",
+      "sha256": "5201eb5a377d1904aa09f4452b60702e17c5bba826784b86cdd90d61fc577edf"
+    },
+    {
+      "file": "int-timeouts/01-questions.md",
+      "sha256": "a805fbaea7f6e1f052ebce7eea7ac15ef599a3d5b67f1688ddcdf2f18a976bfa"
+    },
+    {
+      "file": "int-timeouts/02-solution.md",
+      "sha256": "ac7a9a0ee81930080bb594e320a3e15a6d2be14a04054c62c00395647550b0aa"
+    },
+    {
+      "file": "int-timeouts/03-rationale.md",
+      "sha256": "4fe94f620a6491623bc144b659ccccea5a502d232e1fae5dcc5dd43ab6073072"
+    },
+    {
+      "file": "int-timeouts/04-evaluation.md",
+      "sha256": "427fa5eee28f8055cc0af782c503c68ac8f4b5ae11f4e04dad240c1863d1831b"
+    },
+    {
+      "file": "req-api-contract/00-task.md",
+      "sha256": "f65c5115ce9dbe2599b2ae9ddd7909c52d621f5aa862c55a93d134df260070d9"
+    },
+    {
+      "file": "req-api-contract/01-questions.md",
+      "sha256": "d762d3c628437720b98b0e49f4ba1f86680181f3909e3d8db7e35ef2c31fc589"
+    },
+    {
+      "file": "req-api-contract/02-solution.md",
+      "sha256": "1d889470fdc07af10ee26df65a457fbb8f524b6882c313eb7d64a18b21987e1d"
+    },
+    {
+      "file": "req-api-contract/03-rationale.md",
+      "sha256": "45eb8c70c8b5292f97b360dda7c3eacd3e44864fedfa9b267bc5e4c2b5ff5d09"
+    },
+    {
+      "file": "req-api-contract/04-evaluation.md",
+      "sha256": "953e6f76baf0704fdc9496da95b634cec5b98ba9e57deee0520a8091afa805ab"
+    },
+    {
+      "file": "req-stakeholder-conflict/00-task.md",
+      "sha256": "9729df91f3fbb10c4bba6b0dc3253697a50fee3381fb607d920dbe9cb5146bd8"
+    },
+    {
+      "file": "req-stakeholder-conflict/01-questions.md",
+      "sha256": "23fddaccfe5d3037e1f153bb20e52bfd877b3409e7cd3937ed85e1adba0fb5fc"
+    },
+    {
+      "file": "req-stakeholder-conflict/02-solution.md",
+      "sha256": "0d391d28af6a30c21d127cfab099c011c513e234bee96c2bfc866c384f6e1634"
+    },
+    {
+      "file": "req-stakeholder-conflict/03-rationale.md",
+      "sha256": "25c3d7c285eb10eaff8ff97ac1730932d6ad1e8bef12dccefd8c4b4887e3b2d4"
+    },
+    {
+      "file": "req-stakeholder-conflict/04-evaluation.md",
+      "sha256": "5b928feaf13b711f1c00032c93ad7816add243ec3ab220241f37b4a073a98b7a"
+    },
+    {
+      "file": "req-vague-feature/00-task.md",
+      "sha256": "07dbf50b874dc9a9b038d8384e085446c5a8bb4e78b8aba4ff2421fe371ea0c8"
+    },
+    {
+      "file": "req-vague-feature/01-questions.md",
+      "sha256": "eee6bd9459f309881599672ecdc18a740cc51b555c44a6203f9503e79e276766"
+    },
+    {
+      "file": "req-vague-feature/02-solution.md",
+      "sha256": "52b81ddf6b1e39d0c17d2553f5ec9401e195e93d086ec942cd731e8c9a14e8fb"
+    },
+    {
+      "file": "req-vague-feature/03-rationale.md",
+      "sha256": "7c230440310878214a12c039623ea992135f1eb2bdc01253fa221ad53d796882"
+    },
+    {
+      "file": "req-vague-feature/04-evaluation.md",
+      "sha256": "2c89b39991d2399850f6f10bc991ab348569055750a80b6a0c30ac855ccaf3b2"
+    },
+    {
+      "file": "QUESTIONS.md",
+      "sha256": "8af3d2da206d005a153e97a6f0d33cbb06b2ed6648a497dd08d2ca122a98c054"
+    },
+    {
+      "file": "README.md",
+      "sha256": "1102996b80466b8ac3ca37482b824e7e28a1973226681da3f11c2a280751cd9b"
+    },
+    {
+      "file": "OBSERVABILITY.md",
+      "sha256": "93551279095eb1dceadea87afa317a9e8d1da9074ffaeb76866275d70e110a55"
+    },
+    {
+      "file": "AUDIT.jsonl",
+      "sha256": "d741a14d8f460d75b3b0d000d90bd5bbad232b4ef949ea0fd668af7f2610eb84"
+    }
+  ]
+}
