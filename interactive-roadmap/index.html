@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Путь аналитика — интерактивная карта курса</title>
+  <meta name="description" content="Геймифицированная карта курса «Системный анализ на практике»: модули, разделы, навыки и ссылки на уроки.">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <div class="bg-decor" aria-hidden="true">
+    <span class="blob blob-1"></span>
+    <span class="blob blob-2"></span>
+    <span class="blob blob-3"></span>
+    <span class="blob blob-4"></span>
+  </div>
+
+  <!-- Верхняя панель: уровень, XP и прогресс -->
+  <header class="hud" id="hud">
+    <div class="hud-brand">
+      <span class="hud-logo">🧭</span>
+      <span class="hud-brand-text">
+        <b>Путь аналитика</b>
+        <small>интерактивная карта</small>
+      </span>
+    </div>
+
+    <div class="hud-level">
+      <span class="hud-level-icon" id="hudLevelIcon">🌱</span>
+      <span class="hud-level-text">
+        <small>уровень</small>
+        <b id="hudLevelName">Новичок в IT</b>
+      </span>
+      <div class="hud-xp">
+        <div class="hud-xp-track"><div class="hud-xp-fill" id="hudXpFill"></div></div>
+        <small id="hudXpLabel">0 / 250 XP</small>
+      </div>
+    </div>
+
+    <div class="hud-right">
+      <span class="hud-progress" id="hudProgress">0 / 48 точек</span>
+      <button class="icon-btn" id="profileBtn" title="Мой профиль" aria-label="Открыть профиль">📊</button>
+      <button class="icon-btn" id="resetBtn" title="Сбросить прогресс" aria-label="Сбросить прогресс">↺</button>
+    </div>
+  </header>
+
+  <main class="page">
+
+    <!-- Заставка -->
+    <section class="hero">
+      <div class="hero-badge">🎮 интерактивная карта курса</div>
+      <h1>Путь аналитика</h1>
+      <p class="hero-sub">
+        От вопроса «а что вообще делает аналитик?» до системной спецификации,
+        по которой другой человек соберёт систему. Кликай по квадратам:
+        внутри — навыки, радар и ссылки на уроки.
+      </p>
+
+      <div class="hero-stats">
+        <div class="stat"><b id="statWorlds">11</b><span>миров</span></div>
+        <div class="stat"><b id="statSections">37</b><span>разделов</span></div>
+        <div class="stat"><b id="statTopics">98</b><span>уроков</span></div>
+        <div class="stat"><b id="statXp">3020</b><span>XP всего</span></div>
+      </div>
+
+      <div class="hero-actions">
+        <button class="btn btn-primary" id="continueBtn">▶ Продолжить путь</button>
+        <button class="btn btn-ghost" id="profileBtn2">📊 Мой профиль</button>
+      </div>
+
+      <div class="legend" aria-label="Обозначения на карте">
+        <span class="legend-item"><i class="dot dot-done"></i> пройдено</span>
+        <span class="legend-item"><i class="dot dot-todo"></i> впереди</span>
+        <span class="legend-item">📖 урок опубликован</span>
+        <span class="legend-item">🚧 урок в производстве</span>
+      </div>
+    </section>
+
+    <p class="board-hint">← карту можно прокручивать вбок →</p>
+
+    <!-- Сама карта -->
+    <section class="board-fit" id="boardFit" aria-label="Карта курса">
+      <div class="board-frame" id="boardFrame">
+        <div class="board" id="board">
+          <svg class="road" id="road" aria-hidden="true"></svg>
+          <div class="zones" id="zones"></div>
+          <div class="nodes" id="nodes"></div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <p>
+        Собрано по <b>curriculum курса «Системный анализ на практике»</b> (Course Publisher v0.3.1)
+        и карте компетенций BA/SA. Твой прогресс хранится только в этом браузере.
+      </p>
+      <p class="footer-small">Клик по квадрату — подробности. Esc — закрыть окно.</p>
+    </footer>
+  </main>
+
+  <!-- Модальное окно -->
+  <div class="overlay" id="overlay" hidden>
+    <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"></div>
+  </div>
+
+  <div class="toasts" id="toasts" aria-live="polite"></div>
+  <div class="confetti-layer" id="confetti" aria-hidden="true"></div>
+
+  <noscript>
+    <div class="noscript">Для интерактивной карты нужен JavaScript.</div>
+  </noscript>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
