@@ -171,13 +171,13 @@
   const NAV_PRACTICE = [
     { href: 'catalog.html', label: 'Задачи', id: 'catalog' },
     { href: 'collections.html', label: 'Подборки', id: 'collections' },
-    { href: 'courses.html', label: 'Курсы', id: 'courses' },
+    { label: 'Курсы', id: 'courses', comingSoon: true },
     { href: 'practice.html#how', label: 'Как это работает', id: 'how' },
     { href: 'practice.html#pricing', label: 'Тарифы', id: 'pricing' }
   ];
 
   const NAV_COURSE = [
-    { href: 'courses.html', label: 'Курсы', id: 'courses' }
+    { label: 'Курсы', id: 'courses', comingSoon: true }
   ];
 
   /* Вход/кабинет в шапке: гостю — текстовые ссылки (кнопка здесь одна —
@@ -235,7 +235,9 @@
         </a>
         <button class="icon-btn burger" id="burgerBtn" type="button" aria-label="Меню" aria-expanded="false">☰</button>
         <nav class="main-nav" aria-label="Основная навигация">
-          ${nav.map((item) => `<a href="${item.href}" ${item.id === active ? 'aria-current="page"' : ''}>${UI.esc(item.label)}</a>`).join('')}
+          ${nav.map((item) => item.comingSoon
+            ? `<span class="nav-coming-soon">${UI.esc(item.label)} <small>Скоро</small></span>`
+            : `<a href="${item.href}" ${item.id === active ? 'aria-current="page"' : ''}>${UI.esc(item.label)}</a>`).join('')}
         </nav>
         <div class="header-actions">
           <span data-auth-slot style="display:contents"></span>
@@ -293,7 +295,7 @@
       { title: 'Практика', links: [
         ['catalog.html', 'Каталог задач'],
         ['collections.html', 'Подборки по доменам'],
-        ['courses.html', 'Курсы'],
+        [null, 'Курсы · скоро'],
         ['results.html', 'Мои результаты']
       ]},
       { title: 'Домены', links: [
@@ -310,8 +312,7 @@
     ],
     course: [
       { title: 'Курсы', links: [
-        ['courses.html', 'Все курсы'],
-        ['course.html?id=req-free', 'Бесплатный курс']
+        [null, 'Курсы · скоро']
       ]},
       { title: 'Тренажёр', links: [
         ['practice.html', 'Онлайн-тренажёр'],
@@ -371,7 +372,9 @@
           ${columns.map((col) => `
             <div class="footer-col">
               <h4>${UI.esc(col.title)}</h4>
-              ${col.links.map(([href, label]) => `<a href="${href}">${UI.esc(label)}</a>`).join('')}
+              ${col.links.map(([href, label]) => href
+                ? `<a href="${href}">${UI.esc(label)}</a>`
+                : `<span class="nav-coming-soon">${UI.esc(label)}</span>`).join('')}
             </div>`).join('')}
           ${demo ? `<div class="footer-col">
             <h4>Демо</h4>

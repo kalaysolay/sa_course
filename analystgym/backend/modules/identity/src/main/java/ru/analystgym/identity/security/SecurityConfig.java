@@ -69,7 +69,7 @@ public class SecurityConfig {
                         // Тарифы публичны (лендинг), вебхук — без сессии (там подпись).
                         // Предзапись тоже гостевая: спрос меряем и у анонимов.
                         // Стоят раньше общего authenticated: первое совпадение побеждает.
-                        .requestMatchers(HttpMethod.GET, "/api/billing/plans").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/billing/plans", "/api/pricing").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/billing/webhooks/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/waitlist").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/assessment/runs/current").authenticated()

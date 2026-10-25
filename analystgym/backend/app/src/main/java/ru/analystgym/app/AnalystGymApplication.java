@@ -19,6 +19,11 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 public class AnalystGymApplication {
 
     public static void main(String[] args) throws Exception {
+        if (args.length == 1 && "--bootstrap-staff".equals(args[0])) {
+            var result = BootstrapStaffCommand.run(System.getenv(), System.in);
+            System.out.println(new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(result));
+            return;
+        }
         if (args.length == 1 && "--bootstrap-admin".equals(args[0])) {
             BootstrapAdminCommand.run(System.getenv());
             return;

@@ -69,6 +69,18 @@ class SessionIntegrationTest {
     @Autowired ru.analystgym.practice.service.ReviewRevisions revisionService;
     @Autowired ru.analystgym.notify.service.NotificationOutbox outbox;
 
+    /** Гость получает региональную цену без авторизации и без попадания ответа в общий кеш. */
+    @Test
+    void публичнаяЦенаПоСтране() throws Exception {
+        var result = mvc.perform(get("/api/pricing").with(request -> {
+            request.setRemoteAddr("2.132.0.1");
+            return request;
+        })).andExpect(status().isOk()).andReturn();
+        assertThat(bodyOf(result).path("currency").asText()).isEqualTo("KZT");
+        assertThat(bodyOf(result).path("monthlyAmount").asInt()).isEqualTo(5000);
+        assertThat(result.getResponse().getHeader("Cache-Control")).contains("no-store");
+    }
+
     @org.junit.jupiter.api.BeforeEach
     void изолироватьОчередьТестовойБазы() {
         // Воркеры отключены; незавершённые сценарии предыдущего теста не захватываются следующим.
@@ -872,6 +884,53 @@ class SessionIntegrationTest {
         var changed = new java.util.HashMap<>(environment);
         changed.put("APP_BOOTSTRAP_ADMIN_EMAIL", occupied);
         assertThatThrownBy(() -> BootstrapAdminCommand.run(changed)).isInstanceOf(java.sql.SQLException.class);
+        assertThat(users.findByEmail(occupied).orElseThrow().getRole()).isEqualTo("STUDENT");
+    }
+
+    @Test
+    void начальныйПерсоналСоздаётсяОдинРазИНеМеняетПаролиПриПовторе() throws Exception {
+        // Четыре роли создаются вместе; повтор с другими паролями не меняет учётные записи.
+        var roles = List.of("SUPERADMIN", "REVIEWER", "METHODIST", "LLM_ADMIN");
+        var accounts = roles.stream().map(role -> Map.of("email", email(), "name", role,
+                "role", role, "password", "initial-safe-password")).toList();
+        Map<String, String> env = Map.of("APP_DB_URL", DB.getJdbcUrl(), "APP_DB_USER", DB.getUsername(),
+                "APP_DB_PASSWORD", DB.getPassword());
+        try {
+            var created = BootstrapStaffCommand.run(env, new java.io.ByteArrayInputStream(json.writeValueAsBytes(accounts)));
+            assertThat(created).allMatch(result -> "created".equals(result.status()));
+            var changed = accounts.stream().map(account -> {
+                var copy = new java.util.HashMap<>(account);
+                copy.put("password", "different-safe-password");
+                return copy;
+            }).toList();
+            var repeated = BootstrapStaffCommand.run(env, new java.io.ByteArrayInputStream(json.writeValueAsBytes(changed)));
+            assertThat(repeated).allMatch(result -> "existing".equals(result.status()));
+            assertThat(repeated).noneMatch(BootstrapStaffCommand.Result::passwordMatches);
+            var encoder = new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder();
+            for (var account : accounts) {
+                var user = users.findByEmail(account.get("email")).orElseThrow();
+                assertThat(user.getRole()).isEqualTo(account.get("role"));
+                assertThat(encoder.matches("initial-safe-password", user.getPasswordHash())).isTrue();
+            }
+        } finally {
+            for (var account : accounts) jdbc.update("DELETE FROM users WHERE email=?", account.get("email"));
+        }
+    }
+
+    @Test
+    void конфликтСОбычнымПользователемОткатываетВесьSeed() throws Exception {
+        // Нельзя захватить email студента; даже ранее вставленная запись должна откатиться.
+        String occupied = email(); register(occupied);
+        String newStaff = email();
+        var accounts = List.of(
+                Map.of("email", newStaff, "name", "Reviewer", "role", "REVIEWER", "password", "initial-safe-password"),
+                Map.of("email", occupied, "name", "Methodist", "role", "METHODIST", "password", "initial-safe-password"));
+        Map<String, String> env = Map.of("APP_DB_URL", DB.getJdbcUrl(), "APP_DB_USER", DB.getUsername(),
+                "APP_DB_PASSWORD", DB.getPassword());
+        assertThatThrownBy(() -> BootstrapStaffCommand.run(env,
+                new java.io.ByteArrayInputStream(json.writeValueAsBytes(accounts))))
+                .isInstanceOf(IllegalStateException.class);
+        assertThat(users.findByEmail(newStaff)).isEmpty();
         assertThat(users.findByEmail(occupied).orElseThrow().getRole()).isEqualTo("STUDENT");
     }
 }

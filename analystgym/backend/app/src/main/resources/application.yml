@@ -31,6 +31,13 @@ app:
     # В проде за https — true (см. deploy/.env.example). Локально по http — false.
     secure: ${APP_COOKIES_SECURE:false}
 
+# Публичные месячные цены: предзапись, без валютной конвертации платежей.
+pricing:
+  monthly-rub: ${PRICING_MONTHLY_RUB:990}
+  monthly-kzt: ${PRICING_MONTHLY_KZT:5000}
+  monthly-usd: ${PRICING_MONTHLY_USD:11.29}
+  country-database: ${PRICING_COUNTRY_DATABASE:classpath:geoip/dbip-country-lite.mmdb.gz}
+
 # Тарифы тренажёра (те же числа, что на лендинге): Free — N задач с ревью.
 # Секции верхнеуровневые: код читает billing.*, yookassa.*, review.*,
 # ratelimit.* (не app.* — иначе env не биндятся, проверено чтением кода).

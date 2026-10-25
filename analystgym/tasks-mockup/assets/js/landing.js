@@ -74,7 +74,7 @@
           Waitlist.open(button.dataset.demoPlan === 'team' ? 'team' : 'landing');
           return;
         }
-        const plan = button.dataset.demoPlan === 'pro' ? 'Pro (990 ₽/мес)' : 'Team';
+        const plan = button.dataset.demoPlan === 'pro' ? 'Pro' : 'Team';
         AppUI.modal({
           title: `Тариф ${plan}`,
           wide: true,

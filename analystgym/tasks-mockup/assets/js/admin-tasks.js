@@ -393,7 +393,19 @@ window.AdminTasks = (function () {
         <div class="panel-body" style="max-width:860px">
           ${field('Подсказки (по одной на строку)', `<textarea data-f="hints" data-kind="lines" rows="4" placeholder="Например: Разделите повтор клиента и молчание эквайринга — это разные механизмы">${AppUI.esc(lines(task.hints))}</textarea>`)}
           ${field('Вопросы интервьюера (по одному на строку)', `<textarea data-f="interviewQuestions" data-kind="lines" rows="4" placeholder="Например: Где храните ключ и какой у него TTL?">${AppUI.esc(lines(task.interviewQuestions))}</textarea>`)}
-          ${field('Эталонное решение (HTML)', `<textarea data-f="authorSolution.doc" rows="9" style="font-size:12px" placeholder="Например: <h3>1. Контракт</h3><p>Ключ генерирует клиент…</p>">${AppUI.esc((task.authorSolution || {}).doc || '')}</textarea>`)}
+          ${field('Эталонное решение', `
+            <div class="reference-editor">
+              <div class="reference-tabs" role="tablist" aria-label="Эталонное решение">
+                <button type="button" role="tab" id="referenceHtmlTab" data-reference-tab="html" aria-selected="true" aria-controls="referenceHtmlPanel">HTML</button>
+                <button type="button" role="tab" id="referenceRenderTab" data-reference-tab="render" aria-selected="false" aria-controls="referenceRenderPanel" tabindex="-1">Рендер</button>
+              </div>
+              <div id="referenceHtmlPanel" role="tabpanel" aria-labelledby="referenceHtmlTab">
+                <textarea data-f="authorSolution.doc" aria-label="HTML эталонного решения" rows="12" spellcheck="false" placeholder="Например: <h3>1. Контракт</h3><p>Ключ генерирует клиент…</p>">${AppUI.esc((task.authorSolution || {}).doc || '')}</textarea>
+              </div>
+              <div id="referenceRenderPanel" role="tabpanel" aria-labelledby="referenceRenderTab" tabindex="0" hidden>
+                <div class="statement reference-preview" data-reference-preview></div>
+              </div>
+            </div>`)}
           ${field('Эталон PlantUML', `<textarea data-f="authorSolution.plantuml" rows="5">${AppUI.esc((task.authorSolution || {}).plantuml || '')}</textarea>`)}
           ${field('Эталон Mermaid', `<textarea data-f="authorSolution.mermaid" rows="5">${AppUI.esc((task.authorSolution || {}).mermaid || '')}</textarea>`)}
           ${api.server ? field('Стартовые вкладки (JSON: type, title, content)', `<textarea id="starterTabsJson" rows="7">${AppUI.esc(JSON.stringify(task.starterTabs || [], null, 2))}</textarea>`) : ''}
@@ -612,7 +624,43 @@ window.AdminTasks = (function () {
       <p class="mono dim mt-16" style="font-size:11px">Агенты: аналитик ${review.agents[0].score}/10 · архитектор ${review.agents[1].score}/10 · движок ${AppUI.esc(review.engine)}</p>`;
   }
 
+  /** Превью строится из текущего textarea; исходный HTML не меняется при переключении. */
+  function bindReferenceEditor(host) {
+    const editor = host.querySelector('.reference-editor');
+    const source = editor.querySelector('[data-f="authorSolution.doc"]');
+    const preview = editor.querySelector('[data-reference-preview]');
+    const tabs = [...editor.querySelectorAll('[data-reference-tab]')];
+    const select = tab => {
+      tabs.forEach(button => {
+        const active = button === tab;
+        button.setAttribute('aria-selected', String(active));
+        button.tabIndex = active ? 0 : -1;
+        editor.querySelector('#' + button.getAttribute('aria-controls')).hidden = !active;
+      });
+      if (tab.dataset.referenceTab === 'render') {
+        // Тот же фильтр HTML, что в эталоне студента: скрипты/обработчики не исполняются.
+        preview.innerHTML = source.value.trim()
+          ? AppUI.safeHtml(source.value)
+          : '<p class="muted">Эталон пока пуст. Добавьте текст на вкладке HTML.</p>';
+      }
+    };
+    tabs.forEach((tab, index) => {
+      tab.addEventListener('click', () => select(tab));
+      tab.addEventListener('keydown', event => {
+        let next;
+        if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') next = tabs[1 - index];
+        else if (event.key === 'Home') next = tabs[0];
+        else if (event.key === 'End') next = tabs[tabs.length - 1];
+        else return;
+        event.preventDefault();
+        select(next);
+        next.focus();
+      });
+    });
+  }
+
   function bindCard(host, task, isNew) {
+    bindReferenceEditor(host);
     if (api.server && isNew) {
       const status = host.querySelector('[data-f="status"]');
       status.value = 'draft';

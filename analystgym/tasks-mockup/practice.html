@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <script>try{var __t=localStorage.getItem('sa-trainer:theme');if(__t==='light')document.documentElement.setAttribute('data-theme','light');else if(__t!=='dark')document.documentElement.setAttribute('data-theme','gray')}catch(e){document.documentElement.setAttribute('data-theme','gray')}</script>
   <link rel="icon" type="image/png" href="./assets/logo.png">
-  <link rel="stylesheet" href="./assets/styles.css?v=20261018-solution">
+  <link rel="stylesheet" href="./assets/styles.css?v=20261020-courses">
 </head>
 <body>
   <header id="siteHeader"></header>
@@ -34,7 +34,7 @@
           </div>
           <div class="hero-stats">
             <div class="hero-stat"><span class="num" id="statTasks">16</span><span class="lbl">задач трёх уровней</span></div>
-            <div class="hero-stat"><span class="num">2</span><span class="lbl">ИИ-ревьюера с ролями</span></div>
+            <div class="hero-stat"><span class="num">ИИ</span><span class="lbl">разбор решения</span></div>
             <div class="hero-stat"><span class="num" id="statQuestions">40</span><span class="lbl">вопросов диагностики</span></div>
             <div class="hero-stat"><span class="num">7</span><span class="lbl">компетенций в профиле</span></div>
           </div>
@@ -149,13 +149,13 @@
             <span class="step-num">03</span>
             <div>
               <h3>Отправляете на ревью</h3>
-              <p>Кнопка «Отправить решение» → подтверждение → агенты разбирают ваш текст по рубрике задачи. Вы видите процесс: кто что читает и проверяет.</p>
+              <p>Кнопка «Отправить решение» → подтверждение → ИИ разбирает ваш текст по критериям задачи. Вы видите ход проверки.</p>
             </div>
           </div>
           <div class="step">
             <span class="step-num">04</span>
             <div>
-              <h3>Получаете два разбора</h3>
+              <h3>Получаете разбор решения</h3>
               <p>Системный аналитик — про полноту, сценарии и измеримость. Архитектор — про реализуемость, данные и надёжность. Плюс вердикт «хорошее / не хорошее решение» и что усилить.</p>
             </div>
           </div>
@@ -212,7 +212,7 @@
   <!-- ================= РЕВЬЮ ================= -->
   <section class="section section-bordered">
     <div class="wrap">
-      <p class="eyebrow">Ревью двумя агентами</p>
+      <p class="eyebrow">Ревью решения с ИИ</p>
       <h2 class="section-title">Оценка качества, а не «правильно / неправильно»</h2>
       <p class="section-lead mb-32">
         В анализе редко бывает один верный ответ. Поэтому мы оцениваем, насколько решение хорошее: что вы учли,
@@ -225,7 +225,7 @@
             <span class="ra-avatar sa">СА</span>
             <div>
               <div class="ra-name">Анна Ковалёва</div>
-              <div class="ra-role">Агент · системный аналитик · 11 лет в финтехе</div>
+              <div class="ra-role">ИИ-ревью · полнота и сценарии</div>
             </div>
             <div class="ra-score"><div class="num">7.4</div><div class="lbl">оценка</div></div>
           </div>
@@ -258,7 +258,7 @@
             <span class="ra-avatar arch">АР</span>
             <div>
               <div class="ra-name">Дмитрий Лазарев</div>
-              <div class="ra-role">Агент · архитектор интеграций · 14 лет</div>
+              <div class="ra-role">ИИ-ревью · архитектура и надёжность</div>
             </div>
             <div class="ra-score"><div class="num">6.8</div><div class="lbl">оценка</div></div>
           </div>
@@ -288,13 +288,11 @@
       </div>
 
       <div class="info-box mt-24" style="max-width:none">
-        <div class="ib-title">Как это устроено под капотом</div>
+        <div class="ib-title">На чём основан разбор</div>
         <p style="margin:0;color:var(--text-2);font-size:13.5px">
-          Каждый агент — отдельная роль со своим промптом, своим фокусом проверки и своей рубрикой.
-          Рубрика задачи состоит из критериев с весами: агент ищет в вашем тексте подтверждения, цитирует их
-          и объясняет, почему непокрытый критерий ломает решение. В этом макете разбор собирается локально
-          (детерминированный движок), в продукте на том же контракте работает LLM — поэтому структура ответа
-          и UX остаются теми же.
+          Разбор опирается на критерии задачи: ИИ ищет подтверждения в вашем тексте,
+          цитирует их и объясняет, к чему могут привести пробелы в решении.
+          ИИ может ошибаться: проверяйте замечания и оспаривайте спорную оценку.
         </p>
       </div>
     </div>
@@ -387,7 +385,7 @@
       <div class="pricing-grid">
         <div class="card price-card">
           <div class="price-name">Free</div>
-          <div class="price-value">0 ₽</div>
+          <div class="price-value" data-price-free>0,00 $</div>
           <p class="muted" style="font-size:13.5px;margin:0">Понять, подходит ли формат</p>
           <ul class="price-features">
             <li>Диагностика знаний по семи темам</li>
@@ -402,7 +400,7 @@
         <div class="card price-card popular">
           <span class="price-flag">Выбирают чаще всего</span>
           <div class="price-name">Pro</div>
-          <div class="price-value">990 ₽ <small>/ мес</small></div>
+          <div class="price-value"><span data-price-monthly>11,29 $</span> <small>/ мес</small></div>
           <p class="muted" style="font-size:13.5px;margin:0">Активная подготовка к собесам</p>
           <ul class="price-features">
             <li>Все задачи и все подборки</li>
@@ -504,6 +502,7 @@
     </div>
   </section>
 
+  <p class="wrap muted" style="font-size:12px">Валюта определяется по стране IP-адреса. <a href="https://db-ip.com" rel="noopener noreferrer">IP Geolocation by DB-IP</a></p>
   <footer id="siteFooter"></footer>
 
   <script src="./assets/vendor/viz-global.js" defer></script>
@@ -511,9 +510,10 @@
   <script src="./assets/vendor/plantuml.js" defer></script>
   <script src="./assets/js/data-core.js" defer></script>
   <script src="./assets/js/store.js" defer></script>
-  <script src="./assets/js/ui.js?v=20261018-ui" defer></script>
+  <script src="./assets/js/ui.js?v=20261020-courses" defer></script>
   <script src="./assets/js/api.js" defer></script>
   <script src="./assets/js/waitlist.js" defer></script>
-  <script src="./assets/js/landing.js" defer></script>
+  <script src="./assets/js/pricing.js?v=20261021" defer></script>
+  <script src="./assets/js/landing.js?v=20261021" defer></script>
 </body>
 </html>
