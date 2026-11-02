@@ -169,6 +169,7 @@ class SessionIntegrationTest {
     void исправлениеЖалобыМеняетРезультатИСохраняетИсториюИУведомлениеАтомарно() throws Exception {
         var task=publishedTask(staff("METHODIST"));var user=studentId();var actor=studentId();UUID id=readyAttempt(user,task);
         var original=reviews.findById(id).orElseThrow().getResult().deepCopy();
+        assertThat(outbox.mine(user)).isEmpty(); // заглушка не уведомляет о готовности содержательного разбора
         var filed=quality.fileComplaint(user,id,"Не учтён критерий контракта",1);
         assertThatThrownBy(()->quality.fileComplaint(user,id,"Повторная открытая жалоба",1)).hasMessageContaining("complaint_already_open");
         assertThatThrownBy(()->quality.resolve(filed.getId(),"resolved","Только текст без исправления",filed.getVersion(),null,null,actor)).hasMessageContaining("complaint_action_required");
@@ -182,7 +183,7 @@ class SessionIntegrationTest {
         assertThat(history.get(1).get("actorId")).isEqualTo(actor);
         assertThat(quality.myComplaints(user).get(0).reviewSnapshot()).isEqualTo(original);
         assertThat(quality.myComplaints(user).get(0).decisions()).hasSize(1);
-        assertThat(outbox.mine(user)).hasSize(2); // готовность исходного ревью + решение по жалобе
+        assertThat(outbox.mine(user)).hasSize(1); // уведомляем только о решении по жалобе
         assertThatThrownBy(()->quality.fileComplaint(user,id,"Старый экран с первой оценкой",1)).hasMessageContaining("review_changed");
     }
 
