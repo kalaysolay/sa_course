@@ -21,6 +21,12 @@ public record ReviewResult(
         Stats stats,
         List<Recommendation> recommendations) {
 
+    /** Демо-движки не выполняют содержательную проверку, включая сохранённые старые версии. */
+    public static boolean isDemonstration(String engine) {
+        String value = engine == null ? "" : engine.toLowerCase(java.util.Locale.ROOT);
+        return value.contains("mock") || value.contains("demo");
+    }
+
     public record Grade(int code, String label, String headline, String tone, int score) {
     }
 

@@ -92,7 +92,7 @@
       await restoreServerSubmission();
     }
     const demo = Api.mode === 'embedded' || reviewLimits?.engine === 'mock';
-    el.taskHost.insertAdjacentHTML('afterbegin', `<p class="info-box">${demo ? 'Демонстрационный режим: поиск маркеров не проверяет смысл решения. Демо-балл ограничен 45/100.' : 'Автоматическое ревью — предварительная обратная связь по рубрике. Качество ещё не подтверждено калибровкой методиста. Оценку можно оспорить.'}</p>`);
+    if (demo) el.taskHost.insertAdjacentHTML('afterbegin', '<p class="info-box">Проверка ИИ в этом режиме недоступна. Можно написать решение и сравнить его с эталоном.</p>');
 
     let last = Store.lastAttempt(task.id);
     const selectedId = AppUI.qs('attempt');
@@ -1090,7 +1090,7 @@
         if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Отправить ещё раз'; }
         renderAttempts();
         showReview(attempt);
-        AppUI.toast(`Ревью готово: ${state.review.grade.label} · ${state.review.grade.score}/100`, state.review.grade.code >= 4 ? 'ok' : 'warn');
+        notifyReviewReady(state.review);
       } else if (state.status === 'failed') {
         clearInterval(pollTimer);
         reviewRunning = false;
@@ -1174,7 +1174,7 @@
       if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Отправить ещё раз'; }
       renderAttempts();
       showReview(attempt);
-      AppUI.toast(`Ревью готово: ${review.grade.label} · ${review.grade.score}/100`, review.grade.code >= 4 ? 'ok' : 'warn');
+      notifyReviewReady(review);
     }).catch((error) => {
       reviewRunning = false;
       if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Отправить решение'; }
@@ -1205,6 +1205,14 @@
 
   /* ==================== показ ревью ==================== */
 
+  function notifyReviewReady(review) {
+    if (Store.isDemoReview(review)) {
+      AppUI.toast('Решение сохранено без оценки: проверка ИИ недоступна.', 'warn');
+    } else {
+      AppUI.toast(`Ревью готово: ${review.grade.label} · ${review.grade.score}/100`, review.grade.code >= 4 ? 'ok' : 'warn');
+    }
+  }
+
   async function showReview(attempt) {
     if (attempt.server) {
       const owner = Store.owner();
@@ -1232,19 +1240,22 @@
     if (!review) return;
     const grade = review.grade;
     const stats = review.stats;
+    const demo = Store.isDemoReview(review);
 
     el.reviewResultSection.classList.remove('hidden');
     el.reviewResultSection.innerHTML = `
       <div class="panel">
         <div class="panel-head">
           <p class="panel-title">Ответ на решение · ${AppUI.esc(attempt.submittedAt ? AppUI.dateTime(attempt.submittedAt) : '')}</p>
-          <div class="row" style="gap:8px">
-            <span class="badge">агентов: ${review.agents.length}</span>
-            <span class="badge badge-violet">${AppUI.esc(review.engine)}</span>
-          </div>
+          ${demo ? '' : `<span class="badge">${String(review.engine).includes('human') ? 'Проверено методистом' : 'Разбор ИИ'}</span>`}
         </div>
 
-        <p class="info-box">${String(review.engine).includes('mock') || String(review.engine).includes('demo') ? 'Демонстрация поиска маркеров. Это не оценка качества решения.' : String(review.engine).includes('human') ? 'Ревью исправлено методистом.' : 'Предварительное автоматическое ревью; калибровка качества методистом ещё не подтверждена.'}${review.correctionReason ? ' Причина исправления: ' + AppUI.esc(review.correctionReason) : ''}</p>
+        ${demo ? `
+        <div class="verdict-head">
+          <h3 class="verdict-label">Решение сохранено, но ещё не проверено</h3>
+          <p class="verdict-summary mt-16">Проверка ИИ в этом режиме недоступна. Пока можно сравнить свой ответ с эталоном.</p>
+        </div>` : `
+        ${review.correctionReason ? `<p class="info-box">Причина исправления: ${AppUI.esc(review.correctionReason)}</p>` : ''}
 
         <!-- вердикт -->
         <div class="verdict-head">
@@ -1254,9 +1265,6 @@
               <div class="verdict-label">${AppUI.esc(grade.headline)}</div>
               <div class="row" style="gap:10px;flex-wrap:wrap;margin-top:6px">
                 <span class="badge badge-${grade.tone === 'accent' ? 'accent' : grade.tone === 'ok' ? 'ok' : grade.tone === 'warn' ? 'warn' : 'bad'}">${AppUI.esc(grade.label)}</span>
-                <span class="badge">критериев закрыто: ${stats.criteriaHit} из ${stats.criteriaTotal}</span>
-                <span class="badge">частично: ${stats.criteriaPartial}</span>
-                <span class="badge">не раскрыто: ${stats.criteriaMiss}</span>
               </div>
             </div>
             <div style="margin-left:auto;text-align:right">
@@ -1275,7 +1283,6 @@
           <div class="verdict-stats">
             <div class="vstat"><span class="k">Объём решения</span><span class="v">${stats.words} слов · ${stats.tabs} вкладок</span></div>
             <div class="vstat"><span class="k">Диаграмм</span><span class="v">${stats.diagramTabs}</span></div>
-            <div class="vstat"><span class="k">Агенты</span><span class="v">аналитик ${review.agents[0].score}/10 · архитектор ${review.agents[1].score}/10</span></div>
             <div class="vstat"><span class="k">Попытка</span><span class="v">${Store.attempts(task.id).indexOf(attempt) + 1} из ${Store.attempts(task.id).length}</span></div>
           </div>
         </div>
@@ -1308,30 +1315,32 @@
                 </div>`;
             }).join('')}
           </div>
-        </div>
+        </div>`}
 
         <!-- что дальше -->
         <div class="review-foot">
-          ${review.recommendations && review.recommendations.length ? `
+          ${!demo && review.recommendations && review.recommendations.length ? `
             <div class="grow">
               <div class="mono" style="font-size:10.5px;color:var(--dim);letter-spacing:.1em;margin-bottom:8px">ЧТО ПОТРЕНИРОВАТЬ ДАЛЬШЕ</div>
               <div class="row" style="gap:8px;flex-wrap:wrap">
                 ${review.recommendations.map((rec) => `<a class="btn btn-ghost btn-sm" href="task.html?id=${AppUI.esc(rec.id)}">${AppUI.esc(rec.title.slice(0, 44))}${rec.title.length > 44 ? '…' : ''} · ${AppUI.esc(Store.level(rec.level).name)}</a>`).join('')}
               </div>
             </div>` : '<div class="grow"></div>'}
-          <span class="note">ревью ${AppUI.timeAgo(attempt.submittedAt)}</span>
+          <span class="note">${demo ? 'сохранено' : 'ревью'} ${AppUI.timeAgo(attempt.submittedAt)}</span>
           ${attempt.server ? '<button class="btn btn-ghost btn-sm" type="button" id="taskContextBtn">Условие этой попытки</button>' : ''}
-          ${attempt.server ? '<button class="btn btn-ghost btn-sm" type="button" id="reviewHistoryBtn">История исправлений</button>' : ''}
-          <button class="btn btn-ghost btn-sm" type="button" id="complainBtn">Оспорить</button>
+          ${attempt.server && !demo ? '<button class="btn btn-ghost btn-sm" type="button" id="reviewHistoryBtn">История исправлений</button>' : ''}
+          ${demo ? '' : '<button class="btn btn-ghost btn-sm" type="button" id="complainBtn">Оспорить</button>'}
           <button class="btn btn-outline btn-sm" type="button" id="openAuthorBtn">Смотреть эталон</button>
-          <button class="btn btn-primary btn-sm" type="button" id="resubmitBtn">Доработать и отправить снова</button>
+          <button class="btn btn-primary btn-sm" type="button" id="resubmitBtn">${demo ? 'Вернуться к решению' : 'Доработать и отправить снова'}</button>
         </div>
       </div>`;
 
     document.getElementById('reviewHistoryBtn')?.addEventListener('click', async () => {
       try {
         const history = await Api.reviewRevisions(attempt.id);
-        AppUI.modal({ title: 'История ревью', wide: true, html: history.map(r => `<h3>Версия ${r.revision} · ${r.result.grade.score}/100</h3><p>${AppUI.esc(r.actorName || 'Автоматическая проверка')} · ${AppUI.esc(AppUI.dateTime(r.createdAt))}</p><p>${AppUI.esc(r.reason || 'Исходный результат')}</p><p>${AppUI.esc(r.result.summary)}</p><ul>${(r.result.criteria || []).map(c => `<li>${AppUI.esc(c.title)}: ${AppUI.esc(c.state)}</li>`).join('')}</ul>`).join('') });
+        AppUI.modal({ title: 'История ревью', wide: true, html: history.map(r => Store.isDemoReview(r.result)
+          ? `<h3>Версия ${r.revision} · без оценки</h3><p>Проверка ИИ была недоступна.</p>`
+          : `<h3>Версия ${r.revision} · ${r.result.grade.score}/100</h3><p>${AppUI.esc(r.actorName || 'Автоматическая проверка')} · ${AppUI.esc(AppUI.dateTime(r.createdAt))}</p><p>${AppUI.esc(r.reason || 'Исходный результат')}</p><p>${AppUI.esc(r.result.summary)}</p><ul>${(r.result.criteria || []).map(c => `<li>${AppUI.esc(c.title)}: ${AppUI.esc(c.state)}</li>`).join('')}</ul>`).join('') });
       } catch (error) { AppUI.toast('Не удалось загрузить историю исправлений.', 'warn'); }
     });
 
@@ -1352,7 +1361,7 @@
         if (panel) panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
         const editor = document.getElementById('docEditor');
         if (editor) editor.focus();
-        AppUI.toast('Поправьте решение по замечаниям и отправьте ещё раз — сравним попытки', 'ok');
+        if (!demo) AppUI.toast('Поправьте решение по замечаниям и отправьте ещё раз — сравним попытки', 'ok');
       }, 400);
     });
 
@@ -1366,7 +1375,7 @@
 
     /* Оспаривание ревью (UC-S08): жалоба уходит в очередь методиста.
        Работает только для серверных попыток — у локальных нет attemptId бэка. */
-    document.getElementById('complainBtn').addEventListener('click', async () => {
+    document.getElementById('complainBtn')?.addEventListener('click', async () => {
       if (!window.Api || !Api.serverPractice() || !attempt.server) {
         AppUI.toast('Оспорить можно серверное ревью: войдите и отправьте решение ещё раз', 'warn');
         return;
@@ -1426,7 +1435,7 @@
         </div>
 
         <div class="ra-narrative">
-          <span class="lbl">${agent.id === 'sa' ? 'Почему решение работает (или нет) с точки зрения аналитики' : 'Почему решение реализуемо (или нет)'}</span>
+          <span class="lbl">${agent.id === 'sa' ? 'Разбор аналитика' : 'Разбор архитектора'}</span>
           ${AppUI.esc(agent.narrative)}
         </div>
 
@@ -1458,18 +1467,18 @@
       <div class="panel">
         <div class="panel-head">
           <p class="panel-title">История попыток · ${attempts.length}</p>
-          <span class="badge">динамика видна, если отправлять повторно</span>
         </div>
         <div class="panel-body" style="padding:12px">
           ${attempts.slice().reverse().map((attempt) => {
             const isActive = activeAttempt && attempt.id === activeAttempt.id;
-            const grade = attempt.review ? attempt.review.grade : null;
+            const demo = Store.isDemoReview(attempt.review);
+            const grade = !demo && attempt.review ? attempt.review.grade : null;
             return `
               <div class="plan-item" style="margin-bottom:6px;${isActive ? 'border-color:rgba(211,242,106,.4)' : ''}">
                 <span class="n">${AppUI.esc(AppUI.dateTime(attempt.submittedAt))}</span>
                 <div>
-                  <div class="t">${grade ? AppUI.esc(grade.label) : 'Ревью в процессе…'}</div>
-                  <div class="s">${attempt.tabs.length} ${AppUI.plural(attempt.tabs.length, ['вкладка', 'вкладки', 'вкладок'])}${grade ? ` · критериев закрыто ${attempt.review.stats.criteriaHit}/${attempt.review.stats.criteriaTotal}` : ''}${isActive ? ' · сейчас открыта' : ''}</div>
+                  <div class="t">${demo ? 'Решение сохранено · без оценки' : grade ? AppUI.esc(grade.label) : attempt.status === 'failed' ? 'Не удалось проверить' : 'Ревью в процессе…'}</div>
+                  <div class="s">${attempt.tabs.length} ${AppUI.plural(attempt.tabs.length, ['вкладка', 'вкладки', 'вкладок'])}${isActive ? ' · сейчас открыта' : ''}</div>
                 </div>
                 <span class="row" style="gap:8px">
                   ${grade ? `<span class="badge badge-${grade.tone === 'accent' ? 'accent' : grade.tone === 'ok' ? 'ok' : grade.tone === 'warn' ? 'warn' : 'bad'}">${grade.score}/100</span>` : ''}

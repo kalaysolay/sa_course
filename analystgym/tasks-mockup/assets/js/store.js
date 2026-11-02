@@ -339,15 +339,22 @@
     status(taskId) {
       const last = this.lastAttempt(taskId);
       if (last && last.status === 'in_review') return 'review';
-      if (last && last.status === 'reviewed') return 'reviewed';
+      if (last && last.status === 'reviewed') {
+        return this.attempts(taskId).some(a => a.status === 'reviewed' && !this.isDemoReview(a.review)) ? 'reviewed' : 'draft';
+      }
       const draft = this.solution(taskId);
       if (draft && draft.tabs && draft.tabs.length) return 'draft';
       return 'new';
     },
 
+    /* Старые сохранённые демо тоже не должны выглядеть как проверенные решения. */
+    isDemoReview(review) {
+      return /mock|demo/i.test(String(review && review.engine || ''));
+    },
+
     bestGrade(taskId) {
       return this.attempts(taskId)
-        .filter((a) => a.review && a.review.grade)
+        .filter((a) => a.review && a.review.grade && !this.isDemoReview(a.review))
         .reduce((max, a) => Math.max(max, a.review.grade.score), 0) || null;
     },
 
@@ -559,7 +566,7 @@
       const avgScore = (() => {
         const scores = [];
         Object.values(state.attempts).forEach((list) => {
-          list.forEach((a) => { if (a.review && a.review.grade) scores.push(a.review.grade.score); });
+          list.forEach((a) => { if (a.review && a.review.grade && !this.isDemoReview(a.review)) scores.push(a.review.grade.score); });
         });
         if (!scores.length) return null;
         return Math.round(scores.reduce((s, v) => s + v, 0) / scores.length);

@@ -150,11 +150,13 @@ public class ReviewProcessor {
         review.setModel(accepted.stream().map(c -> c.getActualModel() == null ? c.getRequestedModel() : c.getActualModel())
                 .distinct().reduce((a, b) -> a + "," + b).orElse(""));
         reviews.saveAndFlush(review); revisions.record(review,null,null);attempt.setStatus("reviewed");
+        job.setStatus("done"); job.setStage("done"); job.setProgress(100); job.setError(null);
+        job.setLeaseToken(null); job.setLeaseUntil(null);
+        // Заглушка сохраняет попытку, но уведомление «ревью готово» с её баллом вводило бы в заблуждение.
+        if (ReviewResult.isDemonstration(result.engine())) return Optional.empty();
         var user=users.findById(attempt.getUserId()).orElseThrow();
         outbox.enqueue(user.getId(),user.getEmail(),"review:"+attempt.getId()+":1","AnalystGym: ревью готово",
                 "Проверка задачи «"+claim.plan().input().title()+"» завершена. Результат: "+result.grade().score()+"/100.\nОткройте задачу в кабинете.","/task.html?id="+attempt.getTaskId()+"&attempt="+attempt.getId());
-        job.setStatus("done"); job.setStage("done"); job.setProgress(100); job.setError(null);
-        job.setLeaseToken(null); job.setLeaseUntil(null);
         return Optional.of(new DoneInfo(attempt.getUserId(), claim.plan().input().title(), result.grade().score()));
     }
 

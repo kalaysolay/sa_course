@@ -23,6 +23,7 @@
     const w = frame.contentWindow, d = w.document;
     await w.Api.ready; await until(() => d.getElementById('submitBtn'));
     w.Store.setUser('review-browser-test'); w.Store.reset();
+    let review = w.ReviewEngine.buildReview(w.Store.task('int-idempotency'), []);
     w.Api.mode = 'server'; w.Api.user = { id: 'review-browser-test' };
     const requests = []; let ready = false;
     const originalFetch = w.fetch;
@@ -35,10 +36,14 @@
         return response({ attemptId: 'accepted', taskId: 'int-idempotency', status: 'in_review' }, 202);
       }
       if (url === '/api/attempts/accepted') {
-        return response(ready ? { status: 'reviewed', progress: 100, stage: 'done', review: w.ReviewEngine.buildReview(w.Store.task('int-idempotency'), []) }
+        return response(ready ? { status: 'reviewed', progress: 100, stage: 'done', review }
           : { status: 'in_review', progress: 45, stage: 'arch' });
       }
       if (url === '/api/attempts/accepted/context') return response({ title: 'Сохранённая задача', version: 7, statement: { brief: 'Старое условие' }, rubric: [] });
+      if (url === '/api/attempts/accepted/revisions') return response([
+        { revision: 1, result: { engine: 'llm-demo/v2' } },
+        { revision: 2, result: review, createdAt: new Date().toISOString() }
+      ]);
       return response({}, 404);
     };
     w.AppUI.confirm = async () => true;
@@ -57,9 +62,35 @@
     ready = true;
     await until(() => d.getElementById('taskContextBtn'));
     check(w.Store.lastAttempt('int-idempotency').status === 'reviewed', 'Готовое ревью сохранено в историю');
+    // Ответ заглушки, в том числе старого формата, не выдаётся за содержательную проверку.
+    const resultBody = d.getElementById('reviewResultSection');
+    check(resultBody.textContent.includes('Решение сохранено, но ещё не проверено'), 'Вместо демо-оценки показан понятный статус');
+    check(!/маркер|45\/100|критериев закрыто|Демо:|mock-agents/.test(resultBody.textContent), 'Технические тексты заглушки скрыты');
+    check(!resultBody.querySelector('.verdict-grade, .grade-meter, .review-agent, #complainBtn'), 'Нет искусственного балла, экспертного разбора и оспаривания');
+    check(d.getElementById('attemptsSection').textContent.includes('без оценки'), 'История не считает демо проверенным решением');
+    check(w.Store.bestGrade('int-idempotency') === null && w.Store.stats().avgScore === null && w.Store.stats().reviewed === 0, 'Демо не повышает лучший балл и прогресс');
+    check(d.getElementById('openAuthorBtn') && d.getElementById('resubmitBtn'), 'Эталон и возврат к решению доступны');
     d.getElementById('taskContextBtn').click();
     await until(() => d.body.textContent.includes('Сохранённая задача · версия 7'));
     check(d.body.textContent.includes('Старое условие'), 'Историческое условие берётся из снимка API');
+    d.dispatchEvent(new w.KeyboardEvent('keydown', { key: 'Escape' }));
+    // Настоящее ревью может вернуть одного агента; разбор и доказательства должны сохраниться.
+    review = { ...review, engine: 'llm:provider/model', grade: { code: 4, score: 72, tone: 'ok', label: 'Хорошо', headline: 'Решение можно улучшить' },
+      summary: 'Уточните обработку повторной доставки.', why: ['Не описана граница транзакции.'],
+      agents: [{ ...review.agents[0], narrative: 'Опишите ключ идемпотентности и срок хранения.' }] };
+    d.querySelector('[data-show-attempt="accepted"]').click();
+    await until(() => d.getElementById('reviewHistoryBtn'));
+    check(resultBody.querySelector('.verdict-grade').textContent === '72', 'Настоящий балл сохранён');
+    check(resultBody.textContent.includes('Опишите ключ идемпотентности') && resultBody.textContent.includes('Разбор аналитика'), 'Содержательный комментарий показан под понятным заголовком');
+    check(resultBody.textContent.includes('Разбор по критериям задачи') && resultBody.querySelectorAll('.crit-row').length > 1, 'Подробный разбор по критериям сохранён');
+    check(!/provider\/model|критериев закрыто|Почему решение работает/.test(resultBody.textContent), 'Настоящий вердикт не содержит технического шума');
+    // Демо после настоящего разбора не отменяет уже достигнутый результат и не меняет средний балл.
+    w.Store.addAttempt('int-idempotency', { id: 'later-demo', status: 'reviewed', tabs: [], review: { ...review, engine: 'mock-agents/v2' } });
+    check(w.Store.bestGrade('int-idempotency') === 72 && w.Store.stats().avgScore === 72 && w.Store.stats().reviewed === 1, 'Демо не меняет ранее полученную настоящую оценку');
+    w.Store.removeAttempt('int-idempotency', 'later-demo');
+    d.getElementById('reviewHistoryBtn').click();
+    await until(() => d.body.textContent.includes('Версия 1 · без оценки'));
+    check(d.body.textContent.includes('Версия 2 · 72/100'), 'История исправлений отличает демо от настоящего ревью');
     check(w.Store.pendingSubmission('int-idempotency') === null, 'После приёма незавершённый ключ очищен');
     w.fetch = originalFetch; w.Store.reset();
     result.textContent = 'PASS ' + checks.length + '\n' + checks.join('\n');

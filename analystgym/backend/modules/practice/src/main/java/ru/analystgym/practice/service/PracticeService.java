@@ -251,13 +251,14 @@ public class PracticeService {
         List<AttemptSummary> result = new ArrayList<>();
         for (Attempt attempt : attempts.findByUserIdAndTaskIdOrderByCreatedAtDesc(userId, taskId)) {
             var review = reviews.findById(attempt.getId()).orElse(null);
+            boolean demo = review != null && ru.analystgym.review.ReviewResult.isDemonstration(review.getEngine());
             int tabsCount = attempt.getTabs() != null && attempt.getTabs().isArray()
                     ? attempt.getTabs().size() : 0;
             result.add(new AttemptSummary(
                     attempt.getId(), attempt.getStatus(),
-                    review == null ? null : review.getScore(),
-                    review == null ? null : review.getGradeCode(),
-                    review == null || review.getResult() == null ? null
+                    review == null || demo ? null : review.getScore(),
+                    review == null || demo ? null : review.getGradeCode(),
+                    demo ? "Решение сохранено · без оценки" : review == null || review.getResult() == null ? null
                             : review.getResult().path("grade").path("label").asText(null),
                     attempt.getCreatedAt() == null ? null : attempt.getCreatedAt().toString(),
                     tabsCount));
@@ -280,14 +281,17 @@ public class PracticeService {
         List<MyAttempt> rows = new ArrayList<>();
         for (Attempt attempt : mine.subList(0, Math.min(max, mine.size()))) {
             var review = reviews.findById(attempt.getId()).orElse(null);
+            boolean demo = review != null && ru.analystgym.review.ReviewResult.isDemonstration(review.getEngine());
             String title = tasks.findById(attempt.getTaskId())
                     .map(Task::getTitle).orElse(attempt.getTaskId());
             String gradeLabel = null;
-            if (review != null && review.getResult() != null) {
+            if (demo) {
+                gradeLabel = "Решение сохранено · без оценки";
+            } else if (review != null && review.getResult() != null) {
                 gradeLabel = review.getResult().path("grade").path("label").asText(null);
             }
             rows.add(new MyAttempt(attempt.getId(), attempt.getTaskId(), title,
-                    attempt.getStatus(), review == null ? null : review.getScore(), gradeLabel,
+                    attempt.getStatus(), review == null || demo ? null : review.getScore(), gradeLabel,
                     attempt.getCreatedAt() == null ? null : attempt.getCreatedAt().toString()));
         }
         return rows;
