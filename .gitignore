@@ -13,6 +13,22 @@ output/*
 !output/План лекций курса системного аналитика.updated.xlsx
 
 node_modules/
+# Кэши Python и локальные окружения
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+# Локальные секреты; примеры настроек остаются в Git
+.env
+.env.*
+!.env.example
+# Временные файлы Microsoft Office
+~$*.docx
+~$*.xlsx
+~$*.pptx
 # Локальные настройки IntelliJ IDEA во всех каталогах проекта
 .idea/
 .DS_Store
