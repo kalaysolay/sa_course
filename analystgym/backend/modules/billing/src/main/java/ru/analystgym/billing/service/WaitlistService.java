@@ -14,7 +14,8 @@ import ru.analystgym.billing.repo.WaitlistRepository;
 /**
  * Предзапись на Pro вместо paywall: email + телефон в БД, изучаем спрос.
  * Email храним строчными, телефон нормализуем к +7XXXXXXXXXX
- * (8 → 7, 10 цифр без кода → добавляем 7). Дубль email — 409, а не вторая строка.
+ * (8 → 7, 10 цифр без кода → добавляем 7). Дубль email — 409;
+ * новый интерес к Team обновляет источник существующей записи Pro.
  */
 @Service
 public class WaitlistService {
@@ -45,7 +46,7 @@ public class WaitlistService {
         String digits = raw == null ? "" : raw.replaceAll("\\D", "");
         if (digits.startsWith("8") && digits.length() == 11) {
             digits = "7" + digits.substring(1);
-        } else if (digits.length() == 10) {
+        } else if (digits.length() == 10 && !raw.trim().startsWith("+")) {
             digits = "7" + digits;
         }
         if (!digits.matches("7\\d{10}")) {
@@ -54,12 +55,20 @@ public class WaitlistService {
         return "+" + digits;
     }
 
-    /** Заявка идемпотентна по email: повтор — 409 already_registered. */
+    /** Повтор email — 409; переход с Pro на Team сохраняется в существующей записи. */
     @Transactional
     public WaitlistEntry join(String rawEmail, String rawPhone, String rawSource) {
         String email = normalizeEmail(rawEmail);
         String phone = normalizePhone(rawPhone);
-        if (waitlist.findByEmail(email).isPresent()) {
+        var existing = waitlist.findByEmail(email);
+        if (existing.isPresent()) {
+            // Интерес к Team не теряется, если эта почта уже записана на Pro.
+            if ("team".equals(rawSource == null ? "" : rawSource.trim())
+                    && !"team".equals(existing.get().getSource())) {
+                existing.get().setSource("team");
+                existing.get().setPhone(phone);
+                return waitlist.save(existing.get());
+            }
             throw new ResponseStatusException(HttpStatus.CONFLICT, "already_registered");
         }
         WaitlistEntry entry = new WaitlistEntry();

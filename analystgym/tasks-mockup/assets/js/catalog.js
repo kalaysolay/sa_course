@@ -347,7 +347,7 @@
       <span class="badge badge-ok">с ревью: ${stats.reviewed}</span>
       <span class="badge badge-info">в работе: ${stats.inProgress}</span>
       ${stats.avgScore ? `<span class="badge badge-accent">средний балл ревью: ${stats.avgScore}/100</span>` : ''}
-      ${stats.assessment ? `<span class="badge badge-violet">уровень: ${AppUI.esc(stats.assessment.grade.name)}</span>` : '<a class="badge" href="assessment.html" style="cursor:pointer">определить уровень →</a>'}
+      ${stats.assessment ? `<span class="badge badge-violet">знания по тесту: ${AppUI.esc(stats.assessment.grade.name)}</span>` : '<a class="badge" href="assessment.html" style="cursor:pointer">проверить знания →</a>'}
     `;
   }
 

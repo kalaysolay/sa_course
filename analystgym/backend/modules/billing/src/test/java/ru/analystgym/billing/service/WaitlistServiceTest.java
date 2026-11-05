@@ -16,6 +16,33 @@ import static org.mockito.Mockito.when;
  */
 class WaitlistServiceTest {
 
+    /** Новый Team-запрос сохраняется, даже если почта уже записана на Pro. */
+    @Test
+    void командныйКонтекстНеТеряетсяДляСуществующейПочты() {
+        var repo = emptyRepo();
+        var existing = new ru.analystgym.billing.domain.WaitlistEntry();
+        existing.setEmail("a@b.cc");
+        existing.setSource("landing");
+        when(repo.findByEmail("a@b.cc")).thenReturn(Optional.of(existing));
+        var service = serviceOf(repo);
+        var result = service.join("a@b.cc", "+77011234567", "team");
+        assertThat(result.getSource()).isEqualTo("team");
+        assertThat(result.getPhone()).isEqualTo("+77011234567");
+        assertThatThrownBy(() -> service.join("a@b.cc", "+77011234567", "landing"))
+                .isInstanceOf(ResponseStatusException.class).hasMessageContaining("409");
+        assertThat(existing.getSource()).isEqualTo("team");
+    }
+
+    /** Географию не определяем: +7 допускается, чужой явный код не подменяется. */
+    @Test
+    void кодыИДлинаНомераПроверяютсяБезПодмены() {
+        assertThat(WaitlistService.normalizePhone("+7 701 123 45 67")).isEqualTo("+77011234567");
+        for (String phone : new String[]{"+380501234567", "+1234567890", "+791612345678"}) {
+            assertThatThrownBy(() -> WaitlistService.normalizePhone(phone))
+                    .isInstanceOf(ResponseStatusException.class).hasMessageContaining("400");
+        }
+    }
+
     private WaitlistService serviceOf(ru.analystgym.billing.repo.WaitlistRepository repo) {
         return new WaitlistService(repo);
     }

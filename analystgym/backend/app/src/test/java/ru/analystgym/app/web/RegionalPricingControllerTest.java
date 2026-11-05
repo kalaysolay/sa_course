@@ -10,7 +10,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class RegionalPricingControllerTest {
     private RegionalPricingController controller() throws Exception {
         return new RegionalPricingController(new ClassPathResource("geoip/dbip-country-lite.mmdb.gz"),
-                new BigDecimal("990"), new BigDecimal("5000"), new BigDecimal("11.29"));
+                new BigDecimal("990"), new BigDecimal("5000"), new BigDecimal("11.29"), 3);
     }
 
     /** IP Казахстана и России получают местные цены; внешний IPv4 и IPv6 — доллары без округления. */
@@ -47,6 +47,7 @@ class RegionalPricingControllerTest {
             request.addHeader("X-Forwarded-For", "77.88.8.8");
             var response = pricing.prices(request);
             assertThat(response.getBody().currency()).isEqualTo("USD");
+            assertThat(response.getBody().freeReviewTasks()).isEqualTo(3);
             assertThat(response.getHeaders().getCacheControl()).isEqualTo("no-store");
         }
     }

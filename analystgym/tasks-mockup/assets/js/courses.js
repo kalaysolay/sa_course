@@ -34,6 +34,10 @@
 
     const courses = (SA_DATA.courses || []);
     const host = document.getElementById('coursesHost');
+    // Курсы ещё не запущены: прямой URL тоже не должен предлагать покупку.
+    host.innerHTML = '<div class="empty-state"><h2>Курсы готовятся к запуску</h2><p>Даты, цены и условия доступа пока не объявлены. Сейчас можно попробовать тренажёр и диагностику знаний.</p><a class="btn btn-primary" href="catalog.html">Посмотреть задачи</a></div>';
+    document.getElementById('coursesStats').innerHTML = '';
+    return;
 
     const totalLessons = courses.reduce((sum, c) => sum + SA_DATA.flatLessons(c).length, 0);
     const started = courses.filter((c) => (Store.courseState(c.id).completed || []).length > 0).length;

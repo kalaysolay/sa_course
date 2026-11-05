@@ -23,14 +23,17 @@ public class RegionalPricingController implements AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(RegionalPricingController.class);
     private final Reader countries;
     private final Map<String, BigDecimal> monthly;
+    private final int freeReviewTasks;
 
     /** Загружает одну общую базу стран и согласованные месячные цены из конфигурации. */
     public RegionalPricingController(
             @Value("${pricing.country-database}") Resource database,
             @Value("${pricing.monthly-rub}") BigDecimal rub,
             @Value("${pricing.monthly-kzt}") BigDecimal kzt,
-            @Value("${pricing.monthly-usd}") BigDecimal usd) throws IOException {
+            @Value("${pricing.monthly-usd}") BigDecimal usd,
+            @Value("${billing.free-review-tasks:2}") int freeReviewTasks) throws IOException {
         monthly = Map.of("RUB", rub, "KZT", kzt, "USD", usd);
+        this.freeReviewTasks = freeReviewTasks;
         try (var input = new GZIPInputStream(database.getInputStream())) {
             countries = new Reader(input);
         }
@@ -60,7 +63,7 @@ public class RegionalPricingController implements AutoCloseable {
             LOG.warn("Не удалось определить страну для цены; используется USD");
         }
         String currency = "KZ".equals(country) ? "KZT" : "RU".equals(country) ? "RUB" : "USD";
-        return new PriceView(country, currency, monthly.get(currency));
+        return new PriceView(country, currency, monthly.get(currency), freeReviewTasks);
     }
 
     /** Освобождает базу при остановке приложения. */
@@ -70,5 +73,5 @@ public class RegionalPricingController implements AutoCloseable {
     }
 
     /** Сумма в основных единицах валюты, а не в копейках/центах; платёж этим ответом не создаётся. */
-    public record PriceView(String country, String currency, BigDecimal monthlyAmount) { }
+    public record PriceView(String country, String currency, BigDecimal monthlyAmount, int freeReviewTasks) { }
 }

@@ -17,6 +17,11 @@
     document.querySelectorAll('[data-price-free]').forEach((node) => {
       node.textContent = format(0, price.currency);
     });
+    if (Number.isInteger(price.freeReviewTasks) && price.freeReviewTasks >= 0) {
+      document.querySelectorAll('[data-free-review-tasks]').forEach((node) => {
+        node.textContent = `Отправка решений по задачам на выбор: ${price.freeReviewTasks}. Повторные попытки по этим задачам не расходуют лимит новых задач.`;
+      });
+    }
   } catch (_) {
     // Без API остаётся международная цена из разметки; предзапись доступна.
   }

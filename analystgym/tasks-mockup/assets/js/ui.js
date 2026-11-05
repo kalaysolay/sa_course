@@ -355,7 +355,7 @@
     const isCourse = product === 'course';    const columns = FOOTERS[isCourse ? 'course' : 'practice'];
     const demo = !window.Api || Api.mode === 'embedded';
     const about = isCourse
-      ? 'Курсы для системных и бизнес-аналитиков: короткие уроки без воды, практика на тренажёре, прогресс по курсу.'
+      ? 'Готовим курсы для системных и бизнес-аналитиков. Запуск и условия доступа пока не объявлены.'
       : 'Тренажёр для системных и бизнес-аналитиков: практические задачи, предварительное автоматическое ревью и диагностика знаний.';
     mount.className = 'site-footer';
     mount.innerHTML = `
@@ -367,7 +367,7 @@
               <span>AnalystGym</span>
             </a>
             <p class="footer-note">${about}</p>
-            <p class="footer-note mono" style="margin-top:14px;font-size:12px">${demo ? 'Кликабельный макет · данные хранятся в браузере' : 'Каталог и ревью хранятся на сервере · черновик сохраняется и в браузере'}</p>
+            <p class="footer-note mono" style="margin-top:14px;font-size:12px">${demo ? 'Статическое демо · решения и результаты в браузере · заявки отправляются отдельно' : 'Решения и диагностика — на сервере · локальные копии — в браузере'}</p>
           </div>
           ${columns.map((col) => `
             <div class="footer-col">

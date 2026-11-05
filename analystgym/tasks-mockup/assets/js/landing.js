@@ -13,7 +13,7 @@
     const collections = Store.dictionaries().collections.filter((c) => c.active !== false);
 
     const statTasks = document.getElementById('statTasks');
-    if (statTasks) statTasks.textContent = String(tasks.length);
+    if (statTasks) statTasks.textContent = Api.catalogError ? '—' : String(tasks.length);
     const statQuestions = document.getElementById('statQuestions');
     if (statQuestions) statQuestions.textContent = String(questions);
 
@@ -28,7 +28,7 @@
         banner.innerHTML = `
           <div class="ib-title">Ваша последняя диагностика</div>
           <div class="row" style="gap:14px;flex-wrap:wrap">
-            <span class="badge badge-accent">уровень: ${AppUI.esc(stats.assessment.grade.name)}</span>
+            <span class="badge badge-accent">знания по тесту: ${AppUI.esc(stats.assessment.grade.name)}</span>
             <span class="badge">итог: ${stats.assessment.score}/100</span>
             <span class="badge ${stats.assessment.weakest ? 'badge-warn' : ''}">зона роста: ${AppUI.esc(stats.assessment.weakest ? stats.assessment.weakest.name : '—')}</span>
             <a class="link-btn" href="results.html">открыть результат →</a>
@@ -76,20 +76,8 @@
         }
         const plan = button.dataset.demoPlan === 'pro' ? 'Pro' : 'Team';
         AppUI.modal({
-          title: `Тариф ${plan}`,
-          wide: true,
-          html: `
-            <p class="muted">В макете оплата не подключена — это место, где будет платёжная форма.</p>
-            <ul class="checklist">
-              <li>Оплата картой или по счёту для юрлиц</li>
-              <li>Пробный период 7 дней на Pro</li>
-              <li>Для Team — пилот на 5 участников и отчёт по команде</li>
-              <li>Чеки и закрывающие документы для бухгалтерии</li>
-            </ul>
-            <div class="info-box mt-16">
-              <div class="ib-title">Что проверить в макете вместо оплаты</div>
-              <p style="margin:0;font-size:13.5px">Откройте <a href="task.html?id=int-idempotency" style="color:var(--accent)">задачу про идемпотентность</a>, напишите пару абзацев решения и отправьте на ревью — это ключевой сценарий продукта.</p>
-            </div>`
+          title: `${plan} · форма недоступна`,
+          html: '<p>Не удалось загрузить форму заявки. Обновите страницу и попробуйте ещё раз. Заявка не отправлена.</p>'
         });
       });
     });

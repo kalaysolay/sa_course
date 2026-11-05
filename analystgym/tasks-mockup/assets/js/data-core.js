@@ -225,12 +225,12 @@ SA_DATA.users = [
 
 /* ---------- Промпты агентов (редакции; в продукте — версионированная таблица) ---------- */
 SA_DATA.prompts = [
-  { key: 'sa-reviewer', name: 'Ревью системного аналитика', agent: 'Анна Ковалёва · SA', versions: [
+  { key: 'sa-reviewer', name: 'Ревью системного аналитика', agent: 'ИИ · требования', versions: [
     { v: 2, status: 'archived', traffic: 0, updatedAt: '2026-09-12', model: 'mock-agents/v1', changelog: 'Первая стабильная редакция: полнота, сценарии, измеримость.' },
     { v: 3, status: 'active', traffic: 80, updatedAt: '2026-09-28', model: 'mock-agents/v1', changelog: 'Ужесточили проверку альтернативных сценариев, добавили цитаты-подтверждения.' },
     { v: 4, status: 'canary', traffic: 20, updatedAt: '2026-10-05', model: 'mock-agents/v1', changelog: 'Эксперимент: отдельный разбор UX-состояний (pending/unknown). Смотрим жалобы.' }
   ]},
-  { key: 'arch-reviewer', name: 'Ревью архитектора', agent: 'Дмитрий Лазарев · Arch', versions: [
+  { key: 'arch-reviewer', name: 'Ревью архитектора', agent: 'ИИ · архитектура', versions: [
     { v: 1, status: 'archived', traffic: 0, updatedAt: '2026-09-10', model: 'mock-agents/v1', changelog: 'Стартовая редакция.' },
     { v: 2, status: 'active', traffic: 100, updatedAt: '2026-09-25', model: 'mock-agents/v1', changelog: 'Добавили проверку гонок и outbox; снизили терпимость к «быстро/надёжно» без цифр.' }
   ]},

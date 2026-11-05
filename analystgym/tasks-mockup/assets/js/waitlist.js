@@ -1,9 +1,9 @@
 /* ============================================================
    waitlist.js — предзапись на Pro вместо paywall.
    Изучаем спрос до запуска платежей: email + телефон (+7-маска),
-   регистрация в БД через POST /api/waitlist. Без сервера
-   (чистая статика) — честный локальный fallback в localStorage,
-   чтобы форму можно было показать хоть на netlify.
+   регистрация в БД через POST /api/waitlist.
+   При сетевой ошибке остаётся локальный черновик для повторной отправки;
+   подтверждение показываем только после ответа сервера.
    ============================================================ */
 
 (function () {
@@ -12,7 +12,7 @@
 
   /** Почта: trim + строчные (сервер делает то же самое). */
   function cleanEmail(value) {
-    return String(value || '').trim().toLowerCase().slice(0, 254);
+    return String(value || '').trim().toLowerCase();
   }
 
   function validEmail(value) {
@@ -22,18 +22,20 @@
 
   /** Цифры телефона как есть (нормализация — в formatPhone/normalizePhone). */
   function phoneDigits(value) {
-    return String(value || '').replace(/\D/g, '').slice(0, 11);
+    return String(value || '').replace(/\D/g, '');
   }
 
   /**
    * Маска +7 (___) ___-__-__: 8 в начале → 7, 10 цифр без кода → добираем 7.
-   * Недобор показываем как есть (частичный ввод), перебор режем.
+   * Недобор показываем как есть; лишние цифры сохраняем для явной ошибки.
    */
   function formatPhone(value) {
     let d = phoneDigits(value);
+    // Чужой код страны и слишком длинный номер не превращаем в +7.
+    if (d.length > 11 || (String(value).trim().startsWith('+') && !d.startsWith('7'))) return value;
     if (d.startsWith('8')) d = '7' + d.slice(1);
-    else if (d.length === 10) d = '7' + d;
-    else if (d && !d.startsWith('7')) d = ('7' + d).slice(0, 11);
+    else if (d.length === 10 && !String(value).trim().startsWith('+')) d = '7' + d;
+    else if (d && !d.startsWith('7')) return value;
     if (!d) return '';
     let out = '+7';
     if (d.length > 1) out += ' (' + d.slice(1, 4);
@@ -48,7 +50,7 @@
   function normalizePhone(value) {
     let d = phoneDigits(value);
     if (d.startsWith('8') && d.length === 11) d = '7' + d.slice(1);
-    else if (d.length === 10) d = '7' + d;
+    else if (d.length === 10 && !String(value).trim().startsWith('+')) d = '7' + d;
     return /^7\d{10}$/.test(d) ? '+' + d : null;
   }
 
@@ -72,12 +74,13 @@
   function saveLocal(email, phone, source) {
     try {
       const list = readLocal();
-      if (list.some((item) => item.email === email)) return { duplicate: true };
+      const old = list.findIndex((item) => item.email === email && item.source === (source || ''));
+      if (old >= 0) list.splice(old, 1);
       list.push({ email, phone, source: source || '', createdAt: new Date().toISOString(), local: true });
       localStorage.setItem(LOCAL_KEY, JSON.stringify(list));
-      return { duplicate: false };
+      return { saved: true };
     } catch (e) {
-      return { duplicate: false };
+      return { saved: false };
     }
   }
 
@@ -90,7 +93,7 @@
 
   /**
    * Отправка заявки: сначала сервер (Api.post сам праймит CSRF),
-   * при сетевом провале (статика без бэка) — локальный список.
+   * при сетевом провале — локальный черновик без подтверждения доставки.
    * 409 с сервера маппим в {duplicate:true}, а не в ошибку.
    */
   async function submit(email, phone, source) {
@@ -122,9 +125,14 @@
 
   async function submitWithFallback(email, phone, source) {
     try {
-      return await submit(email, phone, source);
+      const result = await submit(email, phone, source);
+      try {
+        localStorage.setItem(LOCAL_KEY, JSON.stringify(readLocal().filter((item) =>
+          item.email !== cleanEmail(email) || item.source !== (source || ''))));
+      } catch (e) { /* Сервер уже принял заявку; очистка локального черновика необязательна. */ }
+      return result;
     } catch (error) {
-      // Сервера рядом нет (file://, netlify-статика): спрос фиксируем локально.
+      // Локальное сохранение не означает доставку заявки команде.
       if (error instanceof TypeError || (error && error.message && String(error.message).startsWith('Failed to fetch'))) {
         return Object.assign({ fallback: true }, saveLocal(cleanEmail(email), phone, source));
       }
@@ -132,15 +140,19 @@
     }
   }
 
-  function formHtml() {
+  function formHtml(source) {
+    const team = source === 'team';
     return `
+      <p class="muted">${team ? 'Запрос на командную практику. Team пока не запущен; формат и стоимость нужно обсудить.' : 'Сообщим о запуске Pro по почте. Заявка не подключает подписку и не требует оплаты.'}</p>
       <div class="field"><label for="wlEmail">Почта</label>
         <input id="wlEmail" type="email" inputmode="email" autocomplete="email" maxlength="254" placeholder="you@example.com">
       </div>
       <div class="field"><label for="wlPhone">Телефон</label>
         <input id="wlPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+7 (___) ___-__-__">
       </div>
-      <p class="muted" style="font-size:12px">Нажимая кнопку, вы соглашаетесь с обработкой персональных данных для связи о запуске Pro.</p>
+      <p class="muted" style="font-size:12px">Сейчас форма принимает только номера +7 (11 цифр: код 7 и ещё 10). Телефон обязателен для отправки заявки; основной контакт — почта. Другие коды стран пока не поддерживаются.</p>
+      <p class="muted" style="font-size:12px">Нажимая кнопку, вы соглашаетесь с обработкой почты и телефона для ${team ? 'связи по командному запросу' : 'связи о запуске Pro'}. Контакты сохраняются на сервере.</p>
+      <p data-role="status" role="status" aria-live="polite"></p>
       <div class="modal-actions">
         <button type="button" class="btn btn-primary" data-role="send">Оставить заявку</button>
       </div>`;
@@ -150,12 +162,26 @@
   function open(source) {
     const ui = window.AppUI || window.UI;
     if (!ui || typeof ui.modal !== 'function') return;
-    const dialog = ui.modal({ title: 'Предзапись на Pro', wide: false, html: formHtml(), closeText: 'Позже' });
+    const dialog = ui.modal({ title: source === 'team' ? 'Обсудить Team' : 'Предзапись на Pro', wide: false, html: formHtml(source), closeText: 'Позже' });
+    bindForm(dialog.body, source);
     const emailInput = dialog.body.querySelector('#wlEmail');
-    const phoneInput = dialog.body.querySelector('#wlPhone');
-    attachPhoneMask(phoneInput);
     setTimeout(() => emailInput.focus(), 60);
-    dialog.body.querySelector('[data-role="send"]').addEventListener('click', async () => {
+  }
+
+  /** Одинаковые состояния доставки в модалке и кабинете; поля остаются при сбое. */
+  function bindForm(host, source) {
+    const emailInput = host.querySelector('#wlEmail');
+    const phoneInput = host.querySelector('#wlPhone');
+    const button = host.querySelector('[data-role="send"]');
+    const status = host.querySelector('[data-role="status"]');
+    const draft = readLocal().filter((item) => item.source === (source || '')).pop();
+    if (draft) {
+      emailInput.value = draft.email;
+      phoneInput.value = draft.phone;
+      status.textContent = 'Есть локальный черновик. Доставка заявки не подтверждена — отправьте её ещё раз.';
+    }
+    attachPhoneMask(phoneInput);
+    button.addEventListener('click', async () => {
       const email = cleanEmail(emailInput.value);
       const phone = normalizePhone(phoneInput.value);
       if (!validEmail(email)) {
@@ -164,17 +190,31 @@
         return;
       }
       if (!phone) {
-        (window.AppUI || window.UI).toast('Проверьте телефон: нужен российский номер', 'warn');
+        (window.AppUI || window.UI).toast('Укажите номер +7 и ещё 10 цифр. Другие коды стран пока не поддерживаются.', 'warn');
         phoneInput.focus();
         return;
       }
       try {
+        button.disabled = true;
+        status.textContent = 'Отправляем заявку…';
         const res = await submitWithFallback(email, phone, source);
-        dialog.body.innerHTML = res.duplicate
-          ? '<p>Вы уже в списке — напишем первым делом, как только Pro откроется.</p>'
-          : '<p>Готово! Вы в предзаписи — напишем, как только Pro откроется.</p>';
+        if (res.fallback) {
+          status.textContent = res.saved
+            ? 'Доставка заявки не подтверждена. Контакты сохранены как черновик в этом браузере. Повторите отправку, когда появится связь.'
+            : 'Заявка не отправлена и черновик не сохранён. Поля остаются в форме — попробуйте отправить ещё раз.';
+          button.textContent = 'Повторить отправку';
+          return;
+        }
+        host.innerHTML = res.duplicate
+          ? '<p role="status">На сервере уже есть заявка с этой почтой. Новая запись не создана.</p>'
+          : source === 'team'
+            ? '<p role="status">Запрос на Team сохранён на сервере. Команда получила контакты для обсуждения. Доступ и оплата не подключены.</p>'
+            : '<p role="status">Заявка на Pro сохранена на сервере. Контакты получены; дата запуска пока не объявлена. Подписка и оплата не подключены.</p>';
       } catch (error) {
-        (window.AppUI || window.UI).toast('Не получилось отправить: ' + (error && error.message ? error.message : error), 'bad');
+        status.textContent = 'Отправка не подтверждена. Проверьте контакты и попробуйте ещё раз. Если связь прервалась после приёма, повторная отправка проверит заявку по почте.';
+        button.textContent = 'Повторить отправку';
+      } finally {
+        button.disabled = false;
       }
     });
   }
@@ -183,31 +223,8 @@
   function renderInline(host, source) {
     host.innerHTML = `
       <div class="row" style="gap:8px;margin-bottom:12px"><span class="badge">Предзапись</span></div>
-      <p class="muted" style="font-size:13px">Pro откроем после набора желающих — оставьте контакты, напишем первым.</p>
-      ${formHtml()}`;
-    const emailInput = host.querySelector('#wlEmail');
-    const phoneInput = host.querySelector('#wlPhone');
-    attachPhoneMask(phoneInput);
-    host.querySelector('[data-role="send"]').addEventListener('click', async () => {
-      const email = cleanEmail(emailInput.value);
-      const phone = normalizePhone(phoneInput.value);
-      if (!validEmail(email)) {
-        (window.AppUI || window.UI).toast('Проверьте почту', 'warn');
-        return;
-      }
-      if (!phone) {
-        (window.AppUI || window.UI).toast('Проверьте телефон: нужен российский номер', 'warn');
-        return;
-      }
-      try {
-        const res = await submitWithFallback(email, phone, source);
-        host.innerHTML = res.duplicate
-          ? '<p class="muted">Вы уже в списке — напишем первым делом.</p>'
-          : '<p class="muted">Готово! Вы в предзаписи.</p>';
-      } catch (error) {
-        (window.AppUI || window.UI).toast('Не получилось отправить: ' + (error && error.message ? error.message : error), 'bad');
-      }
-    });
+      ${formHtml(source)}`;
+    bindForm(host, source);
   }
 
   window.Waitlist = {
