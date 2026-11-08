@@ -299,7 +299,7 @@
         <section class="pane" aria-label="Условие задачи">
           <div class="pane-head">
             <div>
-              <div class="title">${AppUI.esc(task.title)}</div>
+              <h1 class="title">${AppUI.esc(task.title)}</h1>
               <div class="row mt-8" style="gap:8px;flex-wrap:wrap">
                 ${AppUI.levelPill(task.level)}
                 <span class="badge">${task.timeMin} мин</span>
@@ -975,6 +975,7 @@
     let res = null;
     try {
       res = await Api.submitReliable(task.id, tabs, version);
+      window.AppAnalytics?.goal('solution_submitted');
     } catch (error) {
       // Восстановление уже попробовал api.js; повторный отказ не подменяем демо-оценкой.
       if (error && error.status === 401) {
@@ -1225,6 +1226,7 @@
     el.reviewProgressSection.classList.add('hidden');
     activeAttempt = attempt;
     renderReview(attempt);
+    window.AppAnalytics?.goal('review_open');
     renderAttempts();
     requestAnimationFrame(() => {
       el.reviewResultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });

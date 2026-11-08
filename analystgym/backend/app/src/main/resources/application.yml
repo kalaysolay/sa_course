@@ -32,6 +32,9 @@ app:
     secure: ${APP_COOKIES_SECURE:false}
 
 # Публичные месячные цены: предзапись, без валютной конвертации платежей.
+analytics:
+  metrika-id: ${ANALYTICS_METRIKA_ID:}
+
 pricing:
   monthly-rub: ${PRICING_MONTHLY_RUB:990}
   monthly-kzt: ${PRICING_MONTHLY_KZT:5000}

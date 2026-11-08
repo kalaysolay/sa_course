@@ -83,6 +83,7 @@ public class SecurityConfig {
                         // /error обязан быть публичным: иначе контейнерный error-dispatch
                         // на 404 контроллера пере-проверяется цепочкой и маскарадит 404 в 401.
                         .requestMatchers("/error").permitAll()
+                        .requestMatchers("/robots.txt", "/sitemap.xml", "/api/site-config").permitAll()
                         .requestMatchers("/", "/*.html", "/assets/**", "/docs/**", "/actuator/health", "/favicon.ico").permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)

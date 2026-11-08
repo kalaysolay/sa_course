@@ -11,6 +11,8 @@
 
 ## Релиз (`release/`)
 
+- `seo-local-smoke.cjs` — проверка поисковых страниц на собранном JAR и временной PostgreSQL. После Gradle build: `node analystgym/tools/release/seo-local-smoke.cjs --screenshots`. Нужны Java 21, Docker и (для скриншотов) Edge; путь можно задать через `EDGE_BINARY`. Вывод остаётся в игнорируемом `backend/app/build/seo-smoke/`, контейнер удаляется после проверки.
+
 - `analystgym-production-release-check.cjs` проверяет публичный сайт, выполняет только чтение. Запуск: `node analystgym-production-release-check.cjs`.
 - `analystgym-regional-release-smoke.cjs` проверяет образ `analystgym-app:release-7e37bf2` в локальном Docker на временной БД; создаёт и удаляет собственные контейнеры и сеть. Требует Docker и свободный порт 18082.
 

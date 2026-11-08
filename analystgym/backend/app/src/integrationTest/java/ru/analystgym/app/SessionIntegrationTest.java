@@ -52,6 +52,70 @@ class SessionIntegrationTest {
     }
 
     @Autowired MockMvc mvc;
+    @Autowired ru.analystgym.catalog.repo.TaskRepository seoTasks;
+
+    /** Гость видит условие без JS, но не эталон, опасный HTML или снятую с публикации задачу. */
+    @Test
+    void publicSearchPagesRenderSafePublishedStatements() throws Exception {
+        var source = seoTasks.search(null, null, "published", null).getFirst();
+        var task = new ru.analystgym.catalog.domain.Task();
+        task.setId("seo-check-" + UUID.randomUUID());
+        task.setTitle("Проверка <script>alert(1)</script>");
+        task.setLevelId(source.getLevelId());
+        task.setStarterTabs(json.createArrayNode());
+        task.setRubric(json.createArrayNode());
+        task.setHints(json.createArrayNode());
+        task.setInterviewQuestions(json.createArrayNode());
+        task.setStatement(json.readTree("""
+                {"context":["Контекст <strong>задачи</strong><script>badScript()</script>"],
+                 "goal":"Проверить доставку отчёта", "inputs":["<img src=x onerror=badImage()>"]}
+                """));
+        task.setAuthorSolution(json.readTree("{\"html\":\"PRIVATE_REFERENCE_SENTINEL\"}"));
+        seoTasks.saveAndFlush(task);
+        try {
+            var html = mvc.perform(get("/task.html").param("id", task.getId()).param("utm_source", "test"))
+                    .andExpect(status().isOk()).andReturn().getResponse().getContentAsString(java.nio.charset.StandardCharsets.UTF_8);
+            var doc = org.jsoup.Jsoup.parse(html);
+            assertThat(doc.selectFirst("h1").text()).isEqualTo(task.getTitle());
+            assertThat(doc.getElementById("taskHost").html()).contains("<strong>задачи</strong>")
+                    .doesNotContain("badScript", "badImage", "PRIVATE_REFERENCE_SENTINEL", "<script>");
+            assertThat(doc.selectFirst("link[rel=canonical]").attr("href"))
+                    .endsWith("/task.html?id=" + task.getId()).doesNotContain("utm_");
+            assertThat(json.readTree(doc.selectFirst("script[type=application/ld+json]").data()).get("name").asText())
+                    .isEqualTo(task.getTitle());
+            String catalog = mvc.perform(get("/catalog.html")).andExpect(status().isOk()).andReturn()
+                    .getResponse().getContentAsString(java.nio.charset.StandardCharsets.UTF_8);
+            assertThat(org.jsoup.Jsoup.parse(catalog).select("#taskRows a[href]").eachAttr("href"))
+                    .contains("/task.html?id=" + task.getId());
+            String sitemap = mvc.perform(get("/sitemap.xml")).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+            assertThat(sitemap).contains("/task.html?id=" + task.getId()).doesNotContain("account.html", "admin.html", "reference");
+            javax.xml.parsers.DocumentBuilderFactory.newInstance().newDocumentBuilder()
+                    .parse(new java.io.ByteArrayInputStream(sitemap.getBytes(java.nio.charset.StandardCharsets.UTF_8)));
+            task.setStatus("draft");
+            seoTasks.saveAndFlush(task);
+            mvc.perform(get("/task.html").param("id", task.getId())).andExpect(status().isNotFound());
+            assertThat(mvc.perform(get("/sitemap.xml")).andReturn().getResponse().getContentAsString()).doesNotContain(task.getId());
+        } finally { seoTasks.deleteById(task.getId()); }
+        mvc.perform(get("/task.html")).andExpect(status().isNotFound());
+        mvc.perform(get("/task.html").param("id", "missing-seo-task")).andExpect(status().isNotFound());
+        mvc.perform(get("/api/tasks/" + source.getId() + "/reference")).andExpect(status().isUnauthorized());
+    }
+
+    /** Поисковые файлы открыты, служебные страницы исключены из поиска, без ID счётчик выключен. */
+    @Test
+    void searchDiscoveryAndPrivatePagesHaveCorrectAccess() throws Exception {
+        assertThat(mvc.perform(get("/robots.txt")).andExpect(status().isOk()).andReturn().getResponse().getContentAsString())
+                .contains("Sitemap: ", "/sitemap.xml", "Disallow: /api/");
+        var account = mvc.perform(get("/account.html")).andExpect(status().isOk()).andReturn().getResponse();
+        assertThat(account.getHeader("X-Robots-Tag")).isEqualTo("noindex, nofollow");
+        var home = mvc.perform(get("/")).andExpect(status().isOk()).andReturn().getResponse();
+        assertThat(home.getHeader("X-Robots-Tag")).isNull();
+        assertThat(org.jsoup.Jsoup.parse(home.getContentAsString(java.nio.charset.StandardCharsets.UTF_8))
+                .selectFirst("link[rel=canonical]").attr("href")).endsWith("/");
+        var config = mvc.perform(get("/api/site-config")).andExpect(status().isOk()).andReturn().getResponse();
+        assertThat(json.readTree(config.getContentAsString()).get("metrikaId").asText()).isEmpty();
+        assertThat(config.getHeader("Cache-Control")).isEqualTo("no-store");
+    }
     @Autowired ObjectMapper json;
     @Autowired AuthService auth;
     @Autowired UserRepository users;

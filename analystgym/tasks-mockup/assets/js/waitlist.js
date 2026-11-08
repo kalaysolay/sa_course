@@ -160,6 +160,7 @@
 
   /** Модалка предзаписи: точка входа для 402, лендинга и кабинета. */
   function open(source) {
+    window.AppAnalytics?.goal(source === 'team' ? 'waitlist_open_team' : 'waitlist_open_pro');
     const ui = window.AppUI || window.UI;
     if (!ui || typeof ui.modal !== 'function') return;
     const dialog = ui.modal({ title: source === 'team' ? 'Обсудить Team' : 'Предзапись на Pro', wide: false, html: formHtml(source), closeText: 'Позже' });
@@ -205,6 +206,7 @@
           button.textContent = 'Повторить отправку';
           return;
         }
+        if (!res.duplicate) window.AppAnalytics?.goal(source === 'team' ? 'waitlist_success_team' : 'waitlist_success_pro');
         host.innerHTML = res.duplicate
           ? '<p role="status">На сервере уже есть заявка с этой почтой. Новая запись не создана.</p>'
           : source === 'team'
