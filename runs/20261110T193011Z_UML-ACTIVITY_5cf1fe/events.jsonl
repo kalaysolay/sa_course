@@ -1,0 +1,21 @@
+{"ts":"2026-11-10T19:30:11.684Z","event":"RUN_CREATED","topicId":"UML-ACTIVITY"}
+{"ts":"2026-11-10T19:30:11.696Z","event":"STATE_CHANGED","status":"TOPIC_RESOLVED"}
+{"ts":"2026-11-10T19:30:11.707Z","event":"STATE_CHANGED","status":"PROGRESS_CHECKED"}
+{"ts":"2026-11-10T19:30:11.713Z","event":"SOURCE_PREFLIGHT","policy":"block_and_register_major_gap","missingPrimary":[],"severity":"minor","blocking":false}
+{"ts":"2026-11-10T19:30:11.721Z","event":"STATE_CHANGED","status":"CONTEXT_READY"}
+{"ts":"2026-11-10T19:30:11.727Z","event":"CODEX_TASKS_CREATED","taskDir":"codex-tasks","taskCount":5}
+{"ts":"2026-11-10T19:30:11.732Z","event":"STATE_CHANGED","status":"CODEX_TASKS_READY"}
+{"ts":"2026-11-10T19:38:23.084Z","event":"CODEX_STAGE_COMPLETED","stage":"01-plan-research","learningOutcomes":7,"sources":["SRC-OMG-UML-251","SRC-PLANTUML-ACTIVITY"],"sourceCaveat":"Author materials unavailable; external primary evidence verified"}
+{"ts":"2026-11-10T19:41:32.534Z","event":"STATE_CHANGED","status":"LECTURE_APPROVED"}
+{"ts":"2026-11-10T19:41:32.535Z","event":"CODEX_STAGE_COMPLETED","stage":"03-lean-review","content":"APPROVED","learning":"APPROVED","manualTrace":"03-lecture/review-v1/manual-trace.md","diagramRender":"5 SVG verified"}
+{"ts":"2026-11-10T19:45:56.798Z","event":"STATE_CHANGED","status":"PACKAGE_READY"}
+{"ts":"2026-11-10T19:45:56.803Z","event":"CODEX_RUN_FINALIZED","output":"output/M04/UML-ACTIVITY/","metrics":{"measuredAt":"2026-11-10T19:45:56.795Z","stageCount":0,"payloadInputChars":0,"payloadOutputChars":0,"plannedCodexInputChars":97614,"producedCodexOutputChars":107599,"exactUsageAvailable":false,"exactUsage":{"inputTokens":0,"outputTokens":0,"totalTokens":0,"cachedInputTokens":0,"reasoningTokens":0}}}
+{"ts":"2026-11-10T19:45:56.810Z","event":"STATE_CHANGED","status":"COMPLETED"}
+{"ts":"2026-11-10T19:47:30.034Z","event":"TRACKER_UPDATED","sheet":"План лекций","row":24,"status":"Готово","verified":true}
+{"ts":"2026-11-10T19:47:30.035Z","event":"PACKAGE_VERIFIED","lectureDiagrams":5,"answerDiagrams":3,"allRenderedAsSvg":true,"packageHashes":"match","progress":"completed","physicalLectureCount":26}
+{"ts":"2026-11-10T19:57:27.143Z","event":"USER_REJECTED_RELEASE","issues":["visual notation examples","explicit merge diagram","verbosity","headings"],"revision":2}
+{"ts":"2026-11-10T19:57:27.146Z","event":"STATE_CHANGED","status":"LECTURE_REWORK"}
+{"ts":"2026-11-11T15:25:42.989Z","event":"STATE_CHANGED","status":"PACKAGE_READY"}
+{"ts":"2026-11-11T15:25:42.993Z","event":"CODEX_RUN_FINALIZED","output":"output/M04/UML-ACTIVITY/","metrics":{"measuredAt":"2026-11-11T15:25:42.984Z","stageCount":0,"payloadInputChars":0,"payloadOutputChars":0,"plannedCodexInputChars":81508,"producedCodexOutputChars":90423,"exactUsageAvailable":false,"exactUsage":{"inputTokens":0,"outputTokens":0,"totalTokens":0,"cachedInputTokens":0,"reasoningTokens":0}}}
+{"ts":"2026-11-11T15:25:42.994Z","event":"STATE_CHANGED","status":"COMPLETED"}
+{"ts":"2026-11-11T15:26:36.108Z","event":"USER_FEEDBACK_REVISION_PUBLISHED","revision":2,"chars":12734,"assets":7,"reviewMode":"main-agent-revision-audit"}

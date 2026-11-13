@@ -1,0 +1,12 @@
+{
+  "module": "M04",
+  "section": "M04-S02",
+  "topic": {
+    "id": "UML-ACTIVITY",
+    "slug": "uml-activity",
+    "title": "UML. Диаграмма активности",
+    "order": 1,
+    "course_order": 20,
+    "passport": "course/modules/M04-modeling/sections/S02-activities/topics/uml-activity.yaml"
+  }
+}

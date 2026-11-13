@@ -1,0 +1,36 @@
+{
+  "reviewer": "deterministic-assessment",
+  "artifact": "04-assessment/draft.json",
+  "verdict": "APPROVED",
+  "summary": "Assessment schema and LO coverage checks passed.",
+  "issues": [],
+  "coverage": {
+    "UML-ACTIVITY-LO1": [
+      "ACT20-01",
+      "ACT20-08"
+    ],
+    "UML-ACTIVITY-LO2": [
+      "ACT20-02",
+      "ACT20-08"
+    ],
+    "UML-ACTIVITY-LO3": [
+      "ACT20-03",
+      "ACT20-04",
+      "ACT20-08"
+    ],
+    "UML-ACTIVITY-LO4": [
+      "ACT20-04",
+      "ACT20-08"
+    ],
+    "UML-ACTIVITY-LO5": [
+      "ACT20-05"
+    ],
+    "UML-ACTIVITY-LO6": [
+      "ACT20-06"
+    ],
+    "UML-ACTIVITY-LO7": [
+      "ACT20-07",
+      "ACT20-08"
+    ]
+  }
+}

@@ -171,13 +171,13 @@
   const NAV_PRACTICE = [
     { href: 'catalog.html', label: 'Задачи', id: 'catalog' },
     { href: 'collections.html', label: 'Подборки', id: 'collections' },
-    { label: 'Курсы', id: 'courses', comingSoon: true },
+    { label: 'Курсы', id: 'courses', href: 'courses.html' },
     { href: 'practice.html#how', label: 'Как это работает', id: 'how' },
     { href: 'practice.html#pricing', label: 'Тарифы', id: 'pricing' }
   ];
 
   const NAV_COURSE = [
-    { label: 'Курсы', id: 'courses', comingSoon: true }
+    { label: 'Курсы', id: 'courses', href: 'courses.html' }
   ];
 
   /* Вход/кабинет в шапке: гостю — текстовые ссылки (кнопка здесь одна —
@@ -295,7 +295,7 @@
       { title: 'Практика', links: [
         ['catalog.html', 'Каталог задач'],
         ['collections.html', 'Подборки по доменам'],
-        [null, 'Курсы · скоро'],
+        ['courses.html', 'Курсы'],
         ['results.html', 'Мои результаты']
       ]},
       { title: 'Домены', links: [
@@ -312,7 +312,7 @@
     ],
     course: [
       { title: 'Курсы', links: [
-        [null, 'Курсы · скоро']
+        ['courses.html', 'Курсы']
       ]},
       { title: 'Тренажёр', links: [
         ['practice.html', 'Онлайн-тренажёр'],
@@ -355,7 +355,7 @@
     const isCourse = product === 'course';    const columns = FOOTERS[isCourse ? 'course' : 'practice'];
     const demo = !window.Api || Api.mode === 'embedded';
     const about = isCourse
-      ? 'Готовим курсы для системных и бизнес-аналитиков. Запуск и условия доступа пока не объявлены.'
+      ? 'Уроки для аналитиков: теория, проверки понимания и практика. Демонстрационный доступ.'
       : 'Тренажёр для системных и бизнес-аналитиков: практические задачи, предварительное автоматическое ревью и диагностика знаний.';
     mount.className = 'site-footer';
     mount.innerHTML = `

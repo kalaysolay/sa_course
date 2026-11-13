@@ -1,0 +1,192 @@
+{
+  "measured_at": "2026-11-11T18:09:51.527Z",
+  "start_at": "2026-11-11T17:54:37.240Z",
+  "source": "Codex session event_msg/token_count cumulative counters",
+  "scope": "Current chat and its descendant agents after task start marker. Snapshot precedes final reply.",
+  "input_includes_cached_tokens": true,
+  "output_note": "Raw output_tokens counter; reasoning_output_tokens is reported separately and is not added again.",
+  "totals": {
+    "input_tokens": 8169794,
+    "cached_input_tokens": 7913344,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 39128,
+    "reasoning_output_tokens": 2401,
+    "total_tokens": 8208922
+  },
+  "sessions": [
+    {
+      "session_id": "01a1cbbe-a25f-7192-87ab-a2c17eae7526",
+      "role": "root",
+      "events": 69,
+      "baseline": {
+        "input_tokens": 0,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 0,
+        "reasoning_output_tokens": 0,
+        "total_tokens": 0
+      },
+      "latest": {
+        "input_tokens": 5131658,
+        "cached_input_tokens": 5054592,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 9981,
+        "reasoning_output_tokens": 1142,
+        "total_tokens": 5141639
+      },
+      "usage": {
+        "input_tokens": 5131658,
+        "cached_input_tokens": 5054592,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 9981,
+        "reasoning_output_tokens": 1142,
+        "total_tokens": 5141639
+      }
+    },
+    {
+      "session_id": "01a1cbc0-3d76-70e3-8aa2-f7171cd979c0",
+      "role": "/root/sequence_plan",
+      "events": 27,
+      "baseline": {
+        "input_tokens": 0,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 0,
+        "reasoning_output_tokens": 0,
+        "total_tokens": 0
+      },
+      "latest": {
+        "input_tokens": 1114018,
+        "cached_input_tokens": 1067392,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 6088,
+        "reasoning_output_tokens": 386,
+        "total_tokens": 1120106
+      },
+      "usage": {
+        "input_tokens": 1114018,
+        "cached_input_tokens": 1067392,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 6088,
+        "reasoning_output_tokens": 386,
+        "total_tokens": 1120106
+      }
+    },
+    {
+      "session_id": "01a1cbc3-901b-7ce1-b077-481328159762",
+      "role": "/root/sequence_writer",
+      "events": 16,
+      "baseline": {
+        "input_tokens": 0,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 0,
+        "reasoning_output_tokens": 0,
+        "total_tokens": 0
+      },
+      "latest": {
+        "input_tokens": 584223,
+        "cached_input_tokens": 553600,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 9344,
+        "reasoning_output_tokens": 455,
+        "total_tokens": 593567
+      },
+      "usage": {
+        "input_tokens": 584223,
+        "cached_input_tokens": 553600,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 9344,
+        "reasoning_output_tokens": 455,
+        "total_tokens": 593567
+      }
+    },
+    {
+      "session_id": "01a1cbc7-525c-7722-8a02-0a2978a6e172",
+      "role": "/root/sequence_review",
+      "events": 9,
+      "baseline": {
+        "input_tokens": 0,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 0,
+        "reasoning_output_tokens": 0,
+        "total_tokens": 0
+      },
+      "latest": {
+        "input_tokens": 321112,
+        "cached_input_tokens": 269696,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1476,
+        "reasoning_output_tokens": 40,
+        "total_tokens": 322588
+      },
+      "usage": {
+        "input_tokens": 321112,
+        "cached_input_tokens": 269696,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1476,
+        "reasoning_output_tokens": 40,
+        "total_tokens": 322588
+      }
+    },
+    {
+      "session_id": "01a1cbc8-4a74-7e33-8fa9-c6e64f11ec91",
+      "role": "/root/sequence_assessment",
+      "events": 10,
+      "baseline": {
+        "input_tokens": 0,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 0,
+        "reasoning_output_tokens": 0,
+        "total_tokens": 0
+      },
+      "latest": {
+        "input_tokens": 360697,
+        "cached_input_tokens": 344960,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 9229,
+        "reasoning_output_tokens": 284,
+        "total_tokens": 369926
+      },
+      "usage": {
+        "input_tokens": 360697,
+        "cached_input_tokens": 344960,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 9229,
+        "reasoning_output_tokens": 284,
+        "total_tokens": 369926
+      }
+    },
+    {
+      "session_id": "01a1cbcb-acf5-71a3-9e8c-2180ca557558",
+      "role": "/root/sequence_tracker",
+      "events": 13,
+      "baseline": {
+        "input_tokens": 0,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 0,
+        "reasoning_output_tokens": 0,
+        "total_tokens": 0
+      },
+      "latest": {
+        "input_tokens": 658086,
+        "cached_input_tokens": 623104,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 3010,
+        "reasoning_output_tokens": 94,
+        "total_tokens": 661096
+      },
+      "usage": {
+        "input_tokens": 658086,
+        "cached_input_tokens": 623104,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 3010,
+        "reasoning_output_tokens": 94,
+        "total_tokens": 661096
+      }
+    }
+  ]
+}

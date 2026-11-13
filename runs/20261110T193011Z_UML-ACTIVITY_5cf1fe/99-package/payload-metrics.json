@@ -1,0 +1,16 @@
+{
+  "measuredAt": "2026-11-11T15:25:42.984Z",
+  "stageCount": 0,
+  "payloadInputChars": 0,
+  "payloadOutputChars": 0,
+  "plannedCodexInputChars": 81508,
+  "producedCodexOutputChars": 90423,
+  "exactUsageAvailable": false,
+  "exactUsage": {
+    "inputTokens": 0,
+    "outputTokens": 0,
+    "totalTokens": 0,
+    "cachedInputTokens": 0,
+    "reasoningTokens": 0
+  }
+}

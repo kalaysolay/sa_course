@@ -1,0 +1,8 @@
+{
+  "reviewer": "format",
+  "artifact": "03-lecture/draft.md",
+  "verdict": "APPROVED",
+  "summary": "Deterministic format and package-link checks passed.",
+  "positiveNotes": [],
+  "issues": []
+}

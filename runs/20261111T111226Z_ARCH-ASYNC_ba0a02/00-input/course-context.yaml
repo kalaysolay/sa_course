@@ -1,0 +1,12 @@
+{
+  "module": "M05",
+  "section": "M05-S04",
+  "topic": {
+    "id": "ARCH-ASYNC",
+    "slug": "async-interaction",
+    "title": "Асинхронное взаимодействие",
+    "order": 2,
+    "course_order": 33,
+    "passport": "course/modules/M05-architecture/sections/S04-interaction/topics/async-interaction.yaml"
+  }
+}

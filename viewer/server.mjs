@@ -240,7 +240,10 @@ async function serveAsset(reqUrl, res) {
     ['.pdf', 'application/pdf']
   ]);
 
-  res.writeHead(200, { 'content-type': types.get(ext) ?? 'application/octet-stream' });
+  res.writeHead(200, {
+    'content-type': types.get(ext) ?? 'application/octet-stream',
+    'cache-control': 'no-store'
+  });
   fs.createReadStream(assetPath).pipe(res);
 }
 

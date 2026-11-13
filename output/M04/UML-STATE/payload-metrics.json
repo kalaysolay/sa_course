@@ -1,0 +1,29 @@
+{
+  "measuredAt": "2026-11-11T15:43:58.251Z",
+  "stageCount": 0,
+  "payloadInputChars": 0,
+  "payloadOutputChars": 0,
+  "plannedCodexInputChars": 61765,
+  "producedCodexOutputChars": 58630,
+  "exactUsageAvailable": false,
+  "exactUsage": {
+    "inputTokens": 0,
+    "outputTokens": 0,
+    "totalTokens": 0,
+    "cachedInputTokens": 0,
+    "reasoningTokens": 0
+  },
+  "codexSessionUsage": {
+    "source": "Codex session event_msg/token_count cumulative counters",
+    "scope": "Current chat and its descendant agents after lesson start marker; lesson 20 revision excluded. Snapshot precedes final reply.",
+    "measured_at": "2026-11-11T15:46:27.093Z",
+    "totals": {
+      "input_tokens": 21304490,
+      "cached_input_tokens": 20886528,
+      "cache_write_input_tokens": 0,
+      "output_tokens": 63486,
+      "reasoning_output_tokens": 20844,
+      "total_tokens": 21367976
+    }
+  }
+}

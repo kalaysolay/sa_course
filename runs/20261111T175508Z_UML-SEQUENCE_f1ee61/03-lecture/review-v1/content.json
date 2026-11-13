@@ -1,0 +1,7 @@
+{
+  "reviewer": "content/coverage",
+  "artifact": "03-lecture/draft-v1.md",
+  "verdict": "APPROVED",
+  "summary": "LO1–LO4 и обязательные темы раскрыты. Проверены пять SVG и preview.png: формы sync/async/reply, lifeline, activation, рамки и условия читаемы и согласованы с текстом. Async и порядок событий описаны корректно; gaps и prerequisite обозначены.",
+  "issues": []
+}

@@ -1,0 +1,10 @@
+{"ts":"2026-11-10T20:50:59.898Z","event":"RUN_CREATED","topicId":"ARCH-CACHE"}
+{"ts":"2026-11-10T20:50:59.914Z","event":"STATE_CHANGED","status":"TOPIC_RESOLVED"}
+{"ts":"2026-11-10T20:50:59.927Z","event":"STATE_CHANGED","status":"PROGRESS_CHECKED"}
+{"ts":"2026-11-10T20:50:59.934Z","event":"SOURCE_PREFLIGHT","policy":"block_and_register_major_gap","missingPrimary":[],"severity":"minor","blocking":false}
+{"ts":"2026-11-10T20:50:59.939Z","event":"STATE_CHANGED","status":"CONTEXT_READY"}
+{"ts":"2026-11-10T20:50:59.947Z","event":"CODEX_TASKS_CREATED","taskDir":"codex-tasks","taskCount":5}
+{"ts":"2026-11-10T20:50:59.957Z","event":"STATE_CHANGED","status":"CODEX_TASKS_READY"}
+{"ts":"2026-11-11T07:12:07.023Z","event":"STATE_CHANGED","status":"PACKAGE_READY"}
+{"ts":"2026-11-11T07:12:07.032Z","event":"CODEX_RUN_FINALIZED","output":"output/M05/ARCH-CACHE/","metrics":{"measuredAt":"2026-11-11T07:12:07.006Z","stageCount":0,"payloadInputChars":0,"payloadOutputChars":0,"plannedCodexInputChars":63982,"producedCodexOutputChars":77617,"exactUsageAvailable":false,"exactUsage":{"inputTokens":0,"outputTokens":0,"totalTokens":0,"cachedInputTokens":0,"reasoningTokens":0}}}
+{"ts":"2026-11-11T07:12:07.032Z","event":"STATE_CHANGED","status":"COMPLETED"}

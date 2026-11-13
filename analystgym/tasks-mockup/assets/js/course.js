@@ -22,14 +22,9 @@
     AppUI.mountHeader('courses', 'course');
     AppUI.mountFooter('course');
 
-    const id = AppUI.qs('id');
+    const id = AppUI.qs('id') || 'interactive-course';
     course = id ? Store.course(id) : null;
     const host = document.getElementById('courseHost');
-    // Не открываем демонстрационную покупку по прямой ссылке на незапущенный курс.
-    document.getElementById('crumbs').innerHTML = '<a href="courses.html">Курсы · скоро</a>';
-    host.innerHTML = '<div class="empty-state"><h1>Курсы готовятся к запуску</h1><p>Покупка и доступ к полной программе пока не открыты. Дата запуска не объявлена.</p><a class="btn btn-primary" href="catalog.html">Посмотреть задачи тренажёра</a></div>';
-    return;
-
     if (!course) {
       document.getElementById('crumbs').innerHTML = '<a href="courses.html">Курсы</a>';
       host.innerHTML = `
@@ -161,6 +156,8 @@
 
     if (!open) {
       renderPaywall();
+    } else if (lesson.interactiveDemo) {
+      CourseDemo.render(lesson, document.getElementById('lessonContent'));
     } else if (lesson.filled) {
       renderFilled();
     } else if (lesson.body) {

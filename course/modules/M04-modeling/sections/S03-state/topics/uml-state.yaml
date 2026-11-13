@@ -31,11 +31,11 @@
     "Seed passport. Требует авторского уточнения перед production-quality выпуском."
   ],
   "sources": {
-    "primary": [],
+    "primary": ["SRC-OMG-UML-251"],
     "secondary": [
-      "SRC-AUTHOR-MATERIALS"
+      "SRC-AUTHOR-MATERIALS", "SRC-PLANTUML-STATE"
     ],
     "examples": [],
-    "allow_external_research": false
+    "allow_external_research": true
   }
 }

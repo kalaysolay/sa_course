@@ -258,7 +258,7 @@ function genericPassport(row) {
     next_topics: next ? [next] : [],
     project: { stage: 'course_foundation', case: 'Связать тему со сквозным проектом Compliance, если это методически уместно.', expected_artifacts: [] },
     author_notes: ['Seed passport. Требует авторского уточнения перед production-quality выпуском.'],
-    sources: { primary: [], secondary: ['SRC-AUTHOR-MATERIALS'], examples: [], allow_external_research: false }
+    sources: { primary: [], secondary: ['SRC-AUTHOR-MATERIALS'], examples: [], allow_external_research: true }
   };
 }
 

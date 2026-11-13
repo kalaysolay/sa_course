@@ -33,6 +33,244 @@
       "suggested_action": "Продолжить на secondary sources и явно отметить ограничение.",
       "created_at": "2026-10-18T08:07:17.376Z",
       "resolved_at": null
+    },
+    {
+      "id": "GAP-0003",
+      "status": "open",
+      "severity": "minor",
+      "type": "missing_lesson_package",
+      "detected_during": {
+        "topic_id": "ARCH-ASYNC",
+        "run_id": "20260814T192557Z_ARCH-ASYNC_6923d8"
+      },
+      "description": "Пакет урока отсутствует в output/, хотя тема была помечена completed (run 20260814T192557Z_ARCH-ASYNC_6923d8).",
+      "affected_topics": [
+        "ARCH-ASYNC"
+      ],
+      "suggested_action": "Пересобрать пакет: node scripts/publisher.mjs /prepare-codex-topic ARCH-ASYNC → ... → /finalize-codex-run <runId>.",
+      "created_at": "2026-11-11T11:10:55.260Z",
+      "resolved_at": null
+    },
+    {
+      "id": "GAP-0004",
+      "status": "open",
+      "severity": "minor",
+      "type": "missing_lesson_package",
+      "detected_during": {
+        "topic_id": "SEC-AUTHENTICATION",
+        "run_id": "20260814T205625Z_SEC-AUTHENTICATION_9009e6"
+      },
+      "description": "Пакет урока отсутствует в output/, хотя тема была помечена completed (run 20260814T205625Z_SEC-AUTHENTICATION_9009e6).",
+      "affected_topics": [
+        "SEC-AUTHENTICATION"
+      ],
+      "suggested_action": "Пересобрать пакет: node scripts/publisher.mjs /prepare-codex-topic SEC-AUTHENTICATION → ... → /finalize-codex-run <runId>.",
+      "created_at": "2026-11-11T11:10:55.277Z",
+      "resolved_at": null
+    },
+    {
+      "id": "GAP-0005",
+      "status": "open",
+      "severity": "minor",
+      "type": "missing_lesson_package",
+      "detected_during": {
+        "topic_id": "SEC-AUTHORIZATION",
+        "run_id": "20260814T205625Z_SEC-AUTHORIZATION_9d87a1"
+      },
+      "description": "Пакет урока отсутствует в output/, хотя тема была помечена completed (run 20260814T205625Z_SEC-AUTHORIZATION_9d87a1).",
+      "affected_topics": [
+        "SEC-AUTHORIZATION"
+      ],
+      "suggested_action": "Пересобрать пакет: node scripts/publisher.mjs /prepare-codex-topic SEC-AUTHORIZATION → ... → /finalize-codex-run <runId>.",
+      "created_at": "2026-11-11T11:10:55.286Z",
+      "resolved_at": null
+    },
+    {
+      "id": "GAP-0006",
+      "status": "open",
+      "severity": "minor",
+      "type": "missing_lesson_package",
+      "detected_during": {
+        "topic_id": "INT-BASICS",
+        "run_id": "20260814T212909Z_INT-BASICS_4d7bc1"
+      },
+      "description": "Пакет урока отсутствует в output/, хотя тема была помечена completed (run 20260814T212909Z_INT-BASICS_4d7bc1).",
+      "affected_topics": [
+        "INT-BASICS"
+      ],
+      "suggested_action": "Пересобрать пакет: node scripts/publisher.mjs /prepare-codex-topic INT-BASICS → ... → /finalize-codex-run <runId>.",
+      "created_at": "2026-11-11T11:10:55.295Z",
+      "resolved_at": null
+    },
+    {
+      "id": "GAP-0007",
+      "status": "open",
+      "severity": "minor",
+      "type": "missing_lesson_package",
+      "detected_during": {
+        "topic_id": "INT-REST",
+        "run_id": "20260815T053035Z_INT-REST_075b32"
+      },
+      "description": "Пакет урока отсутствует в output/, хотя тема была помечена completed (run 20260815T053035Z_INT-REST_075b32).",
+      "affected_topics": [
+        "INT-REST"
+      ],
+      "suggested_action": "Пересобрать пакет: node scripts/publisher.mjs /prepare-codex-topic INT-REST → ... → /finalize-codex-run <runId>.",
+      "created_at": "2026-11-11T11:10:55.304Z",
+      "resolved_at": null
+    },
+    {
+      "id": "GAP-0008",
+      "status": "open",
+      "severity": "minor",
+      "type": "missing_lesson_package",
+      "detected_during": {
+        "topic_id": "INT-SOAP",
+        "run_id": "20260818T051353Z_INT-SOAP_d599e9"
+      },
+      "description": "Пакет урока отсутствует в output/, хотя тема была помечена completed (run 20260818T051353Z_INT-SOAP_d599e9).",
+      "affected_topics": [
+        "INT-SOAP"
+      ],
+      "suggested_action": "Пересобрать пакет: node scripts/publisher.mjs /prepare-codex-topic INT-SOAP → ... → /finalize-codex-run <runId>.",
+      "created_at": "2026-11-11T11:10:55.313Z",
+      "resolved_at": null
+    },
+    {
+      "id": "GAP-0009",
+      "status": "open",
+      "severity": "minor",
+      "type": "missing_lesson_package",
+      "detected_during": {
+        "topic_id": "INT-MQ",
+        "run_id": "20260824T203750Z_INT-MQ_843ade"
+      },
+      "description": "Пакет урока отсутствует в output/, хотя тема была помечена completed (run 20260824T203750Z_INT-MQ_843ade).",
+      "affected_topics": [
+        "INT-MQ"
+      ],
+      "suggested_action": "Пересобрать пакет: node scripts/publisher.mjs /prepare-codex-topic INT-MQ → ... → /finalize-codex-run <runId>.",
+      "created_at": "2026-11-11T11:10:55.322Z",
+      "resolved_at": null
+    },
+    {
+      "id": "GAP-0010",
+      "status": "open",
+      "severity": "minor",
+      "type": "missing_lesson_package",
+      "detected_during": {
+        "topic_id": "INT-FILES",
+        "run_id": "20260825T045808Z_INT-FILES_9fa644"
+      },
+      "description": "Пакет урока отсутствует в output/, хотя тема была помечена completed (run 20260825T045808Z_INT-FILES_9fa644).",
+      "affected_topics": [
+        "INT-FILES"
+      ],
+      "suggested_action": "Пересобрать пакет: node scripts/publisher.mjs /prepare-codex-topic INT-FILES → ... → /finalize-codex-run <runId>.",
+      "created_at": "2026-11-11T11:10:55.331Z",
+      "resolved_at": null
+    },
+    {
+      "id": "GAP-0011",
+      "status": "open",
+      "severity": "minor",
+      "type": "missing_lesson_package",
+      "detected_during": {
+        "topic_id": "INT-DATABASE",
+        "run_id": "20260826T192218Z_INT-DATABASE_378826"
+      },
+      "description": "Пакет урока отсутствует в output/, хотя тема была помечена completed (run 20260826T192218Z_INT-DATABASE_378826).",
+      "affected_topics": [
+        "INT-DATABASE"
+      ],
+      "suggested_action": "Пересобрать пакет: node scripts/publisher.mjs /prepare-codex-topic INT-DATABASE → ... → /finalize-codex-run <runId>.",
+      "created_at": "2026-11-11T11:10:55.340Z",
+      "resolved_at": null
+    },
+    {
+      "id": "GAP-0012",
+      "status": "open",
+      "severity": "minor",
+      "type": "missing_lesson_package",
+      "detected_during": {
+        "topic_id": "INT-API-DESIGN",
+        "run_id": "20260827T194221Z_INT-API-DESIGN_e7105b"
+      },
+      "description": "Пакет урока отсутствует в output/, хотя тема была помечена completed (run 20260827T194221Z_INT-API-DESIGN_e7105b).",
+      "affected_topics": [
+        "INT-API-DESIGN"
+      ],
+      "suggested_action": "Пересобрать пакет: node scripts/publisher.mjs /prepare-codex-topic INT-API-DESIGN → ... → /finalize-codex-run <runId>.",
+      "created_at": "2026-11-11T11:10:55.350Z",
+      "resolved_at": null
+    },
+    {
+      "id": "GAP-0013",
+      "status": "open",
+      "severity": "minor",
+      "type": "missing_lesson_package",
+      "detected_during": {
+        "topic_id": "DB-INTRO",
+        "run_id": "20260828T135922Z_DB-INTRO_fe7f60"
+      },
+      "description": "Пакет урока отсутствует в output/, хотя тема была помечена completed (run 20260828T135922Z_DB-INTRO_fe7f60).",
+      "affected_topics": [
+        "DB-INTRO"
+      ],
+      "suggested_action": "Пересобрать пакет: node scripts/publisher.mjs /prepare-codex-topic DB-INTRO → ... → /finalize-codex-run <runId>.",
+      "created_at": "2026-11-11T11:10:55.359Z",
+      "resolved_at": null
+    },
+    {
+      "id": "GAP-0014",
+      "status": "open",
+      "severity": "minor",
+      "type": "missing_lesson_package",
+      "detected_during": {
+        "topic_id": "DB-RELATIONAL",
+        "run_id": "20260828T194520Z_DB-RELATIONAL_440c7e"
+      },
+      "description": "Пакет урока отсутствует в output/, хотя тема была помечена completed (run 20260828T194520Z_DB-RELATIONAL_440c7e).",
+      "affected_topics": [
+        "DB-RELATIONAL"
+      ],
+      "suggested_action": "Пересобрать пакет: node scripts/publisher.mjs /prepare-codex-topic DB-RELATIONAL → ... → /finalize-codex-run <runId>.",
+      "created_at": "2026-11-11T11:10:55.369Z",
+      "resolved_at": null
+    },
+    {
+      "id": "GAP-0015",
+      "status": "open",
+      "severity": "minor",
+      "type": "missing_lesson_package",
+      "detected_during": {
+        "topic_id": "DB-STRUCTURE",
+        "run_id": "20260905T123031Z_DB-STRUCTURE_4efcfa"
+      },
+      "description": "Пакет урока отсутствует в output/, хотя тема была помечена completed (run 20260905T123031Z_DB-STRUCTURE_4efcfa).",
+      "affected_topics": [
+        "DB-STRUCTURE"
+      ],
+      "suggested_action": "Пересобрать пакет: node scripts/publisher.mjs /prepare-codex-topic DB-STRUCTURE → ... → /finalize-codex-run <runId>.",
+      "created_at": "2026-11-11T11:10:55.378Z",
+      "resolved_at": null
+    },
+    {
+      "id": "GAP-0016",
+      "status": "open",
+      "severity": "minor",
+      "type": "missing_lesson_package",
+      "detected_during": {
+        "topic_id": "DB-PSQL",
+        "run_id": "20260911T045957Z_DB-PSQL_f739a4"
+      },
+      "description": "Пакет урока отсутствует в output/, хотя тема была помечена completed (run 20260911T045957Z_DB-PSQL_f739a4).",
+      "affected_topics": [
+        "DB-PSQL"
+      ],
+      "suggested_action": "Пересобрать пакет: node scripts/publisher.mjs /prepare-codex-topic DB-PSQL → ... → /finalize-codex-run <runId>.",
+      "created_at": "2026-11-11T11:10:55.388Z",
+      "resolved_at": null
     }
   ]
 }

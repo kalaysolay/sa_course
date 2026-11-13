@@ -1,0 +1,7 @@
+{
+  "reviewer": "content",
+  "artifact": "03-lecture/draft-v1.md",
+  "verdict": "APPROVED",
+  "summary": "Все 7 LO раскрыты. Два маршрута, открытие с/без полномочия, guards, initial/final, порядок действий, петля и повторное событие согласованы с графами и подписями SVG. Доказательства в manual-check.md; отрисовка проверяется отдельно.",
+  "issues": []
+}

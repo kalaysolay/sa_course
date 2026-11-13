@@ -1,0 +1,10 @@
+{"ts":"2026-11-11T07:31:26.949Z","event":"RUN_CREATED","topicId":"ARCH-STORAGE"}
+{"ts":"2026-11-11T07:31:26.967Z","event":"STATE_CHANGED","status":"TOPIC_RESOLVED"}
+{"ts":"2026-11-11T07:31:26.982Z","event":"STATE_CHANGED","status":"PROGRESS_CHECKED"}
+{"ts":"2026-11-11T07:31:27.008Z","event":"SOURCE_PREFLIGHT","policy":"block_and_register_major_gap","missingPrimary":[],"severity":"minor","blocking":false}
+{"ts":"2026-11-11T07:31:27.009Z","event":"STATE_CHANGED","status":"CONTEXT_READY"}
+{"ts":"2026-11-11T07:31:27.015Z","event":"CODEX_TASKS_CREATED","taskDir":"codex-tasks","taskCount":5}
+{"ts":"2026-11-11T07:31:27.020Z","event":"STATE_CHANGED","status":"CODEX_TASKS_READY"}
+{"ts":"2026-11-11T08:30:08.448Z","event":"STATE_CHANGED","status":"PACKAGE_READY"}
+{"ts":"2026-11-11T08:30:08.451Z","event":"CODEX_RUN_FINALIZED","output":"output/M05/ARCH-STORAGE/","metrics":{"measuredAt":"2026-11-11T08:30:08.444Z","stageCount":0,"payloadInputChars":0,"payloadOutputChars":0,"plannedCodexInputChars":68025,"producedCodexOutputChars":107818,"exactUsageAvailable":false,"exactUsage":{"inputTokens":0,"outputTokens":0,"totalTokens":0,"cachedInputTokens":0,"reasoningTokens":0}}}
+{"ts":"2026-11-11T08:30:08.457Z","event":"STATE_CHANGED","status":"COMPLETED"}

@@ -1,0 +1,10 @@
+{"ts":"2026-11-11T10:21:02.293Z","event":"RUN_CREATED","topicId":"ARCH-SYNC"}
+{"ts":"2026-11-11T10:21:02.312Z","event":"STATE_CHANGED","status":"TOPIC_RESOLVED"}
+{"ts":"2026-11-11T10:21:02.323Z","event":"STATE_CHANGED","status":"PROGRESS_CHECKED"}
+{"ts":"2026-11-11T10:21:02.328Z","event":"SOURCE_PREFLIGHT","policy":"block_and_register_major_gap","missingPrimary":[],"severity":"minor","blocking":false}
+{"ts":"2026-11-11T10:21:02.333Z","event":"STATE_CHANGED","status":"CONTEXT_READY"}
+{"ts":"2026-11-11T10:21:02.339Z","event":"CODEX_TASKS_CREATED","taskDir":"codex-tasks","taskCount":5}
+{"ts":"2026-11-11T10:21:02.345Z","event":"STATE_CHANGED","status":"CODEX_TASKS_READY"}
+{"ts":"2026-11-11T10:59:17.800Z","event":"STATE_CHANGED","status":"PACKAGE_READY"}
+{"ts":"2026-11-11T10:59:17.804Z","event":"CODEX_RUN_FINALIZED","output":"output/M05/ARCH-SYNC/","metrics":{"measuredAt":"2026-11-11T10:59:17.797Z","stageCount":0,"payloadInputChars":0,"payloadOutputChars":0,"plannedCodexInputChars":68466,"producedCodexOutputChars":111450,"exactUsageAvailable":false,"exactUsage":{"inputTokens":0,"outputTokens":0,"totalTokens":0,"cachedInputTokens":0,"reasoningTokens":0}}}
+{"ts":"2026-11-11T10:59:17.808Z","event":"STATE_CHANGED","status":"COMPLETED"}

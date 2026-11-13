@@ -1,0 +1,38 @@
+{
+  "topicId": "UML-STATE",
+  "runId": "20261111T152707Z_UML-STATE_1e4aa7",
+  "status": "COMPLETED",
+  "workflowVersion": "0.4-lean",
+  "learningOutcomes": [
+    "UML-STATE-LO1",
+    "UML-STATE-LO2",
+    "UML-STATE-LO3",
+    "UML-STATE-LO4",
+    "UML-STATE-LO5",
+    "UML-STATE-LO6",
+    "UML-STATE-LO7"
+  ],
+  "files": {
+    "lecture": "lecture.md",
+    "exercises": "exercises.md",
+    "answers": "answers.md",
+    "sources": "sources.md"
+  },
+  "projectChanges": [],
+  "reviews": {
+    "content": "APPROVED",
+    "learning": "APPROVED",
+    "format": "APPROVED",
+    "assessment": "APPROVED",
+    "project": "SKIPPED"
+  },
+  "metrics": "payload-metrics.json",
+  "assets": [
+    "assets/diagnostics.svg",
+    "assets/entry-exit-loop.svg",
+    "assets/notation.svg",
+    "assets/request-lifecycle.svg",
+    "assets/transition-label.svg"
+  ],
+  "tokenUsageReport": "token-usage.json"
+}

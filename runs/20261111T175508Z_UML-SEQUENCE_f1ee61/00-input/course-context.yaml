@@ -1,0 +1,12 @@
+{
+  "module": "M04",
+  "section": "M04-S04",
+  "topic": {
+    "id": "UML-SEQUENCE",
+    "slug": "uml-sequence",
+    "title": "UML. Диаграмма последовательностей",
+    "order": 1,
+    "course_order": 22,
+    "passport": "course/modules/M04-modeling/sections/S04-sequence/topics/uml-sequence.yaml"
+  }
+}

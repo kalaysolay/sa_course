@@ -1,0 +1,192 @@
+{
+  "measured_at": "2026-11-11T15:46:27.093Z",
+  "start_at": "2026-11-11T15:27:06.295Z",
+  "source": "Codex session event_msg/token_count cumulative counters",
+  "scope": "Current chat and its descendant agents after lesson start marker; lesson 20 revision excluded. Snapshot precedes final reply.",
+  "input_includes_cached_tokens": true,
+  "output_note": "Raw output_tokens counter; reasoning_output_tokens is reported separately and is not added again.",
+  "totals": {
+    "input_tokens": 21304490,
+    "cached_input_tokens": 20886528,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 63486,
+    "reasoning_output_tokens": 20844,
+    "total_tokens": 21367976
+  },
+  "sessions": [
+    {
+      "session_id": "01a1c6bf-aefc-7fa3-b2b8-5790f994324e",
+      "role": "root",
+      "events": 45,
+      "baseline": {
+        "input_tokens": 43644822,
+        "cached_input_tokens": 43075584,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 72106,
+        "reasoning_output_tokens": 26503,
+        "total_tokens": 43716928
+      },
+      "latest": {
+        "input_tokens": 59670859,
+        "cached_input_tokens": 59070592,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 102885,
+        "reasoning_output_tokens": 44285,
+        "total_tokens": 59773744
+      },
+      "usage": {
+        "input_tokens": 16026037,
+        "cached_input_tokens": 15995008,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 30779,
+        "reasoning_output_tokens": 17782,
+        "total_tokens": 16056816
+      }
+    },
+    {
+      "session_id": "01a1c6de-30aa-76b3-a72c-0bf36ae7f661",
+      "role": "/root/lesson_plan",
+      "events": 12,
+      "baseline": {
+        "input_tokens": 7224974,
+        "cached_input_tokens": 6941824,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 22962,
+        "reasoning_output_tokens": 3641,
+        "total_tokens": 7247936
+      },
+      "latest": {
+        "input_tokens": 10555507,
+        "cached_input_tokens": 10010624,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 30811,
+        "reasoning_output_tokens": 4934,
+        "total_tokens": 10586318
+      },
+      "usage": {
+        "input_tokens": 3330533,
+        "cached_input_tokens": 3068800,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 7849,
+        "reasoning_output_tokens": 1293,
+        "total_tokens": 3338382
+      }
+    },
+    {
+      "session_id": "01a1cb3d-1ad9-7d41-838a-9a6572c9d8b7",
+      "role": "/root/state_writer",
+      "events": 17,
+      "baseline": {
+        "input_tokens": 0,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 0,
+        "reasoning_output_tokens": 0,
+        "total_tokens": 0
+      },
+      "latest": {
+        "input_tokens": 690029,
+        "cached_input_tokens": 664960,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 10990,
+        "reasoning_output_tokens": 331,
+        "total_tokens": 701019
+      },
+      "usage": {
+        "input_tokens": 690029,
+        "cached_input_tokens": 664960,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 10990,
+        "reasoning_output_tokens": 331,
+        "total_tokens": 701019
+      }
+    },
+    {
+      "session_id": "01a1cb3d-6754-7de1-9cd0-523500535cdf",
+      "role": "/root/state_visuals",
+      "events": 7,
+      "baseline": {
+        "input_tokens": 0,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 0,
+        "reasoning_output_tokens": 0,
+        "total_tokens": 0
+      },
+      "latest": {
+        "input_tokens": 242860,
+        "cached_input_tokens": 232832,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 4287,
+        "reasoning_output_tokens": 860,
+        "total_tokens": 247147
+      },
+      "usage": {
+        "input_tokens": 242860,
+        "cached_input_tokens": 232832,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 4287,
+        "reasoning_output_tokens": 860,
+        "total_tokens": 247147
+      }
+    },
+    {
+      "session_id": "01a1cb41-b8af-7af0-ba14-e2ed015d63d6",
+      "role": "/root/state_review",
+      "events": 16,
+      "baseline": {
+        "input_tokens": 0,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 0,
+        "reasoning_output_tokens": 0,
+        "total_tokens": 0
+      },
+      "latest": {
+        "input_tokens": 687090,
+        "cached_input_tokens": 612352,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 4413,
+        "reasoning_output_tokens": 382,
+        "total_tokens": 691503
+      },
+      "usage": {
+        "input_tokens": 687090,
+        "cached_input_tokens": 612352,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 4413,
+        "reasoning_output_tokens": 382,
+        "total_tokens": 691503
+      }
+    },
+    {
+      "session_id": "01a1cb45-1286-7231-8d1d-b4c8a993d9b8",
+      "role": "/root/state_assessment",
+      "events": 9,
+      "baseline": {
+        "input_tokens": 0,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 0,
+        "reasoning_output_tokens": 0,
+        "total_tokens": 0
+      },
+      "latest": {
+        "input_tokens": 327941,
+        "cached_input_tokens": 312576,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 5168,
+        "reasoning_output_tokens": 196,
+        "total_tokens": 333109
+      },
+      "usage": {
+        "input_tokens": 327941,
+        "cached_input_tokens": 312576,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 5168,
+        "reasoning_output_tokens": 196,
+        "total_tokens": 333109
+      }
+    }
+  ]
+}

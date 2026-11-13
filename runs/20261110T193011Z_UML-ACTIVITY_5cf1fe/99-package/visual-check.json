@@ -1,0 +1,13 @@
+{
+  "date": "2026-11-11",
+  "artifact": "03-lecture/draft-v1.md",
+  "sha256": "8bc55678d4a09619f25fd6246c72c60d210f9918ca29123dac3860780ff771cf",
+  "viewer": "Course Viewer, in-app browser",
+  "plantUmlBlocks": 5,
+  "renderedSvg": 5,
+  "cycleAndSwimlanes": "PASS",
+  "forkJoin": "PASS",
+  "flowFinalSymbol": "circle with X via end",
+  "activityFinalSymbol": "bullseye via stop",
+  "unconnectedJoinRemovedBeforeDraft": true
+}

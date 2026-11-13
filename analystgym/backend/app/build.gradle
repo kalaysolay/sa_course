@@ -53,7 +53,7 @@ dependencies {
 tasks.register('syncMockup', Sync) {
     description = 'Копирует tasks-mockup в статику приложения.'
     from("${rootDir}/../tasks-mockup") {
-        exclude 'server.py', 'check-mockup.py', 'scripts/**', 'tests/**', 'assets/js/data-tasks-*.js', 'assets/js/questions.js'
+        exclude 'server.py', 'serve.mjs', 'serve.ps1', 'check-mockup.py', 'scripts/**', 'tests/**', 'assets/js/data-tasks-*.js', 'assets/js/questions.js'
     }
     into 'src/main/resources/static'
 }

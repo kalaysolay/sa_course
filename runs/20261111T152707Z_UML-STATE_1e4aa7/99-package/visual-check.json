@@ -1,0 +1,11 @@
+{
+  "artifact": "03-lecture/final.md",
+  "sha256": "ecf550e4564005d1332a87b8ba46d3161438e15dbcff0308fab90e6cc93aaa44",
+  "images": 5,
+  "loaded": 5,
+  "notationHeight": 560,
+  "allScreenshotsInspected": true,
+  "rootSwitchCacheRegression": "PASS: notation height changed from lesson20 1335 to lesson21 560",
+  "sourceHeader": "Cache-Control: no-store",
+  "minorOrientationFix": "top/bottom confirmed"
+}

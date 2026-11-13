@@ -1,0 +1,12 @@
+{
+  "module": "M04",
+  "section": "M04-S01",
+  "topic": {
+    "id": "UML-USE-CASE",
+    "slug": "uml-use-case",
+    "title": "UML. Диаграмма сценариев использования",
+    "order": 1,
+    "course_order": 19,
+    "passport": "course/modules/M04-modeling/sections/S01-use-cases/topics/uml-use-case.yaml"
+  }
+}

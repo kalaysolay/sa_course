@@ -1,0 +1,29 @@
+{
+  "topicId": "ARCH-API-GATEWAY",
+  "runId": "20261110T201049Z_ARCH-API-GATEWAY_768b31",
+  "status": "COMPLETED",
+  "workflowVersion": "0.4-lean",
+  "learningOutcomes": [
+    "ARCH-API-GATEWAY-LO1",
+    "ARCH-API-GATEWAY-LO2",
+    "ARCH-API-GATEWAY-LO3",
+    "ARCH-API-GATEWAY-LO4",
+    "ARCH-API-GATEWAY-LO5",
+    "ARCH-API-GATEWAY-LO6"
+  ],
+  "files": {
+    "lecture": "lecture.md",
+    "exercises": "exercises.md",
+    "answers": "answers.md",
+    "sources": "sources.md"
+  },
+  "projectChanges": [],
+  "reviews": {
+    "content": "APPROVED",
+    "learning": "APPROVED",
+    "format": "APPROVED",
+    "assessment": "APPROVED",
+    "project": "SKIPPED"
+  },
+  "metrics": "payload-metrics.json"
+}

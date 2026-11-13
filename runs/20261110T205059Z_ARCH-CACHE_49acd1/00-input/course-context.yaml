@@ -1,0 +1,12 @@
+{
+  "module": "M05",
+  "section": "M05-S03",
+  "topic": {
+    "id": "ARCH-CACHE",
+    "slug": "cache",
+    "title": "Кэш — обзор",
+    "order": 3,
+    "course_order": 30,
+    "passport": "course/modules/M05-architecture/sections/S03-infrastructure/topics/cache.yaml"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "module": "M05",
+  "section": "M05-S03",
+  "topic": {
+    "id": "ARCH-API-GATEWAY",
+    "slug": "api-gateway",
+    "title": "API Gateway — обзор",
+    "order": 2,
+    "course_order": 29,
+    "passport": "course/modules/M05-architecture/sections/S03-infrastructure/topics/api-gateway.yaml"
+  }
+}

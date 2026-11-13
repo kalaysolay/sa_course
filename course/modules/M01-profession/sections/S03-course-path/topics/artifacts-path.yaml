@@ -45,6 +45,6 @@
       "SRC-AUTHOR-MATERIALS"
     ],
     "examples": [],
-    "allow_external_research": false
+    "allow_external_research": true
   }
 }

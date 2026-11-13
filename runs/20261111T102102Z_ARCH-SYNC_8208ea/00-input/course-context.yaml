@@ -1,0 +1,12 @@
+{
+  "module": "M05",
+  "section": "M05-S04",
+  "topic": {
+    "id": "ARCH-SYNC",
+    "slug": "sync-interaction",
+    "title": "Синхронное взаимодействие",
+    "order": 1,
+    "course_order": 32,
+    "passport": "course/modules/M05-architecture/sections/S04-interaction/topics/sync-interaction.yaml"
+  }
+}

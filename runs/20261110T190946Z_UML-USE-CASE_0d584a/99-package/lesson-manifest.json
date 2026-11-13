@@ -1,0 +1,29 @@
+{
+  "topicId": "UML-USE-CASE",
+  "runId": "20261110T190946Z_UML-USE-CASE_0d584a",
+  "status": "COMPLETED",
+  "workflowVersion": "0.4-lean",
+  "learningOutcomes": [
+    "UML-USE-CASE-LO1",
+    "UML-USE-CASE-LO2",
+    "UML-USE-CASE-LO3",
+    "UML-USE-CASE-LO4",
+    "UML-USE-CASE-LO5",
+    "UML-USE-CASE-LO6"
+  ],
+  "files": {
+    "lecture": "lecture.md",
+    "exercises": "exercises.md",
+    "answers": "answers.md",
+    "sources": "sources.md"
+  },
+  "projectChanges": [],
+  "reviews": {
+    "content": "APPROVED",
+    "learning": "APPROVED",
+    "format": "APPROVED",
+    "assessment": "APPROVED",
+    "project": "SKIPPED"
+  },
+  "metrics": "payload-metrics.json"
+}

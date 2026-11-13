@@ -1,0 +1,19 @@
+{"ts":"2026-11-10T19:09:46.272Z","event":"RUN_CREATED","topicId":"UML-USE-CASE"}
+{"ts":"2026-11-10T19:09:46.296Z","event":"STATE_CHANGED","status":"TOPIC_RESOLVED"}
+{"ts":"2026-11-10T19:09:46.311Z","event":"STATE_CHANGED","status":"PROGRESS_CHECKED"}
+{"ts":"2026-11-10T19:09:46.352Z","event":"SOURCE_PREFLIGHT","policy":"block_and_register_major_gap","missingPrimary":[],"severity":"minor","blocking":false}
+{"ts":"2026-11-10T19:09:46.353Z","event":"STATE_CHANGED","status":"CONTEXT_READY"}
+{"ts":"2026-11-10T19:09:46.368Z","event":"CODEX_TASKS_CREATED","taskDir":"codex-tasks","taskCount":5}
+{"ts":"2026-11-10T19:09:46.370Z","event":"STATE_CHANGED","status":"CODEX_TASKS_READY"}
+{"ts":"2026-11-10T19:11:33.195Z","event":"STATE_CHANGED","status":"NEEDS_HUMAN_REVIEW"}
+{"ts":"2026-11-10T19:13:15.018Z","event":"USER_SOURCE_POLICY_OVERRIDE","decision":"External research authorized for this and all future lessons","localDate":"2026-11-11","preferredSources":"official primary sources"}
+{"ts":"2026-11-10T19:13:15.021Z","event":"STATE_CHANGED","status":"CODEX_TASKS_READY"}
+{"ts":"2026-11-10T19:17:53.749Z","event":"CODEX_STAGE_COMPLETED","stage":"01-plan-research","inputChars":3820,"outputChars":8442,"externalResearchAuthorized":true}
+{"ts":"2026-11-10T19:20:58.186Z","event":"CODEX_STAGE_COMPLETED","stage":"02-writer","artifact":"03-lecture/draft-v1.md"}
+{"ts":"2026-11-10T19:20:58.188Z","event":"CODEX_STAGE_COMPLETED","stage":"03-lean-review","content":"APPROVED","learning":"APPROVED","visualCheck":"2 PlantUML diagrams rendered as SVG in Course Viewer"}
+{"ts":"2026-11-10T19:20:58.189Z","event":"STATE_CHANGED","status":"LECTURE_APPROVED"}
+{"ts":"2026-11-10T19:25:08.186Z","event":"STATE_CHANGED","status":"PACKAGE_READY"}
+{"ts":"2026-11-10T19:25:08.190Z","event":"CODEX_RUN_FINALIZED","output":"output/M04/UML-USE-CASE/","metrics":{"measuredAt":"2026-11-10T19:25:08.179Z","stageCount":0,"payloadInputChars":0,"payloadOutputChars":0,"plannedCodexInputChars":81917,"producedCodexOutputChars":93408,"exactUsageAvailable":false,"exactUsage":{"inputTokens":0,"outputTokens":0,"totalTokens":0,"cachedInputTokens":0,"reasoningTokens":0}}}
+{"ts":"2026-11-10T19:25:08.197Z","event":"STATE_CHANGED","status":"COMPLETED"}
+{"ts":"2026-11-10T19:27:06.214Z","event":"TRACKER_UPDATED","sheet":"План лекций","row":23,"status":"Готово","verified":true}
+{"ts":"2026-11-10T19:27:06.216Z","event":"PACKAGE_VERIFIED","filesExist":true,"lectureDiagrams":2,"answerDiagrams":2,"renderedAsSvg":true,"progress":"completed"}

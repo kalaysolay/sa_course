@@ -1,0 +1,38 @@
+{
+  "reviewer": "deterministic-assessment",
+  "artifact": "04-assessment/draft.json",
+  "verdict": "APPROVED",
+  "summary": "Assessment schema and LO coverage checks passed.",
+  "issues": [],
+  "coverage": {
+    "UML-STATE-LO1": [
+      "STATE-01",
+      "STATE-08"
+    ],
+    "UML-STATE-LO2": [
+      "STATE-02",
+      "STATE-04",
+      "STATE-08"
+    ],
+    "UML-STATE-LO3": [
+      "STATE-02",
+      "STATE-03",
+      "STATE-07",
+      "STATE-08"
+    ],
+    "UML-STATE-LO4": [
+      "STATE-04",
+      "STATE-08"
+    ],
+    "UML-STATE-LO5": [
+      "STATE-05"
+    ],
+    "UML-STATE-LO6": [
+      "STATE-06"
+    ],
+    "UML-STATE-LO7": [
+      "STATE-07",
+      "STATE-08"
+    ]
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "topicId": "UML-ACTIVITY",
+  "runId": "20261110T193011Z_UML-ACTIVITY_5cf1fe",
+  "status": "COMPLETED",
+  "workflowVersion": "0.4-lean",
+  "learningOutcomes": [
+    "UML-ACTIVITY-LO1",
+    "UML-ACTIVITY-LO2",
+    "UML-ACTIVITY-LO3",
+    "UML-ACTIVITY-LO4",
+    "UML-ACTIVITY-LO5",
+    "UML-ACTIVITY-LO6",
+    "UML-ACTIVITY-LO7"
+  ],
+  "files": {
+    "lecture": "lecture.md",
+    "exercises": "exercises.md",
+    "answers": "answers.md",
+    "sources": "sources.md"
+  },
+  "projectChanges": [],
+  "reviews": {
+    "content": "APPROVED",
+    "learning": "APPROVED",
+    "format": "APPROVED",
+    "assessment": "APPROVED",
+    "project": "SKIPPED"
+  },
+  "metrics": "payload-metrics.json",
+  "editorialRevision": 2,
+  "assets": [
+    "assets/clarification-loop.svg",
+    "assets/control-object-flow.svg",
+    "assets/decision-merge.svg",
+    "assets/final-nodes.svg",
+    "assets/fork-join.svg",
+    "assets/linear-swimlanes.svg",
+    "assets/notation.svg"
+  ],
+  "reviewMode": "main-agent-revision-audit"
+}

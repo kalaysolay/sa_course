@@ -56,7 +56,7 @@ function assetUrl(baseId, href) {
   if (state.mode === 'files') {
     return localAssetUrl(baseId, href);
   }
-  return `/api/asset?base=${encodeURIComponent(baseId)}&href=${encodeURIComponent(href)}`;
+  return `/api/asset?base=${encodeURIComponent(baseId)}&href=${encodeURIComponent(href)}&root=${encodeURIComponent(state.root)}`;
 }
 
 function normalizePath(value) {

@@ -1,0 +1,12 @@
+{
+  "module": "M05",
+  "section": "M05-S03",
+  "topic": {
+    "id": "ARCH-STORAGE",
+    "slug": "storage",
+    "title": "Файловое/объектное хранилище — обзор",
+    "order": 4,
+    "course_order": 31,
+    "passport": "course/modules/M05-architecture/sections/S03-infrastructure/topics/storage.yaml"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "topicId": "ARCH-CACHE",
+  "runId": "20261110T205059Z_ARCH-CACHE_49acd1",
+  "status": "COMPLETED",
+  "workflowVersion": "0.4-lean",
+  "learningOutcomes": [
+    "ARCH-CACHE-LO1",
+    "ARCH-CACHE-LO2",
+    "ARCH-CACHE-LO3",
+    "ARCH-CACHE-LO4",
+    "ARCH-CACHE-LO5",
+    "ARCH-CACHE-LO6"
+  ],
+  "files": {
+    "lecture": "lecture.md",
+    "exercises": "exercises.md",
+    "answers": "answers.md",
+    "sources": "sources.md"
+  },
+  "projectChanges": [],
+  "reviews": {
+    "content": "APPROVED",
+    "learning": "APPROVED",
+    "format": "APPROVED",
+    "assessment": "APPROVED",
+    "project": "SKIPPED"
+  },
+  "metrics": "payload-metrics.json"
+}

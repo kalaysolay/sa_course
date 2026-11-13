@@ -208,6 +208,10 @@ export class Orchestrator {
     copyFile(path.join(runDir, '04-assessment', 'answers.md'), path.join(outputDir, 'answers.md'));
     copyFile(path.join(runDir, '02-research', 'source-pack.md'), path.join(outputDir, 'sources.md'));
     copyFile(path.join(runDir, '05-project', 'task.md'), path.join(outputDir, 'project', 'task.md'));
+    const lectureAssetsDir = path.join(runDir, '03-lecture', 'assets');
+    if (exists(lectureAssetsDir)) {
+      fs.cpSync(lectureAssetsDir, path.join(outputDir, 'assets'), { recursive: true });
+    }
     if (exists(path.join(runDir, '05-project', 'approved'))) {
       fs.cpSync(path.join(runDir, '05-project', 'approved'), path.join(outputDir, 'project', 'solution'), { recursive: true });
     }
@@ -217,6 +221,7 @@ export class Orchestrator {
 
     const metrics = this.payloadMetrics(runDir);
     writeData(path.join(runDir, '99-package', 'payload-metrics.json'), metrics);
+    copyFile(path.join(runDir, '99-package', 'payload-metrics.json'), path.join(outputDir, 'payload-metrics.json'));
     const manifest = {
       topicId: topic.id,
       runId: run.runId,

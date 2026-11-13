@@ -1,0 +1,21 @@
+{
+  "session_path": "C:/Users/homepc/.codex/sessions/2026/11/10/rollout-2026-11-10T23-36-53-01a1c6bf-aefc-7fa3-b2b8-5790f994324e.jsonl",
+  "captured_at": "2026-11-11T15:27:06.295Z",
+  "meta": {
+    "id": "01a1c6bf-aefc-7fa3-b2b8-5790f994324e",
+    "source": "vscode"
+  },
+  "baseline": {
+    "timestamp": "2026-11-11T15:26:36.259Z",
+    "usage": {
+      "input_tokens": 43644822,
+      "cached_input_tokens": 43075584,
+      "cache_write_input_tokens": 0,
+      "output_tokens": 72106,
+      "reasoning_output_tokens": 26503,
+      "total_tokens": 43716928
+    },
+    "last_usage_includes_reasoning": true
+  },
+  "scope": "UML-STATE generation from prepare through package/tracker verification; lesson20 revision excluded"
+}

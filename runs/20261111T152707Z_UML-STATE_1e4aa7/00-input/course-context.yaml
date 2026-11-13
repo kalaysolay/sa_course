@@ -1,0 +1,12 @@
+{
+  "module": "M04",
+  "section": "M04-S03",
+  "topic": {
+    "id": "UML-STATE",
+    "slug": "uml-state",
+    "title": "UML. Диаграмма состояний",
+    "order": 1,
+    "course_order": 21,
+    "passport": "course/modules/M04-modeling/sections/S03-state/topics/uml-state.yaml"
+  }
+}

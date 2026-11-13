@@ -399,11 +399,16 @@ test('Codex finalizer validates and packages a lean run without an LLM packaging
   const adapter = new FakeAgentAdapter();
   const brief = adapter.designLesson({ topic, module, section, passport });
   const sourcePack = adapter.research({ sources });
-  const lecture = adapter.writeLecture({ brief, topic });
+  const imagePath = 'assets/notation.svg';
+  const image = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100"><circle cx="50" cy="50" r="20"/></svg>';
+  const lecture = `${adapter.writeLecture({ brief, topic })}\n\n![Образец обозначения](${imagePath})\n`;
   const assessment = adapter.createAssessment({ brief });
   writeData(path.join(prepared.runDir, '01-brief', 'lesson-brief-final.json'), brief);
   fs.writeFileSync(path.join(prepared.runDir, '02-research', 'source-pack.md'), sourcePack);
   fs.writeFileSync(path.join(prepared.runDir, '03-lecture', 'final.md'), lecture);
+  // Изображение из лекции должно сохраниться при переносе run в опубликованный пакет.
+  fs.mkdirSync(path.join(prepared.runDir, '03-lecture', 'assets'), { recursive: true });
+  fs.writeFileSync(path.join(prepared.runDir, '03-lecture', imagePath), image);
   writeData(path.join(prepared.runDir, '03-lecture', 'review-v1', 'content.json'), adapter.contentReview({ brief, lecture }));
   writeData(path.join(prepared.runDir, '03-lecture', 'review-v1', 'learning.json'), adapter.learningReview({ brief, lecture }));
   writeData(path.join(prepared.runDir, '04-assessment', 'draft.json'), assessment);
@@ -412,6 +417,8 @@ test('Codex finalizer validates and packages a lean run without an LLM packaging
   const finalized = orchestrator.finalizeCodexRun(prepared.runId);
   assert.equal(finalized.status, 'COMPLETED');
   assert.ok(fs.existsSync(path.join(finalized.output, 'lesson-manifest.json')));
+  assert.equal(fs.readFileSync(path.join(finalized.output, imagePath), 'utf8'), image);
   const metrics = readData(path.join(prepared.runDir, '99-package', 'payload-metrics.json'));
+  assert.deepEqual(readData(path.join(finalized.output, 'payload-metrics.json')), metrics);
   assert.ok(metrics.plannedCodexInputChars > 0);
 });

@@ -1,0 +1,13 @@
+{"ts":"2026-11-11T15:27:07.032Z","event":"RUN_CREATED","topicId":"UML-STATE"}
+{"ts":"2026-11-11T15:27:07.045Z","event":"STATE_CHANGED","status":"TOPIC_RESOLVED"}
+{"ts":"2026-11-11T15:27:07.057Z","event":"STATE_CHANGED","status":"PROGRESS_CHECKED"}
+{"ts":"2026-11-11T15:27:07.078Z","event":"SOURCE_PREFLIGHT","policy":"block_and_register_major_gap","missingPrimary":[],"severity":"minor","blocking":false}
+{"ts":"2026-11-11T15:27:07.079Z","event":"STATE_CHANGED","status":"CONTEXT_READY"}
+{"ts":"2026-11-11T15:27:07.092Z","event":"CODEX_TASKS_CREATED","taskDir":"codex-tasks","taskCount":5}
+{"ts":"2026-11-11T15:27:07.093Z","event":"STATE_CHANGED","status":"CODEX_TASKS_READY"}
+{"ts":"2026-11-11T15:41:34.181Z","event":"STATE_CHANGED","status":"LECTURE_APPROVED"}
+{"ts":"2026-11-11T15:41:34.182Z","event":"CODEX_STAGE_COMPLETED","stage":"03-lean-review","content":"APPROVED","learning":"APPROVED","independent":true,"visualCheck":"5 SVG verified"}
+{"ts":"2026-11-11T15:43:58.257Z","event":"STATE_CHANGED","status":"PACKAGE_READY"}
+{"ts":"2026-11-11T15:43:58.262Z","event":"CODEX_RUN_FINALIZED","output":"output/M04/UML-STATE/","metrics":{"measuredAt":"2026-11-11T15:43:58.251Z","stageCount":0,"payloadInputChars":0,"payloadOutputChars":0,"plannedCodexInputChars":61765,"producedCodexOutputChars":58630,"exactUsageAvailable":false,"exactUsage":{"inputTokens":0,"outputTokens":0,"totalTokens":0,"cachedInputTokens":0,"reasoningTokens":0}}}
+{"ts":"2026-11-11T15:43:58.263Z","event":"STATE_CHANGED","status":"COMPLETED"}
+{"ts":"2026-11-11T15:45:47.006Z","event":"TRACKER_UPDATED","sheet":"План лекций","row":25,"status":"Готово","verified":true}

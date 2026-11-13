@@ -1,0 +1,41 @@
+{
+  "id": "UML-USE-CASE",
+  "title": "UML. Диаграмма сценариев использования",
+  "course_order": 19,
+  "purpose": "Задать базовое понимание темы «UML. Диаграмма сценариев использования» в логике курса системного анализа.",
+  "scope": {
+    "include": [
+      "UML. Диаграмма сценариев использования"
+    ],
+    "exclude": [
+      "углубление за пределы базового уровня курса"
+    ]
+  },
+  "prerequisites": {
+    "topics": [
+      "REQ-MANAGEMENT"
+    ]
+  },
+  "previous_topics": [
+    "REQ-MANAGEMENT"
+  ],
+  "next_topics": [
+    "UML-ACTIVITY"
+  ],
+  "project": {
+    "stage": "course_foundation",
+    "case": "Связать тему со сквозным проектом Compliance, если это методически уместно.",
+    "expected_artifacts": []
+  },
+  "author_notes": [
+    "Seed passport. Требует авторского уточнения перед production-quality выпуском."
+  ],
+  "sources": {
+    "primary": ["SRC-OMG-UML-251"],
+    "secondary": [
+      "SRC-AUTHOR-MATERIALS", "SRC-OMG-UML-25", "SRC-PLANTUML-USE-CASE"
+    ],
+    "examples": [],
+    "allow_external_research": true
+  }
+}

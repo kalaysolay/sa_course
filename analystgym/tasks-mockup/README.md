@@ -11,6 +11,11 @@
 start-mockup.bat        (в каталоге analystgym/)
 ```
 
+Лаунчер сам выбирает рантайм: настоящий Python → Node.js (`serve.mjs`) →
+PowerShell (`serve.ps1`). Проверка идёт запуском интерпретатора, а не поиском
+файла: алиас `python` из Microsoft Store — это заглушка, она не Python
+(Windows Store сообщает «Python was not found» и завершается с кодом 9009).
+
 Вариант 2 — вручную:
 
 ```
@@ -48,6 +53,8 @@ tasks-mockup/
   results.html        результат диагностики: профиль, план прокачки, разбор ответов
   admin.html          справочники: метки, уровни, подборки, данные макета
   server.py           статический сервер для локального просмотра
+  serve.mjs           то же самое на Node.js (машины без Python)
+  serve.ps1           то же самое на PowerShell (машины без Python и Node.js)
   assets/
     styles.css        дизайн-система (графитовый минимализм)
     vendor/           mermaid + plantuml (локальный рендер)
@@ -138,3 +145,13 @@ course.analystgym.ru     → courses.html + course.html (+ admin.html — вну
 - Меток: ~60 в 11 категориях. Подборок: 6.
 - У каждой задачи: условие, рубрика для ревью, стартовые вкладки, подсказки,
   вопросы интервьюера, эталонное решение автора.
+# Новые примеры уроков (2026-11-09)
+
+Запуск без Python: `node analystgym/tasks-mockup/serve.mjs` из корня `sa_course`, либо двойным кликом по `tasks-mockup/start-demo.bat`. Без Python и Node.js: `powershell -NoProfile -ExecutionPolicy Bypass -File analystgym/tasks-mockup/serve.ps1`.
+
+- `http://127.0.0.1:5180/course.html?id=interactive-course&lesson=visual` — текст и изображение.
+- `http://127.0.0.1:5180/course.html?id=interactive-course&lesson=quiz` — текст и тест.
+- `http://127.0.0.1:5180/course.html?id=interactive-course&lesson=api` — текст и локальный API-симулятор.
+- `http://127.0.0.1:5180/course.html?id=interactive-course&lesson=sql` — текст, тест и ограниченная SQL-практика с перепечатыванием.
+
+Все четыре урока доступны через каталог `courses.html`; демонстрационный курс бесплатный. Вызовы API не уходят в сеть, SQL не исполняется в СУБД. Для прежних курсов сохраняются существующие демонстрационные правила доступа и незаполненные уроки.

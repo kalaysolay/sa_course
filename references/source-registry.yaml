@@ -1,6 +1,56 @@
 {
   "sources": [
     {
+      "id": "SRC-PLANTUML-STATE",
+      "type": "official_documentation",
+      "title": "PlantUML State Diagram",
+      "publisher": "PlantUML",
+      "availability": "available",
+      "location": { "type": "web_url", "url": "https://plantuml.com/state-diagram" },
+      "verified_at": "2026-11-11",
+      "notes": "State syntax, initial/final nodes and transition labels; normative semantics verified in OMG UML 2.5.1 chapter 14."
+    },
+    {
+      "id": "SRC-PLANTUML-ACTIVITY",
+      "type": "official_documentation",
+      "title": "PlantUML Activity Diagram (new syntax)",
+      "publisher": "PlantUML",
+      "availability": "available",
+      "location": { "type": "web_url", "url": "https://plantuml.com/activity-diagram-beta" },
+      "verified_at": "2026-11-11",
+      "notes": "Syntax for actions, conditions, loops, fork/join, swimlanes and terminal symbols; normative semantics are grounded in OMG UML."
+    },
+    {
+      "id": "SRC-OMG-UML-251",
+      "type": "official_specification",
+      "title": "OMG Unified Modeling Language 2.5.1",
+      "publisher": "Object Management Group",
+      "availability": "available",
+      "location": { "type": "web_url", "url": "https://www.omg.org/spec/UML/2.5.1/PDF" },
+      "verified_at": "2026-11-11",
+      "notes": "Chapter 18, sections 18.1.3–18.1.4 verified for UML-USE-CASE; chapter 15, sections 15.2–15.6 verified for UML-ACTIVITY."
+    },
+    {
+      "id": "SRC-OMG-UML-25",
+      "type": "official_specification",
+      "title": "OMG Unified Modeling Language 2.5",
+      "publisher": "Object Management Group",
+      "availability": "available",
+      "location": { "type": "web_url", "url": "https://www.omg.org/spec/UML/2.5/PDF" },
+      "verified_at": "2026-11-11",
+      "notes": "Previous edition; sections 9.2.3–9.2.4 verified for generalization notation."
+    },
+    {
+      "id": "SRC-PLANTUML-USE-CASE",
+      "type": "official_documentation",
+      "title": "PlantUML Use Case Diagram",
+      "publisher": "PlantUML",
+      "availability": "available",
+      "location": { "type": "web_url", "url": "https://plantuml.com/use-case-diagram" },
+      "verified_at": "2026-11-11",
+      "notes": "Tool syntax only; UML semantics are grounded in OMG specifications."
+    },
+    {
       "id": "SRC-WIEGERS-REQUIREMENTS",
       "type": "book",
       "title": "Software Requirements",
@@ -28,7 +78,7 @@
       "id": "SRC-AUTHOR-MATERIALS",
       "type": "author_material",
       "title": "Авторские материалы курса",
-      "availability": "available",
+      "availability": "missing",
       "location": {
         "type": "directory",
         "path": "references/author-materials"
